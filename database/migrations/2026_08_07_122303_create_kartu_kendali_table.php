@@ -11,6 +11,8 @@ return new class extends Migration
         Schema::create('kartu_kendali', function (Blueprint $table) {
             $table->id();
             $table->morphs('inspectable');
+            $table->unsignedBigInteger('tahun_ajaran_id')->nullable()->after('inspectable_id');
+            $table->foreign('tahun_ajaran_id')->references('id')->on('tahun_ajaran')->nullOnDelete();
             $table->date('tanggal_pemeriksaan');
             $table->string('pemeriksa');
             $table->enum('kondisi_keseluruhan', ['baik', 'cukup', 'rusak'])->default('baik');

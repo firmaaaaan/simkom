@@ -18,8 +18,6 @@ return new class extends Migration
             $table->string('kategori');
             $table->string('versi')->nullable();
             $table->enum('lisensi', ['gratis', 'berbayar', 'edukasi', 'trial', 'open_source'])->default('gratis');
-            $table->integer('jumlah_instalasi')->default(0);
-            $table->foreignId('laboratorium_id')->nullable()->constrained('laboratorium')->nullOnDelete();
             $table->date('tanggal_instalasi')->nullable();
             $table->date('tanggal_expired')->nullable();
             $table->enum('status', ['aktif', 'tidak_aktif', 'trial'])->default('aktif');

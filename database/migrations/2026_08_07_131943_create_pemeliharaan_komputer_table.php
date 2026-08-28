@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('pemeliharaan_komputer', function (Blueprint $table) {
             $table->id();
             $table->foreignId('komputer_id')->constrained('komputer')->cascadeOnDelete();
-            $table->string('tahun_ajaran', 20);
+            $table->unsignedBigInteger('tahun_ajaran_id')->nullable()->after('komputer_id');
+            $table->foreign('tahun_ajaran_id')->references('id')->on('tahun_ajaran')->nullOnDelete();
             $table->date('tanggal_pemeliharaan');
             $table->enum('jenis_pemeliharaan', ['preventif', 'korektif', 'upgrade', 'penggantian', 'lainnya'])->default('preventif');
             $table->text('deskripsi');
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->string('pic', 255)->nullable();
             $table->timestamps();
 
-            $table->index(['komputer_id', 'tahun_ajaran']);
+            $table->index(['komputer_id', 'tahun_ajaran_id']);
         });
     }
 

@@ -74,10 +74,6 @@
                             Masuk
                         </button>
                     </form>
-
-                    <div class="mt-6 text-center text-sm text-slate-500">
-                        <p>Demo: admin@simlabkom.id / {{ env('DEFAULT_ADMIN_PASSWORD', 'password') }}</p>
-                    </div>
                 </div>
             </div>
 

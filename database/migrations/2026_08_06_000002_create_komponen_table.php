@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('komponen', function (Blueprint $table) {
+        Schema::create('hardware', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_komponen')->unique();
-            $table->string('nama_komponen');
+            $table->string('kode_hardware')->unique();
+            $table->string('nama_hardware');
             $table->string('kategori');
             $table->string('merek')->nullable();
             $table->text('spesifikasi')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('komponen');
+        Schema::dropIfExists('hardware');
     }
 };

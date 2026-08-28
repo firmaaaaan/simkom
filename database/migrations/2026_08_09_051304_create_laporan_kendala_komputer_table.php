@@ -16,9 +16,12 @@ return new class extends Migration
             $table->foreignId('komputer_id')->constrained('komputer')->cascadeOnDelete();
             $table->string('nama_pelapor');
             $table->string('npm_nim');
+            $table->string('nama_prodi')->nullable()->after('npm_nim');
             $table->text('deskripsi_kendala');
+            $table->string('gambar')->nullable()->after('deskripsi_kendala');
             $table->enum('status_kendala', ['menunggu', 'diperbaiki', 'selesai'])->default('menunggu');
-            $table->string('gambar')->nullable();
+            $table->string('kode_tracker')->nullable()->unique()->after('status_kendala');
+            $table->enum('kategori_kerusakan', ['hardware', 'software', 'jaringan', 'lainnya'])->nullable()->after('nama_prodi');
             $table->date('tanggal_lapor');
             $table->date('tanggal_perbaikan')->nullable();
             $table->text('catatan_admin')->nullable();

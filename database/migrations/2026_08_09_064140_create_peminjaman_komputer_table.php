@@ -16,11 +16,14 @@ return new class extends Migration
             $table->foreignId('komputer_id')->constrained('komputer')->cascadeOnDelete();
             $table->string('nama_peminjam');
             $table->string('npm_nim');
+            $table->string('kode_tracker')->unique()->nullable()->after('npm_nim');
             $table->string('nama_prodi')->nullable();
             $table->text('catatan')->nullable();
             $table->enum('status', ['dipinjam', 'dikembalikan'])->default('dipinjam');
-            $table->date('tanggal_pinjam');
-            $table->date('tanggal_kembali_direncanakan');
+            $table->string('status_peminjaman')->default('menunggu')->after('status');
+            $table->date('tanggal_pinjam')->nullable();
+            $table->time('jam_mulai')->nullable()->after('tanggal_pinjam');
+            $table->time('jam_selesai')->nullable()->after('jam_mulai');
             $table->date('tanggal_kembali_aktual')->nullable();
             $table->timestamps();
         });

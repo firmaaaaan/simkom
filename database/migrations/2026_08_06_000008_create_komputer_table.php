@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('laboratorium_id')->nullable()->constrained('laboratorium')->nullOnDelete();
             $table->string('foto')->nullable();
             $table->text('spesifikasi')->nullable();
-            $table->enum('status', ['aktif', 'tidak_aktif', 'perbaikan', 'rusak'])->default('aktif');
+            $table->enum('status', ['aktif', 'tidak_aktif', 'perbaikan', 'rusak', 'dipinjam'])->default('aktif');
             $table->text('catatan')->nullable();
             $table->timestamps();
         });
