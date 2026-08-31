@@ -23,7 +23,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            // comiit
+            // LaboratoriumSeeder::class,
+            // HardwareSeeder::class,
+            // SoftwareSeeder::class,
+            // KomponenIotJaringanSeeder::class,
+            // KomputerSeeder::class,
+            // InventarisIoTJaringanSeeder::class,
+            // KartuKendaliSeeder::class,
+            // PemeliharaanKomputerSeeder::class,
+            // PeminjamanInventarisIoTJaringanSeeder::class,
+            // LaporanKendalaKomputerSeeder::class,
             UserSeeder::class,
         ]);
     }
