@@ -163,14 +163,14 @@ class HardwareController extends Controller
 
     protected function importExcel(Request $request)
     {
-        $path = $request->file('file')->getRealPath();
+        $file = $request->file('file');
         $import = new class implements \Maatwebsite\Excel\Concerns\ToCollection {
             public function collection(\Illuminate\Support\Collection $collection)
             {
                 return $collection;
             }
         };
-        $rows = Excel::toArray($import, $path)[0] ?? [];
+        $rows = Excel::toArray($import, $file)[0] ?? [];
         $rows = array_slice($rows, 1);
 
         $imported = 0;
