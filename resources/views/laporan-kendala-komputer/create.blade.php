@@ -183,13 +183,16 @@
         var kendalaForm = document.getElementById('kendala-form');
         var komputerTerpilih = document.getElementById('komputer-terpilih');
 
-        var komputerData = @json($komputers->map(fn($k) => [
-            'id' => $k->id,
-            'nama' => $k->nama_komputer,
-            'kode' => $k->kode_komputer,
-            'lab' => $k->laboratorium->nama_laboratorium ?? '-',
-            'status' => $k->status,
-        ]));
+        @php
+            $komputerJson = $komputers->map(fn($k) => [
+                'id' => $k->id,
+                'nama' => $k->nama_komputer,
+                'kode' => $k->kode_komputer,
+                'lab' => $k->laboratorium->nama_laboratorium ?? '-',
+                'status' => $k->status,
+            ]);
+        @endphp
+        var komputerData = @json($komputerJson);
 
         function syncCardStates() {
             cards.forEach(function (card) {
