@@ -146,13 +146,13 @@ class KomponenIotController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,pdf,docx', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,pdf,docx', 'max:10240'],
         ]);
 
         $extension = $request->file('file')->getClientOriginalExtension();
 
         try {
-            if ($extension === 'xlsx') {
+            if (in_array($extension, ['xlsx', 'xls'])) {
                 return $this->importExcel($request);
             } elseif ($extension === 'pdf') {
                 return $this->importPdf($request);
