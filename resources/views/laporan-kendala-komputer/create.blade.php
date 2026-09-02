@@ -22,8 +22,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('laporan-kendala-komputer.store') }}" class="space-y-4" enctype="multipart/form-data">
-                @csrf
+            <div class="space-y-4">
                 <div>
                     <label for="laboratorium_id" class="block text-sm font-medium text-slate-700 mb-1">Pilih Laboratorium</label>
                     <select name="laboratorium_id" id="laboratorium_id" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('laboratorium_id') border-red-500 @enderror">
@@ -82,93 +81,110 @@
                     @error('komputer_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
 
-                <div id="kendala-form" class="hidden">
-                    <div id="komputer-terpilih" class="hidden bg-slate-50 rounded-xl p-4 border border-slate-100 mb-4">
-                        <h2 class="font-semibold text-slate-900 mb-2">Komputer Terpilih</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <span class="text-slate-500">Nama Komputer</span>
-                                <div id="info-nama-komputer" class="font-medium text-slate-900">-</div>
-                            </div>
-                            <div>
-                                <span class="text-slate-500">Kode Komputer</span>
-                                <div id="info-kode-komputer" class="font-medium text-slate-900">-</div>
-                            </div>
-                            <div>
-                                <span class="text-slate-500">Laboratorium</span>
-                                <div id="info-laboratorium" class="font-medium text-slate-900">-</div>
-                            </div>
-                            <div>
-                                <span class="text-slate-500">Status</span>
-                                <div id="info-status" class="font-medium text-slate-900">-</div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="nama_pelapor" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                        <input type="text" name="nama_pelapor" id="nama_pelapor" value="{{ old('nama_pelapor') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('nama_pelapor') border-red-500 @enderror" placeholder="Masukkan nama lengkap" required>
-                        @error('nama_pelapor') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+<div id="kendala-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div id="kendala-modal-backdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900">Lapor Kendala Komputer</h2>
+                <div id="modal-komputer-info" class="text-sm text-slate-500 mt-0.5"></div>
+            </div>
+            <button type="button" id="kendala-modal-close" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('laporan-kendala-komputer.store') }}" class="p-6 space-y-4" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="komputer_id" id="modal-komputer-id" required>
+
+            <div id="modal-komputer-detail" class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                    <div>
+                        <span class="text-slate-500">Nama Komputer</span>
+                        <div id="info-nama-komputer" class="font-medium text-slate-900">-</div>
                     </div>
                     <div>
-                        <label for="npm_nim" class="block text-sm font-medium text-slate-700 mb-1">NPM/NIM <span class="text-red-500">*</span></label>
-                        <input type="text" name="npm_nim" id="npm_nim" value="{{ old('npm_nim') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('npm_nim') border-red-500 @enderror" placeholder="Masukkan NPM atau NIM" required>
-                        @error('npm_nim') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        <span class="text-slate-500">Kode Komputer</span>
+                        <div id="info-kode-komputer" class="font-medium text-slate-900">-</div>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">Laboratorium</span>
+                        <div id="info-laboratorium" class="font-medium text-slate-900">-</div>
+                    </div>
+                    <div>
+                        <span class="text-slate-500">Status</span>
+                        <div id="info-status" class="font-medium text-slate-900">-</div>
                     </div>
                 </div>
+            </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label for="nama_prodi" class="block text-sm font-medium text-slate-700 mb-1">Nama Prodi (Opsional)</label>
-                    <input type="text" name="nama_prodi" id="nama_prodi" value="{{ old('nama_prodi') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('nama_prodi') border-red-500 @enderror" placeholder="Contoh: Teknik Informatika">
-                    @error('nama_prodi') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    <label for="nama_pelapor" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" name="nama_pelapor" id="nama_pelapor" value="{{ old('nama_pelapor') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('nama_pelapor') border-red-500 @enderror" placeholder="Masukkan nama lengkap" required>
+                    @error('nama_pelapor') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
-
                 <div>
-                    <label for="kategori_kerusakan" class="block text-sm font-medium text-slate-700 mb-1">Kategori Kerusakan</label>
-                    <select name="kategori_kerusakan" id="kategori_kerusakan" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('kategori_kerusakan') border-red-500 @enderror">
-                        <option value="">-- Pilih Kategori Kerusakan --</option>
-                        <option value="hardware" {{ old('kategori_kerusakan') == 'hardware' ? 'selected' : '' }}>Hardware</option>
-                        <option value="software" {{ old('kategori_kerusakan') == 'software' ? 'selected' : '' }}>Software</option>
-                        <option value="jaringan" {{ old('kategori_kerusakan') == 'jaringan' ? 'selected' : '' }}>Jaringan</option>
-                        <option value="lainnya" {{ old('kategori_kerusakan') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
-                    </select>
-                    @error('kategori_kerusakan') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    <label for="npm_nim" class="block text-sm font-medium text-slate-700 mb-1">NPM/NIM <span class="text-red-500">*</span></label>
+                    <input type="text" name="npm_nim" id="npm_nim" value="{{ old('npm_nim') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('npm_nim') border-red-500 @enderror" placeholder="Masukkan NPM atau NIM" required>
+                    @error('npm_nim') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
+            </div>
 
-                <div>
-                    <label for="kondisi" class="block text-sm font-medium text-slate-700 mb-1">Kondisi Kendala <span class="text-red-500">*</span></label>
-                    <select name="kondisi" id="kondisi" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('kondisi') border-red-500 @enderror" required>
-                        <option value="">-- Pilih Kondisi --</option>
-                        <option value="ringan" {{ old('kondisi') == 'ringan' ? 'selected' : '' }}>Ringan (tidak mengganggu praktikum)</option>
-                        <option value="berat" {{ old('kondisi') == 'berat' ? 'selected' : '' }}>Berat (tidak bisa digunakan)</option>
-                    </select>
-                    @error('kondisi') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
+            <div>
+                <label for="nama_prodi" class="block text-sm font-medium text-slate-700 mb-1">Nama Prodi (Opsional)</label>
+                <input type="text" name="nama_prodi" id="nama_prodi" value="{{ old('nama_prodi') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('nama_prodi') border-red-500 @enderror" placeholder="Contoh: Teknik Informatika">
+                @error('nama_prodi') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
 
-                <div>
-                    <label for="deskripsi_kendala" class="block text-sm font-medium text-slate-700 mb-1">Deskripsi Kendala <span class="text-red-500">*</span></label>
-                    <textarea name="deskripsi_kendala" id="deskripsi_kendala" rows="4" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('deskripsi_kendala') border-red-500 @enderror" placeholder="Jelaskan kendala yang terjadi..." required>{{ old('deskripsi_kendala') }}</textarea>
-                    @error('deskripsi_kendala') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
+            <div>
+                <label for="kategori_kerusakan" class="block text-sm font-medium text-slate-700 mb-1">Kategori Kerusakan</label>
+                <select name="kategori_kerusakan" id="kategori_kerusakan" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('kategori_kerusakan') border-red-500 @enderror">
+                    <option value="">-- Pilih Kategori Kerusakan --</option>
+                    <option value="hardware" {{ old('kategori_kerusakan') == 'hardware' ? 'selected' : '' }}>Hardware</option>
+                    <option value="software" {{ old('kategori_kerusakan') == 'software' ? 'selected' : '' }}>Software</option>
+                    <option value="jaringan" {{ old('kategori_kerusakan') == 'jaringan' ? 'selected' : '' }}>Jaringan</option>
+                    <option value="lainnya" {{ old('kategori_kerusakan') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
+                </select>
+                @error('kategori_kerusakan') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
 
-                <div>
-                    <label for="gambar" class="block text-sm font-medium text-slate-700 mb-1">Upload Gambar (Opsional)</label>
-                    <input type="file" name="gambar" id="gambar" accept="image/*" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('gambar') border-red-500 @enderror">
-                    <p class="text-xs text-slate-500 mt-1">Format: JPG, JPEG, PNG. Maksimal 2MB.</p>
-                    @error('gambar') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                    <img id="preview_gambar" class="mt-2 hidden max-h-48 rounded-lg border border-slate-200" alt="Preview">
-                </div>
+            <div>
+                <label for="kondisi" class="block text-sm font-medium text-slate-700 mb-1">Kondisi Kendala <span class="text-red-500">*</span></label>
+                <select name="kondisi" id="kondisi" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('kondisi') border-red-500 @enderror" required>
+                    <option value="">-- Pilih Kondisi --</option>
+                    <option value="ringan" {{ old('kondisi') == 'ringan' ? 'selected' : '' }}>Ringan (tidak mengganggu praktikum)</option>
+                    <option value="berat" {{ old('kondisi') == 'berat' ? 'selected' : '' }}>Berat (tidak bisa digunakan)</option>
+                </select>
+                @error('kondisi') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
 
-                <div class="flex items-center gap-3 pt-2">
-                        <button type="submit" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                            Kirim Laporan
-                        </button>
-                        <a href="{{ url('/') }}" class="text-slate-600 hover:text-slate-900 transition-colors">Batal</a>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div>
+                <label for="deskripsi_kendala" class="block text-sm font-medium text-slate-700 mb-1">Deskripsi Kendala <span class="text-red-500">*</span></label>
+                <textarea name="deskripsi_kendala" id="deskripsi_kendala" rows="4" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('deskripsi_kendala') border-red-500 @enderror" placeholder="Jelaskan kendala yang terjadi..." required>{{ old('deskripsi_kendala') }}</textarea>
+                @error('deskripsi_kendala') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            </div>
+
+            <div>
+                <label for="gambar" class="block text-sm font-medium text-slate-700 mb-1">Upload Gambar (Opsional)</label>
+                <input type="file" name="gambar" id="gambar" accept="image/*" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('gambar') border-red-500 @enderror">
+                <p class="text-xs text-slate-500 mt-1">Format: JPG, JPEG, PNG. Maksimal 2MB.</p>
+                @error('gambar') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                <img id="preview_gambar" class="mt-2 hidden max-h-48 rounded-lg border border-slate-200" alt="Preview">
+            </div>
+
+            <div class="flex items-center gap-3 pt-2 border-t border-slate-200">
+                <button type="submit" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                    Kirim Laporan
+                </button>
+                <button type="button" id="kendala-modal-cancel" class="text-slate-600 hover:text-slate-900 transition-colors">Batal</button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
@@ -180,8 +196,12 @@
         var cards = Array.prototype.slice.call(document.querySelectorAll('.komputer-card'));
         var hint = document.getElementById('komputer-hint');
         var emptyState = document.getElementById('komputer-empty');
-        var kendalaForm = document.getElementById('kendala-form');
-        var komputerTerpilih = document.getElementById('komputer-terpilih');
+        var modal = document.getElementById('kendala-modal');
+        var modalBackdrop = document.getElementById('kendala-modal-backdrop');
+        var modalClose = document.getElementById('kendala-modal-close');
+        var modalCancel = document.getElementById('kendala-modal-cancel');
+        var modalKomputerId = document.getElementById('modal-komputer-id');
+        var modalKomputerInfo = document.getElementById('modal-komputer-info');
 
         @php
             $komputerJson = $komputers->map(fn($k) => [
@@ -193,6 +213,16 @@
             ]);
         @endphp
         var komputerData = @json($komputerJson);
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
 
         function syncCardStates() {
             cards.forEach(function (card) {
@@ -218,7 +248,7 @@
             });
         }
 
-        function showKendalaForm() {
+        function showKendalaModal() {
             var selectedRadio = document.querySelector('input[name="komputer_id"]:checked');
             if (!selectedRadio) return;
 
@@ -228,22 +258,14 @@
 
             var statusLabels = { 'aktif': 'Normal', 'tidak_aktif': 'Tidak Aktif', 'perbaikan': 'Perbaikan', 'rusak': 'Rusak' };
 
+            modalKomputerId.value = data.id;
+            modalKomputerInfo.textContent = data.nama + ' — ' + data.kode;
             document.getElementById('info-nama-komputer').textContent = data.nama;
             document.getElementById('info-kode-komputer').textContent = data.kode;
             document.getElementById('info-laboratorium').textContent = data.lab;
             document.getElementById('info-status').textContent = statusLabels[data.status] || data.status;
 
-            kendalaForm.classList.remove('hidden');
-            komputerTerpilih.classList.remove('hidden');
-
-            setTimeout(function () {
-                kendalaForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-
-        function hideKendalaForm() {
-            kendalaForm.classList.add('hidden');
-            komputerTerpilih.classList.add('hidden');
+            openModal();
         }
 
         function filterCards() {
@@ -267,7 +289,6 @@
             });
 
             syncCardStates();
-            hideKendalaForm();
         }
 
         if (laboratoriumSelect) {
@@ -279,9 +300,16 @@
             if (radio) {
                 radio.addEventListener('change', function () {
                     syncCardStates();
-                    showKendalaForm();
+                    showKendalaModal();
                 });
             }
+        });
+
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modalCancel) modalCancel.addEventListener('click', closeModal);
+        if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
         });
 
         filterCards();
