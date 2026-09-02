@@ -82,9 +82,32 @@
                     @error('komputer_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="nama_pelapor" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                <div id="kendala-form" class="hidden">
+                    <div id="komputer-terpilih" class="hidden bg-slate-50 rounded-xl p-4 border border-slate-100 mb-4">
+                        <h2 class="font-semibold text-slate-900 mb-2">Komputer Terpilih</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-slate-500">Nama Komputer</span>
+                                <div id="info-nama-komputer" class="font-medium text-slate-900">-</div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">Kode Komputer</span>
+                                <div id="info-kode-komputer" class="font-medium text-slate-900">-</div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">Laboratorium</span>
+                                <div id="info-laboratorium" class="font-medium text-slate-900">-</div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500">Status</span>
+                                <div id="info-status" class="font-medium text-slate-900">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="nama_pelapor" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" name="nama_pelapor" id="nama_pelapor" value="{{ old('nama_pelapor') }}" class="w-full rounded-lg border-slate-300 focus:border-primary-500 focus:ring-primary-500 px-3 py-2 border @error('nama_pelapor') border-red-500 @enderror" placeholder="Masukkan nama lengkap" required>
                         @error('nama_pelapor') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -138,10 +161,11 @@
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
-                    <button type="submit" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors font-medium">
-                        Kirim Laporan
-                    </button>
-                    <a href="{{ url('/') }}" class="text-slate-600 hover:text-slate-900 transition-colors">Batal</a>
+                        <button type="submit" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+                            Kirim Laporan
+                        </button>
+                        <a href="{{ url('/') }}" class="text-slate-600 hover:text-slate-900 transition-colors">Batal</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -156,6 +180,16 @@
         var cards = Array.prototype.slice.call(document.querySelectorAll('.komputer-card'));
         var hint = document.getElementById('komputer-hint');
         var emptyState = document.getElementById('komputer-empty');
+        var kendalaForm = document.getElementById('kendala-form');
+        var komputerTerpilih = document.getElementById('komputer-terpilih');
+
+        var komputerData = @json($komputers->map(fn($k) => [
+            'id' => $k->id,
+            'nama' => $k->nama_komputer,
+            'kode' => $k->kode_komputer,
+            'lab' => $k->laboratorium->nama_laboratorium ?? '-',
+            'status' => $k->status,
+        ]));
 
         function syncCardStates() {
             cards.forEach(function (card) {
@@ -181,6 +215,34 @@
             });
         }
 
+        function showKendalaForm() {
+            var selectedRadio = document.querySelector('input[name="komputer_id"]:checked');
+            if (!selectedRadio) return;
+
+            var komputerId = parseInt(selectedRadio.value);
+            var data = komputerData.find(function (k) { return k.id === komputerId; });
+            if (!data) return;
+
+            var statusLabels = { 'aktif': 'Normal', 'tidak_aktif': 'Tidak Aktif', 'perbaikan': 'Perbaikan', 'rusak': 'Rusak' };
+
+            document.getElementById('info-nama-komputer').textContent = data.nama;
+            document.getElementById('info-kode-komputer').textContent = data.kode;
+            document.getElementById('info-laboratorium').textContent = data.lab;
+            document.getElementById('info-status').textContent = statusLabels[data.status] || data.status;
+
+            kendalaForm.classList.remove('hidden');
+            komputerTerpilih.classList.remove('hidden');
+
+            setTimeout(function () {
+                kendalaForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function hideKendalaForm() {
+            kendalaForm.classList.add('hidden');
+            komputerTerpilih.classList.add('hidden');
+        }
+
         function filterCards() {
             var labId = laboratoriumSelect ? laboratoriumSelect.value : '';
             var visible = 0;
@@ -194,7 +256,6 @@
             if (hint) hint.classList.toggle('hidden', !!labId);
             if (emptyState) emptyState.classList.toggle('hidden', visible > 0 || !labId);
 
-            // Batalkan pilihan komputer yang tidak lagi terlihat
             cards.forEach(function (card) {
                 if (card.classList.contains('hidden')) {
                     var radio = card.querySelector('input[name="komputer_id"]');
@@ -203,6 +264,7 @@
             });
 
             syncCardStates();
+            hideKendalaForm();
         }
 
         if (laboratoriumSelect) {
@@ -211,7 +273,12 @@
 
         cards.forEach(function (card) {
             var radio = card.querySelector('input[name="komputer_id"]');
-            if (radio) radio.addEventListener('change', syncCardStates);
+            if (radio) {
+                radio.addEventListener('change', function () {
+                    syncCardStates();
+                    showKendalaForm();
+                });
+            }
         });
 
         filterCards();
