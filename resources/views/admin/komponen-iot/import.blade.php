@@ -13,19 +13,17 @@
             </div>
         @endif
 
-        @isset($errors)
-            @if($errors->any())
-                <div class="alert alert-danger alert-dismissible" role="alert">
-                    <strong>Terjadi kesalahan!</strong> Periksa kembali file Anda.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-        @endisset
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <strong>Terjadi kesalahan!</strong> Periksa kembali file Anda.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">Import Data Komponen IoT</h5>
-                <small class="text-muted">Format yang didukung: Excel (.xlsx)</small>
+                <small class="text-muted">Format yang didukung: Excel (.xlsx, .xls)</small>
             </div>
             <div class="card-body">
                 <div class="alert alert-info mb-3">
@@ -41,11 +39,9 @@
                     <div class="col-md-6">
                         <label for="file" class="form-label">Pilih File <span class="text-danger">*</span></label>
                         <input type="file" name="file" id="file" class="form-control @error('file') is-invalid @enderror" accept=".xlsx,.xls" required>
-                        @isset($errors)
-                            @error('file')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        @endisset
+                        @error('file')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Format Import</label>

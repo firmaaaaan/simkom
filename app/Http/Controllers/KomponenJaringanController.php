@@ -152,11 +152,28 @@ class KomponenJaringanController extends Controller
 
     public function import(Request $request)
     {
+        $file = $request->file('file');
+
+        if ($file && $file->getError() !== UPLOAD_ERR_OK) {
+            $errorMessages = [
+                UPLOAD_ERR_INI_SIZE => 'Ukuran file melebihi batas maksimum PHP.',
+                UPLOAD_ERR_FORM_SIZE => 'Ukuran file melebihi batas yang diizinkan form.',
+                UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian. Coba upload ulang.',
+                UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diupload.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary server tidak tersedia.',
+                UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk server.',
+                UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh ekstensi PHP.',
+            ];
+            $errorCode = $file->getError();
+            $message = $errorMessages[$errorCode] ?? 'Gagal upload (error code: ' . $errorCode . '). Hubungi administrator.';
+            return back()->withErrors(['file' => $message])->withInput();
+        }
+
         $request->validate([
             'file' => ['required', 'file', 'mimes:xlsx,xls,pdf,docx', 'max:10240'],
         ]);
 
-        $extension = $request->file('file')->getClientOriginalExtension();
+        $extension = $file->getClientOriginalExtension();
 
         try {
             if (in_array($extension, ['xlsx', 'xls'])) {
