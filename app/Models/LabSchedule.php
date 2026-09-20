@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LabSchedule extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'laboratory_id',
         'day',
@@ -142,7 +144,7 @@ class LabSchedule extends Model
         return implode(' - ', $parts);
     }
 
-    public static function checkConflict(int $laboratoryId, string $day, string $startTime, string $endTime, int|array|null $excludeIds = null): ?self
+    public static function checkConflict(string $laboratoryId, string $day, string $startTime, string $endTime, string|array|null $excludeIds = null): ?self
     {
         $query = static::where('laboratory_id', $laboratoryId)
             ->where('day', $day)

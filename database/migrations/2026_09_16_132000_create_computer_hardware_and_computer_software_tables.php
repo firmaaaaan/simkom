@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,17 +9,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('computer_hardware', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('computer_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('hardware_id')->constrained('hardware')->cascadeOnDelete();
+            $table->uuid('computer_id');
+            $table->uuid('hardware_id');
             $table->timestamps();
+            $table->primary(['computer_id', 'hardware_id']);
+            $table->foreign('computer_id')->references('id')->on('computers')->cascadeOnDelete();
+            $table->foreign('hardware_id')->references('id')->on('hardware')->cascadeOnDelete();
         });
 
         Schema::create('computer_software', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('computer_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('software_id')->constrained('software')->cascadeOnDelete();
+            $table->uuid('computer_id');
+            $table->uuid('software_id');
             $table->timestamps();
+            $table->primary(['computer_id', 'software_id']);
+            $table->foreign('computer_id')->references('id')->on('computers')->cascadeOnDelete();
+            $table->foreign('software_id')->references('id')->on('software')->cascadeOnDelete();
         });
     }
 

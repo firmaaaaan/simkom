@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('computer_borrowings', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('tracking_code', 20)->nullable()->unique();
-            $table->foreignId('computer_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('laboratory_id')->constrained()->cascadeOnDelete();
+            $table->uuid('computer_id');
+            $table->uuid('laboratory_id');
             $table->string('borrower_name');
             $table->string('borrower_prodi')->nullable();
             $table->string('borrower_nim')->nullable();
@@ -23,6 +23,8 @@ return new class extends Migration
             $table->enum('status', ['Pending', 'Approved', 'Rejected', 'Returned'])->default('Pending');
             $table->text('admin_notes')->nullable();
             $table->timestamps();
+            $table->foreign('computer_id')->references('id')->on('computers')->cascadeOnDelete();
+            $table->foreign('laboratory_id')->references('id')->on('laboratories')->cascadeOnDelete();
         });
     }
 

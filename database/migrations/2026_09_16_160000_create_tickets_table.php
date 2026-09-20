@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('tracking_code', 20)->nullable()->unique();
-            $table->foreignId('laboratory_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('computer_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('reported_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            $table->uuid('laboratory_id');
+            $table->uuid('computer_id')->nullable();
+            $table->uuid('academic_year_id');
+            $table->uuid('reported_by')->nullable();
+            $table->uuid('assigned_to')->nullable();
             $table->string('reporter_name')->nullable();
             $table->string('reporter_prodi')->nullable();
             $table->string('reporter_nim')->nullable();
@@ -26,6 +26,11 @@ return new class extends Migration
             $table->enum('priority', ['Rendah', 'Sedang', 'Tinggi', 'Darurat'])->default('Sedang');
             $table->enum('status', ['Open', 'In Progress', 'Resolved', 'Closed'])->default('Open');
             $table->timestamps();
+            $table->foreign('laboratory_id')->references('id')->on('laboratories')->cascadeOnDelete();
+            $table->foreign('computer_id')->references('id')->on('computers')->nullOnDelete();
+            $table->foreign('academic_year_id')->references('id')->on('academic_years')->cascadeOnDelete();
+            $table->foreign('reported_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('assigned_to')->references('id')->on('users')->nullOnDelete();
         });
     }
 

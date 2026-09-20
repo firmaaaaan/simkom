@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class DeviceCheck extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'laboratory_id',
         'academic_year_id',

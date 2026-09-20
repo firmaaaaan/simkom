@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,11 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket_comments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ticket_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->uuid('ticket_id');
+            $table->uuid('user_id');
             $table->text('message');
             $table->timestamps();
+            $table->foreign('ticket_id')->references('id')->on('tickets')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

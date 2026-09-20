@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('title');
             $table->text('message');
-            $table->string('type', 30)->default('info');   // ticket | borrowing
-            $table->string('url')->nullable();             // tujuan saat diklik
-            $table->timestamp('read_at')->nullable();      // global: penanda "read pointer" paling baru
+            $table->string('type', 30)->default('info');
+            $table->string('url')->nullable();
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
 

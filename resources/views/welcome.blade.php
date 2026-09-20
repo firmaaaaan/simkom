@@ -193,16 +193,45 @@
                                     Lihat Spesifikasi
                                 </button>
                                 @endif
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <a href="{{ route('lapor-kendala.create', $computer) }}"
-                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-                                        Lapor Kendala
-                                    </a>
-                                    <a href="{{ route('pinjam-komputer.create', $computer) }}"
-                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                                        Pinjam
-                                    </a>
-                                </div>
+
+                                @if($computer->status !== 'Aktif' || ($computer->tickets_count ?? 0) > 0)
+                                    <div class="space-y-2">
+                                        @if($computer->status === 'Maintenance')
+                                            <div class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-yellow-700 bg-yellow-50 rounded-lg">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.412 15.822l-3.739 3.738a1.5 1.5 0 01-2.122 0l-1.2-1.2a1.5 1.5 0 010-2.122l3.738-3.739M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-6 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                Komputer dalam maintenance
+                                            </div>
+                                        @elseif($computer->status === 'Tidak Aktif')
+                                            <div class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 bg-gray-50 rounded-lg">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                                Komputer tidak aktif
+                                            </div>
+                                        @endif
+                                        @if(($computer->tickets_count ?? 0) > 0)
+                                            <div class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-700 bg-red-50 rounded-lg">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                                </svg>
+                                                Sedang dalam penanganan tiket
+                                            </div>
+                                        @endif
+                                    </div>
+                                @else
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <a href="{{ route('lapor-kendala.create', $computer) }}"
+                                           class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                                            Lapor Kendala
+                                        </a>
+                                        <a href="{{ route('pinjam-komputer.create', $computer) }}"
+                                           class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                            Pinjam
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
 
                             @if($showSpec)

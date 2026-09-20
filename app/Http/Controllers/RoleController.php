@@ -103,7 +103,7 @@ class RoleController extends Controller
             ],
             'label' => ['required', 'string', 'max:255'],
             'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['integer', 'exists:permissions,id'],
+            'permissions.*' => ['string', 'exists:permissions,id'],
         ], [
             'name.alpha_dash' => 'Nama role hanya boleh berisi huruf, angka, tanda hubung, dan garis bawah.',
             'name.unique' => 'Nama role tersebut sudah dipakai.',

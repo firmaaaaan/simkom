@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class MaintenanceChecklistItem extends Model
 {
+    use HasUuids;
     protected $fillable = [
         'maintenance_checklist_id',
         'computer_id',

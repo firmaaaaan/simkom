@@ -187,7 +187,7 @@ class DeviceCheckController extends Controller
 
             // Satu query lab dipakai ulang untuk dropdown dan isi laporan.
             $labs = $filtered
-                ? $laboratories->where('id', (int) $labId)->values()
+                ? $laboratories->where('id', $labId)->values()
                 : $laboratories;
 
             $selectedLab = $filtered
@@ -211,9 +211,7 @@ class DeviceCheckController extends Controller
                 ->groupBy('laboratory_id');
 
             // Tanpa parameter checks[] semua baris dianggap terpilih.
-            $requested = collect($request->input('checks', []))
-                ->filter(fn ($id) => is_numeric($id))
-                ->map(fn ($id) => (int) $id);
+            $requested = collect($request->input('checks', []));
             $hasSelection = $requested->isNotEmpty();
 
             foreach ($labs as $laboratory) {

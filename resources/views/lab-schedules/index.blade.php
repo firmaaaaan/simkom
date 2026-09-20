@@ -105,7 +105,7 @@
                                     @if($schedule)
                                         <td class="group border border-gray-200 bg-green-50/40 text-left p-2.5 align-top cursor-grab active:cursor-grabbing" id="cell-{{ $cellKey }}"
                                             draggable="true"
-                                            ondragstart="handleDragStart(event, {{ $schedule->id }})"
+                                            ondragstart="handleDragStart(event, '{{ $schedule->id }}')"
                                             ondragend="dragReset()"
                                             data-source-id="{{ $schedule->id }}"
                                             data-label="{{ $schedule->course_name }}"
@@ -622,7 +622,7 @@
             return;
         }
         const target = {
-            id: td.getAttribute('data-source-id') ? Number(td.getAttribute('data-source-id')) : null,
+            id: td.getAttribute('data-source-id') || null,
             label: td.getAttribute('data-label') || td.getAttribute('data-slot-label'),
             day: td.getAttribute('data-day'),
             start: td.getAttribute('data-start'),

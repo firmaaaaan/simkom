@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -8,34 +8,34 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Roles
         Schema::create('roles', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->unique();
             $table->string('label');
             $table->timestamps();
         });
 
-        // Permissions
         Schema::create('permissions', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->unique();
             $table->string('label');
             $table->timestamps();
         });
 
-        // Role-Permission Pivot
         Schema::create('role_permission', function (Blueprint $table) {
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
+            $table->uuid('role_id');
+            $table->uuid('permission_id');
             $table->primary(['role_id', 'permission_id']);
+            $table->foreign('role_id')->references('id')->on('roles')->cascadeOnDelete();
+            $table->foreign('permission_id')->references('id')->on('permissions')->cascadeOnDelete();
         });
 
-        // User-Role Pivot
         Schema::create('user_role', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->uuid('user_id');
+            $table->uuid('role_id');
             $table->primary(['user_id', 'role_id']);
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('role_id')->references('id')->on('roles')->cascadeOnDelete();
         });
     }
 
