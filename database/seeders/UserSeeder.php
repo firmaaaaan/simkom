@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -47,7 +48,7 @@ class UserSeeder extends Seeder
             unset($userData['role']);
 
             $user = User::create($userData);
-            $user->roles()->attach($role === 'admin' ? 1 : 2);
+            $user->roles()->attach(Role::where('name', $role)->firstOrFail());
         }
     }
 }

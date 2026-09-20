@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@simkom.com',
             'password' => bcrypt('password'),
         ]);
-        $admin->roles()->attach(1); // admin role
+        $admin->roles()->attach(Role::where('name', 'admin')->firstOrFail());
 
         $this->call([
             UserSeeder::class,
