@@ -3,34 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Hardware extends Model
 {
-    protected $table = 'hardware';
-
     protected $fillable = [
-        'kode_hardware',
-        'nama_hardware',
-        'kategori',
-        'merek',
-        'spesifikasi',
-        'jumlah',
-        'lokasi',
+        'name',
+        'code',
+        'brand',
+        'model',
+        'category',
+        'quantity',
         'status',
-        'catatan',
+        'description',
     ];
 
-    protected function casts(): array
+    public function computers(): BelongsToMany
     {
-        return [
-            'jumlah' => 'integer',
-        ];
-    }
-
-    public function komputers()
-    {
-        return $this->belongsToMany(Komputer::class, 'komputer_hardware', 'hardware_id', 'komputer_id')
-            ->withPivot('jumlah')
-            ->withTimestamps();
+        return $this->belongsToMany(Computer::class, 'computer_hardware')->withTimestamps();
     }
 }

@@ -3,127 +3,44 @@
 namespace Database\Seeders;
 
 use App\Models\Software;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SoftwareSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $software = [
-            [
-                'kode_software' => 'SOFT-001',
-                'nama_software' => 'Windows 11 Pro',
-                'kategori' => 'Operating System',
-                'versi' => '23H2',
-                'lisensi' => 'berbayar',
-                'tanggal_instalasi' => '2024-01-15',
-                'tanggal_expired' => '2025-01-15',
-                'status' => 'aktif',
-                'catatan' => 'OS utama Lab Komputer',
-            ],
-            [
-                'kode_software' => 'SOFT-002',
-                'nama_software' => 'Microsoft Office 365',
-                'kategori' => 'Office',
-                'versi' => '2024',
-                'lisensi' => 'berbayar',
-                'tanggal_instalasi' => '2024-01-15',
-                'tanggal_expired' => '2025-01-15',
-                'status' => 'aktif',
-                'catatan' => 'Paket Office untuk seluruh PC lab',
-            ],
-            [
-                'kode_software' => 'SOFT-003',
-                'nama_software' => 'Visual Studio Code',
-                'kategori' => 'Programming',
-                'versi' => '1.85',
-                'lisensi' => 'gratis',
-                'tanggal_instalasi' => '2024-02-01',
-                'tanggal_expired' => null,
-                'status' => 'aktif',
-                'catatan' => 'IDE untuk praktikum programming',
-            ],
-            [
-                'kode_software' => 'SOFT-004',
-                'nama_software' => 'Cisco Packet Tracer',
-                'kategori' => 'Programming',
-                'versi' => '8.2',
-                'lisensi' => 'gratis',
-                'tanggal_instalasi' => '2024-02-10',
-                'tanggal_expired' => null,
-                'status' => 'aktif',
-                'catatan' => 'Simulator jaringan untuk praktikum',
-            ],
-            [
-                'kode_software' => 'SOFT-005',
-                'nama_software' => 'Adobe Photoshop',
-                'kategori' => 'Design',
-                'versi' => '2024',
-                'lisensi' => 'berbayar',
-                'tanggal_instalasi' => '2024-01-20',
-                'tanggal_expired' => '2025-01-20',
-                'status' => 'aktif',
-                'catatan' => 'Software desain grafis',
-            ],
-            [
-                'kode_software' => 'SOFT-006',
-                'nama_software' => 'MySQL Workbench',
-                'kategori' => 'Database',
-                'versi' => '8.0',
-                'lisensi' => 'gratis',
-                'tanggal_instalasi' => '2024-02-05',
-                'tanggal_expired' => null,
-                'status' => 'aktif',
-                'catatan' => 'Tools untuk praktikum database',
-            ],
-            [
-                'kode_software' => 'SOFT-007',
-                'nama_software' => 'Windows Defender',
-                'kategori' => 'Antivirus',
-                'versi' => '4.18',
-                'lisensi' => 'gratis',
-                'tanggal_instalasi' => '2024-01-01',
-                'tanggal_expired' => null,
-                'status' => 'aktif',
-                'catatan' => 'Antivirus bawaan Windows',
-            ],
-            [
-                'kode_software' => 'SOFT-008',
-                'nama_software' => 'MATLAB',
-                'kategori' => 'Programming',
-                'versi' => 'R2024a',
-                'lisensi' => 'edukasi',
-                'tanggal_instalasi' => '2024-03-01',
-                'tanggal_expired' => '2025-03-01',
-                'status' => 'aktif',
-                'catatan' => 'Lisensi edukasi untuk fisika',
-            ],
-            [
-                'kode_software' => 'SOFT-009',
-                'nama_software' => 'LabVIEW',
-                'kategori' => 'Programming',
-                'versi' => '2023',
-                'lisensi' => 'trial',
-                'tanggal_instalasi' => '2024-04-01',
-                'tanggal_expired' => '2024-10-01',
-                'status' => 'trial',
-                'catatan' => 'Trial version untuk eksperimen',
-            ],
-            [
-                'kode_software' => 'SOFT-010',
-                'nama_software' => 'PyCharm Community',
-                'kategori' => 'Programming',
-                'versi' => '2024.1',
-                'lisensi' => 'open_source',
-                'tanggal_instalasi' => '2024-02-15',
-                'tanggal_expired' => null,
-                'status' => 'aktif',
-                'catatan' => 'IDE Python untuk praktikum AI',
-            ],
+            // Operating System
+            ['name' => 'Windows 11 Pro', 'code' => 'SW-OS-001', 'version' => '23H2', 'license_type' => 'OEM', 'category' => 'Operating System', 'license_count' => 100, 'status' => 'Aktif', 'description' => 'Sistem operasi Windows 11 Pro lisensi OEM'],
+            ['name' => 'Windows 10 Pro', 'code' => 'SW-OS-002', 'version' => '22H2', 'license_type' => 'OEM', 'category' => 'Operating System', 'license_count' => 50, 'status' => 'Aktif', 'description' => 'Sistem operasi Windows 10 Pro lisensi OEM'],
+            ['name' => 'Ubuntu 22.04 LTS', 'code' => 'SW-OS-003', 'version' => '22.04', 'license_type' => 'Open Source', 'category' => 'Operating System', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Sistem operasi Linux Ubuntu'],
+
+            // Office
+            ['name' => 'Microsoft Office 2021', 'code' => 'SW-OFF-001', 'version' => '2021', 'license_type' => 'Volume License', 'category' => 'Office Suite', 'license_count' => 80, 'status' => 'Aktif', 'description' => 'Paket Office Word, Excel, PowerPoint, Outlook'],
+            ['name' => 'Google Workspace', 'code' => 'SW-OFF-002', 'version' => 'Latest', 'license_type' => 'Cloud', 'category' => 'Office Suite', 'license_count' => 200, 'status' => 'Aktif', 'description' => 'Google Docs, Sheets, Slides'],
+
+            // Development
+            ['name' => 'Visual Studio Code', 'code' => 'SW-DEV-001', 'version' => '1.92', 'license_type' => 'Free', 'category' => 'Development', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Code editor dari Microsoft'],
+            ['name' => 'Visual Studio 2022', 'code' => 'SW-DEV-002', 'version' => '2022', 'license_type' => 'Education', 'category' => 'Development', 'license_count' => 50, 'status' => 'Aktif', 'description' => 'IDE untuk pengembangan .NET'],
+            ['name' => 'JetBrains IntelliJ IDEA', 'code' => 'SW-DEV-003', 'version' => '2024.1', 'license_type' => 'Education', 'category' => 'Development', 'license_count' => 50, 'status' => 'Aktif', 'description' => 'IDE untuk Java Development'],
+            ['name' => 'XAMPP', 'code' => 'SW-DEV-004', 'version' => '8.2', 'license_type' => 'Free', 'category' => 'Development', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Local server Apache + MySQL + PHP'],
+
+            // Browser
+            ['name' => 'Google Chrome', 'code' => 'SW-BRW-001', 'version' => 'Latest', 'license_type' => 'Free', 'category' => 'Browser', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Web browser dari Google'],
+            ['name' => 'Mozilla Firefox', 'code' => 'SW-BRW-002', 'version' => 'Latest', 'license_type' => 'Free', 'category' => 'Browser', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Web browser open source'],
+
+            // Multimedia
+            ['name' => 'Adobe Photoshop 2024', 'code' => 'SW-MUL-001', 'version' => '2024', 'license_type' => 'Subscription', 'category' => 'Multimedia', 'license_count' => 20, 'status' => 'Aktif', 'description' => 'Software editing gambar'],
+            ['name' => 'Adobe Premiere Pro 2024', 'code' => 'SW-MUL-002', 'version' => '2024', 'license_type' => 'Subscription', 'category' => 'Multimedia', 'license_count' => 15, 'status' => 'Aktif', 'description' => 'Software editing video'],
+            ['name' => 'OBS Studio', 'code' => 'SW-MUL-003', 'version' => '30.0', 'license_type' => 'Free', 'category' => 'Multimedia', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Software screen recording dan streaming'],
+
+            // Security
+            ['name' => 'Kaspersky Endpoint Security', 'code' => 'SW-SEC-001', 'version' => '12.0', 'license_type' => 'Subscription', 'category' => 'Security', 'license_count' => 100, 'status' => 'Aktif', 'description' => 'Antivirus untuk komputer lab'],
+            ['name' => 'Bitdefender GravityZone', 'code' => 'SW-SEC-002', 'version' => '6.0', 'license_type' => 'Subscription', 'category' => 'Security', 'license_count' => 100, 'status' => 'Expired', 'description' => 'Antivirus enterprise'],
+
+            // Utility
+            ['name' => '7-Zip', 'code' => 'SW-UTL-001', 'version' => '24.0', 'license_type' => 'Free', 'category' => 'Utility', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'Software kompresi file'],
+            ['name' => 'Adobe Acrobat Reader', 'code' => 'SW-UTL-002', 'version' => '2024', 'license_type' => 'Free', 'category' => 'Utility', 'license_count' => 999, 'status' => 'Aktif', 'description' => 'PDF reader dari Adobe'],
         ];
 
         foreach ($software as $item) {

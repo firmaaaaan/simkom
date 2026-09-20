@@ -1,287 +1,358 @@
-@extends('layouts.public')
-@section('content')
-<!-- Hero Section -->
-    <section class="hero-gradient pt-32 pb-20 lg:pt-40 lg:pb-28 relative overflow-hidden">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ config('app.name', 'SimLab') }} - Sistem Manajemen Laboratorium</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        [x-cloak] { display: none !important; }
+        .computer-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .computer-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15); }
+        .computer-card:active { transform: translateY(-1px) scale(0.98); }
+        .legend-pill { transition: all 0.2s ease; }
+        .legend-pill:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+    {{-- Navbar --}}
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="flex justify-between items-center h-16">
+                <a href="{{ url('/') }}" class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-4.25-11.396c.251.023.501.05.75.082M12 21a8.966 8.966 0 005.982-2.275M12 21a8.966 8.966 0 01-5.982-2.275M15.75 3.186a24.284 24.284 0 012.038.443M8.25 3.186a24.284 24.284 0 00-2.038.443M18 14.5l-6 6-6-6" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Lab</span></span>
+                </a>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <a href="{{ route('jadwal-lab.index') }}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        <span class="hidden sm:inline">Jadwal Lab</span>
+                    </a>
+                    <a href="{{ route('track.index') }}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <span class="hidden sm:inline">Lacak Laporan</span>
+                    </a>
+                    <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm">
+                        Masuk Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {{-- Hero --}}
+    <header class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+            <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/15 border border-white/25 rounded-full mb-5">
+                    <span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                    <span class="text-sm font-medium text-white">Sistem Manajemen Laboratorium</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
+                    Lapor Kendala &amp; Pinjam Komputer Laboratorium
+                </h1>
+                <p class="text-base sm:text-lg text-green-50 mb-8">
+                    Pilih laboratorium, temukan komputer yang Anda gunakan, lalu laporkan kendala atau ajukan peminjaman tanpa perlu login.
+                </p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="#denah" class="inline-flex items-center gap-2 px-5 py-3 bg-white text-green-700 text-sm font-semibold rounded-xl hover:bg-green-50 transition-colors shadow-lg">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" />
+                        </svg>
+                        Lihat Denah Lab
+                    </a>
+                    <a href="{{ route('jadwal-lab.index') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/30 text-white text-sm font-semibold rounded-xl hover:bg-white/25 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        Jadwal Lab
+                    </a>
+                    <a href="{{ route('track.index') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/30 text-white text-sm font-semibold rounded-xl hover:bg-white/25 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        Lacak Laporan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {{-- Filter Laboratorium --}}
+        <section id="denah" class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
                 <div>
-                    <div class="inline-flex items-center gap-2 bg-primary-50 text-primary-700 border border-primary-100 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                        <span class="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
-                        Sistem Laboratorium Komputer Terpadu
+                    <h2 class="text-2xl font-black text-gray-900">Denah Komputer</h2>
+                    <p class="text-sm text-gray-500 mt-1">Pilih laboratorium untuk melihat daftar komputernya.</p>
+                </div>
+
+                @if($selectedLab)
+                    <div class="text-sm text-gray-500">
+                        <span class="font-semibold text-gray-800">{{ $computers->count() }}</span> komputer di
+                        <span class="font-semibold text-gray-800">{{ $selectedLab->name }}</span>
                     </div>
-                    <h1 class="text-4xl lg:text-6xl font-bold leading-tight mb-6">
-                        Kelola Laboratorium Komputer dengan <br>
-                        <span class="gradient-text">Mudah & Efisien</span>
-                    </h1>
-                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
-                        Platform digital untuk mengelola aset laboratorium komputer, melaporkan kendala, meminjam komputer untuk tugas, dan memantau kondisi perangkat secara real-time.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4 mb-10">
-                        <a href="{{ route('peminjaman-komputer.index') }}" class="inline-flex items-center justify-center gap-2 bg-primary-600 text-white px-8 py-3.5 rounded-xl hover:bg-primary-700 transition-all font-semibold shadow-lg shadow-primary-600/25">
-                            Pinjam Komputer
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                            </svg>
+                @endif
+            </div>
+
+            @if($laboratories->count() > 0)
+                <div class="flex flex-wrap gap-2 mb-6">
+                    @foreach($laboratories as $lab)
+                        <a href="{{ url('/?laboratory_id=' . $lab->id) }}"
+                           class="legend-pill inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-colors
+                               {{ $selectedLab && $selectedLab->id === $lab->id
+                                    ? 'bg-green-600 border-green-600 text-white shadow-sm'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:border-green-300 hover:text-green-600' }}">
+                            {{ $lab->name }}
+                            @if($lab->code)
+                                <span class="text-xs {{ $selectedLab && $selectedLab->id === $lab->id ? 'text-green-100' : 'text-gray-400' }}">{{ $lab->code }}</span>
+                            @endif
                         </a>
-                        <a href="{{ route('laporan-kendala-komputer.create') }}" class="inline-flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-8 py-3.5 rounded-xl hover:border-primary-300 hover:text-primary-700 transition-all font-semibold">
-                            Lapor Kendala
-                        </a>
-                        <a href="{{ route('jadwal-kuliah.index') }}" class="inline-flex items-center justify-center gap-2 text-primary-700 px-4 py-3.5 rounded-xl hover:text-primary-900 transition-all font-semibold">
-                            Lihat Jadwal
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    </div>
-                    <!-- Quick Stats -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 border-t border-primary-100 pt-8">
-                        <div>
-                            <p class="text-3xl font-bold text-primary-700">{{ $stats['komputer'] }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Komputer Terdaftar</p>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-primary-700">{{ $stats['laboratorium'] }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Laboratorium</p>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-primary-700">{{ $stats['peminjaman'] }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Peminjaman</p>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-primary-700">{{ $stats['laporan'] }}</p>
-                            <p class="text-sm text-gray-500 mt-1">Laporan Kendala</p>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-                <div class="relative">
-                    <div class="relative z-10">
-                        <svg viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full max-w-lg mx-auto drop-shadow-xl">
-                            <rect x="50" y="80" width="400" height="280" rx="12" fill="white" stroke="#d1fae5" stroke-width="2"/>
-                            <rect x="50" y="80" width="400" height="50" rx="12" fill="#f0fdf4"/>
-                            <rect x="50" y="110" width="400" height="20" fill="#f0fdf4"/>
-                            <circle cx="75" cy="105" r="6" fill="#ef4444"/>
-                            <circle cx="95" cy="105" r="6" fill="#f59e0b"/>
-                            <circle cx="115" cy="105" r="6" fill="#10b981"/>
-                            <rect x="50" y="140" width="120" height="220" rx="8" fill="#ecfdf5"/>
-                            <rect x="180" y="140" width="270" height="100" rx="8" fill="#f8fafc"/>
-                            <rect x="180" y="250" width="130" height="110" rx="8" fill="#f8fafc"/>
-                            <rect x="320" y="250" width="130" height="110" rx="8" fill="#f8fafc"/>
-                            <rect x="70" y="160" width="80" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="180" width="60" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="200" width="90" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="220" width="70" height="8" rx="4" fill="#10b981"/>
-                            <rect x="70" y="240" width="80" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="260" width="60" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="280" width="90" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="70" y="300" width="70" height="8" rx="4" fill="#34d399"/>
-                            <rect x="200" y="160" width="100" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="180" width="220" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="200" width="180" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="220" width="230" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="270" width="100" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="290" width="110" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="200" y="310" width="80" height="8" rx="4" fill="#10b981"/>
-                            <rect x="200" y="330" width="100" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="340" y="270" width="100" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="340" y="290" width="90" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="340" y="310" width="110" height="8" rx="4" fill="#cbd5e1"/>
-                            <rect x="340" y="330" width="80" height="8" rx="4" fill="#cbd5e1"/>
-                        </svg>
-                    </div>
-                    <!-- Floating badge: status -->
-                    <div class="absolute top-8 -right-2 lg:right-0 bg-white rounded-2xl shadow-lg border border-primary-100 px-4 py-3 flex items-center gap-3 z-20">
-                        <span class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">Sistem Normal</p>
-                            <p class="text-xs text-gray-500">Komputer siap dipinjam</p>
-                        </div>
-                    </div>
-                    <!-- Floating badge: tracker -->
-                    <div class="absolute -bottom-6 left-4 bg-white rounded-2xl shadow-lg border border-primary-100 px-4 py-3 flex items-center gap-3 z-20">
-                        <span class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">Lacak Kendala</p>
-                            <p class="text-xs text-gray-500">Kode tracker unik</p>
-                        </div>
-                    </div>
-                    <div class="absolute -top-4 -right-4 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                    <div class="absolute -bottom-8 -left-4 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                </div>
-            </div>
-        </div>
-    </section>
+            @endif
 
-    <!-- Features Section -->
-    <section id="fitur" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="inline-block bg-primary-50 text-primary-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">Fitur Unggulan</span>
-                <h2 class="text-3xl lg:text-4xl font-bold mb-4">Semua Kebutuhan Laboratorium dalam Satu Platform</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Kelola seluruh aset laboratorium dengan fitur-fitur lengkap yang dirancang untuk memudahkan administrasi dan pemantauan.</p>
+            {{-- Keterangan Status --}}
+            <div class="flex flex-wrap items-center gap-3 mb-6 text-xs">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 rounded-full font-medium">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span> Aktif
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full font-medium">
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full"></span> Maintenance
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-600 rounded-full font-medium">
+                    <span class="w-2 h-2 bg-gray-400 rounded-full"></span> Tidak Aktif
+                </span>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Peminjaman Komputer</h3>
-                    <p class="text-gray-600 leading-relaxed mb-4">Pinjam komputer untuk tugas kuliah dengan sistem booking online dan verifikasi via kode tracker.</p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>Normal</span>
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-yellow-700 bg-yellow-50 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>Perbaikan</span>
-                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-red-700 bg-red-50 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>Rusak</span>
-                    </div>
-                </div>
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Lapor Kendala</h3>
-                    <p class="text-gray-600 leading-relaxed">Laporkan kendala komputer di laboratorium dengan mudah, lengkapi dengan foto dan kategori kerusakan.</p>
-                </div>
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Lacak Status</h3>
-                    <p class="text-gray-600 leading-relaxed">Pantau status laporan kendala dan peminjaman komputer dengan kode tracker yang unik, tanpa perlu login.</p>
-                </div>
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Jadwal Kuliah</h3>
-                    <p class="text-gray-600 leading-relaxed">Lihat jadwal kuliah dan praktikum laboratorium dengan kalender interaktif yang terintegrasi.</p>
-                </div>
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M12 20h4.01M5.6 5.6l.01.01M20 12h.01M5.6 19.4l.01.01M12 12H5.6M12 12h.01M12 20H5.6M12 20h.01M19.4 5.6l.01.01"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">QR Code & Kartu Kendali</h3>
-                    <p class="text-gray-600 leading-relaxed">Setiap komputer dilengkapi QR code dan kartu kendali untuk pelacakan riwayat pemeliharaan dengan cepat.</p>
-                </div>
-                <div class="card-hover bg-white border border-gray-100 rounded-2xl p-8">
-                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">Dashboard Analytics</h3>
-                    <p class="text-gray-600 leading-relaxed">Pantau statistik penggunaan laboratorium, jumlah komputer per lab, dan notifikasi real-time untuk admin.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- How It Works Section -->
-    <section id="cara-kerja" class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="inline-block bg-primary-50 text-primary-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">Cara Kerja</span>
-                <h2 class="text-3xl lg:text-4xl font-bold mb-4">Mudah Digunakan dalam 3 Langkah</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Tidak perlu akun, langsung gunakan layanan yang tersedia untuk mahasiswa dan dosen.</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="relative bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                    <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mb-6 text-white text-2xl font-bold shadow-lg shadow-primary-600/25">1</div>
-                    <h3 class="text-xl font-bold mb-3">Pilih Komputer</h3>
-                    <p class="text-gray-600 leading-relaxed">Cari komputer yang tersedia berdasarkan laboratorium dan statusnya. Filter berdasarkan lab atau kata kunci.</p>
-                </div>
-                <div class="relative bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                    <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mb-6 text-white text-2xl font-bold shadow-lg shadow-primary-600/25">2</div>
-                    <h3 class="text-xl font-bold mb-3">Isi Data & Ajukan</h3>
-                    <p class="text-gray-600 leading-relaxed">Lengkapi formulir peminjaman atau laporan kendala. Cukup isi nama, NPM/NIM, dan detail yang dibutuhkan.</p>
-                </div>
-                <div class="relative bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                    <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mb-6 text-white text-2xl font-bold shadow-lg shadow-primary-600/25">3</div>
-                    <h3 class="text-xl font-bold mb-3">Dapatkan Kode Tracker</h3>
-                    <p class="text-gray-600 leading-relaxed">Terima kode tracker unik untuk memantau status peminjaman atau perbaikan secara real-time kapan saja.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+            {{-- Daftar Komputer --}}
+            @if($computers->count() > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    @foreach($computers as $computer)
+                        <div class="computer-card bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.41A2.25 2.25 0 012.25 5.496V5.25" />
+                                    </svg>
+                                </div>
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {{ $computer->status === 'Aktif' ? 'bg-green-100 text-green-800' : ($computer->status === 'Maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600') }}">
+                                        {{ $computer->status }}
+                                    </span>
+                                    @if(($computer->tickets_count ?? 0) > 0)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                            </svg>
+                                            {{ $computer->tickets_count }} tiket
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
 
-    <!-- Status Komputer Section -->
-    <section id="status" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="inline-block bg-primary-50 text-primary-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">Status Komputer</span>
-                <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ketahui Kondisi Sebelum Meminjam</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Setiap komputer dilengkapi kartu status yang jelas untuk memudahkan peminjaman.</p>
-            </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="card-hover bg-white rounded-2xl p-8 border border-green-200 shadow-sm">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-2 text-green-700">Normal</h3>
-                    <p class="text-gray-600 text-center">Komputer siap pakai untuk peminjaman. Status aktif dan dalam kondisi baik.</p>
-                </div>
-                <div class="card-hover bg-white rounded-2xl p-8 border border-yellow-200 shadow-sm">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-2 text-yellow-700">Perbaikan</h3>
-                    <p class="text-gray-600 text-center">Komputer sedang dalam perbaikan. Tidak tersedia untuk dipinjam sementara waktu.</p>
-                </div>
-                <div class="card-hover bg-white rounded-2xl p-8 border border-red-200 shadow-sm">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-2 text-red-700">Rusak</h3>
-                    <p class="text-gray-600 text-center">Komputer mengalami kerusakan. Menunggu pemeliharaan atau penggantian.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+                            <h3 class="text-lg font-bold text-gray-900">{{ $computer->code }}</h3>
+                            <p class="text-sm text-gray-500 mb-4">{{ $computer->laboratory?->name ?? '-' }}</p>
 
-    <!-- CTA Section -->
-    <section class="py-20 relative overflow-hidden bg-primary-700">
-        <div class="absolute inset-0 opacity-20">
-            <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
-            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-            <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">Siap Memulai?</h2>
-            <p class="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">Kelola laboratorium Anda dengan lebih efisien menggunakan SimLabKom. Gratis untuk seluruh sivitas akademika.</p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="{{ route('peminjaman-komputer.index') }}" class="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-3.5 rounded-xl hover:bg-gray-100 transition-all font-semibold shadow-lg">
-                    Pinjam Komputer
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            <div class="mt-auto pt-4 border-t border-gray-100 space-y-2">
+                                @if($showSpec)
+                                <button type="button"
+                                        data-spec-trigger
+                                        data-spec-target="#spec-{{ $computer->id }}"
+                                        data-spec-title="{{ $computer->code }}"
+                                        data-spec-subtitle="{{ $computer->laboratory?->name ?? '-' }}"
+                                        class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 hover:text-gray-800 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                    </svg>
+                                    Lihat Spesifikasi
+                                </button>
+                                @endif
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <a href="{{ route('lapor-kendala.create', $computer) }}"
+                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                                        Lapor Kendala
+                                    </a>
+                                    <a href="{{ route('pinjam-komputer.create', $computer) }}"
+                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                        Pinjam
+                                    </a>
+                                </div>
+                            </div>
+
+                            @if($showSpec)
+                            {{-- Data spesifikasi (dipakai modal) --}}
+                            <div id="spec-{{ $computer->id }}" class="hidden">
+                                <div class="space-y-6">
+                                    <section>
+                                        <div class="flex items-center justify-between mb-2.5">
+                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Hardware</p>
+                                            <span class="text-xs text-gray-400">{{ $computer->hardware->count() }} item</span>
+                                        </div>
+                                        @if($computer->hardware->isNotEmpty())
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @foreach($computer->hardware as $hw)
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">
+                                                        {{ $hw->name }}
+                                                        @if($hw->category)
+                                                            <span class="ml-1 text-blue-400">({{ $hw->category }})</span>
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <p class="text-sm text-gray-400 italic">Belum ada data hardware.</p>
+                                        @endif
+                                    </section>
+
+                                    <section>
+                                        <div class="flex items-center justify-between mb-2.5">
+                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Software</p>
+                                            <span class="text-xs text-gray-400">{{ $computer->software->count() }} item</span>
+                                        </div>
+                                        @if($computer->software->isNotEmpty())
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @foreach($computer->software as $sw)
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
+                                                        {{ $sw->name }}
+                                                        @if($sw->version || $sw->category)
+                                                            <span class="ml-1 text-purple-400">({{ $sw->version ?? $sw->category }})</span>
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <p class="text-sm text-gray-400 italic">Belum ada data software.</p>
+                                        @endif
+                                    </section>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="bg-white rounded-2xl border border-gray-200 px-6 py-16 text-center">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.41A2.25 2.25 0 012.25 5.496V5.25" />
                     </svg>
-                </a>
-                <a href="{{ route('laporan-kendala-komputer.create') }}" class="inline-flex items-center gap-2 bg-primary-800 text-white px-8 py-3.5 rounded-xl hover:bg-primary-900 transition-all font-semibold">
-                    Lapor Kendala
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </a>
+                    <p class="text-gray-500 text-lg font-medium">Belum ada komputer pada laboratorium ini</p>
+                    <p class="text-gray-400 text-sm mt-1">Pilih laboratorium lain di atas untuk melihat daftar komputer.</p>
+                </div>
+            @endif
+        </section>
+    </main>
+
+    {{-- Footer --}}
+    <footer class="mt-12 bg-white border-t border-gray-200 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimLab - Sistem Manajemen Laboratorium</p>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('track.index') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Lacak Laporan</a>
+                <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Masuk Admin</a>
             </div>
         </div>
-    </section>
-@endsection
+    </footer>
+    @if($showSpec)
+    {{-- Modal Spesifikasi --}}
+    <div id="specModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="specModalTitle">
+        <div data-spec-close class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+        <div class="relative min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div class="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col">
+                <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100">
+                    <div>
+                        <p class="text-xs font-semibold text-green-600 uppercase tracking-wider mb-1">Spesifikasi</p>
+                        <h3 id="specModalTitle" class="text-lg font-bold text-gray-900">-</h3>
+                        <p id="specModalSubtitle" class="text-sm text-gray-500"></p>
+                    </div>
+                    <button type="button" id="specModalClose" data-spec-close aria-label="Tutup"
+                            class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="specModalBody" class="px-6 py-5 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const modal = document.getElementById('specModal');
+            const modalBody = document.getElementById('specModalBody');
+            const modalTitle = document.getElementById('specModalTitle');
+            const modalSubtitle = document.getElementById('specModalSubtitle');
+            const closeButton = document.getElementById('specModalClose');
+            let lastTrigger = null;
+
+            function openSpec(trigger) {
+                const source = document.querySelector(trigger.dataset.specTarget);
+                if (!source) return;
+
+                lastTrigger = trigger;
+                modalTitle.textContent = trigger.dataset.specTitle || 'Spesifikasi';
+                modalSubtitle.textContent = trigger.dataset.specSubtitle || '';
+                modalBody.innerHTML = source.innerHTML;
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                closeButton.focus();
+            }
+
+            function closeSpec() {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                modalBody.innerHTML = '';
+                lastTrigger?.focus();
+                lastTrigger = null;
+            }
+
+            document.addEventListener('click', function (event) {
+                const trigger = event.target.closest('[data-spec-trigger]');
+
+                if (trigger) {
+                    openSpec(trigger);
+                    return;
+                }
+
+                if (event.target.closest('[data-spec-close]')) {
+                    closeSpec();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeSpec();
+                }
+            });
+        })();
+    </script>
+    @endif
+
+</body>
+</html>

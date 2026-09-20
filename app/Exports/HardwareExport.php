@@ -7,55 +7,38 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class HardwareExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class HardwareExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    protected $hardware;
-
-    public function __construct($hardware)
-    {
-        $this->hardware = $hardware;
-    }
-
     public function collection()
     {
-        return $this->hardware;
+        return Hardware::all();
     }
 
     public function headings(): array
     {
-        return [
-            'Nama Hardware',
-            'Kategori',
-            'Merek',
-            'Spesifikasi',
-            'Jumlah',
-            'Lokasi',
-            'Status',
-            'Catatan',
-        ];
+        return ['Kode', 'Nama', 'Merk', 'Model', 'Kategori', 'Jumlah', 'Status', 'Keterangan'];
     }
 
     public function map($hardware): array
     {
         return [
-            $hardware->nama_hardware,
-            $hardware->kategori,
-            $hardware->merek ?: '-',
-            $hardware->spesifikasi ?: '-',
-            $hardware->jumlah,
-            $hardware->lokasi ?: '-',
-            ucfirst($hardware->status),
-            $hardware->catatan ?: '-',
+            $hardware->code,
+            $hardware->name,
+            $hardware->brand,
+            $hardware->model,
+            $hardware->category,
+            $hardware->quantity,
+            $hardware->status,
+            $hardware->description,
         ];
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
         return [
-            1 => ['font' => ['bold' => true, 'size' => 12]],
+            1 => ['font' => ['bold' => true]],
         ];
     }
 }

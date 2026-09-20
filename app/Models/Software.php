@@ -3,34 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Software extends Model
 {
-    protected $table = 'software';
-
     protected $fillable = [
-        'kode_software',
-        'nama_software',
-        'kategori',
-        'versi',
-        'lisensi',
-        'tanggal_instalasi',
-        'tanggal_expired',
+        'name',
+        'code',
+        'version',
+        'license_type',
+        'category',
+        'license_count',
         'status',
-        'catatan',
+        'description',
     ];
 
-    protected function casts(): array
+    public function computers(): BelongsToMany
     {
-        return [
-            'tanggal_instalasi' => 'date',
-            'tanggal_expired' => 'date',
-        ];
-    }
-
-    public function komputers()
-    {
-        return $this->belongsToMany(Komputer::class, 'komputer_software', 'software_id', 'komputer_id')
-            ->withTimestamps();
+        return $this->belongsToMany(Computer::class, 'computer_software')->withTimestamps();
     }
 }

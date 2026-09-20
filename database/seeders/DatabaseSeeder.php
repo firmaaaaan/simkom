@@ -10,30 +10,34 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RoleSeeder::class,
+            // Idempoten: aman dipanggil ulang untuk DB yang sudah ada sebelum
+            // permission manage-lab-schedules diperkenalkan.
+            LabSchedulePermissionSeeder::class,
         ]);
 
+        $admin = User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@simlab.com',
+            'password' => bcrypt('password'),
+        ]);
+        $admin->roles()->attach(1); // admin role
+
         $this->call([
-            // LaboratoriumSeeder::class,
-            // HardwareSeeder::class,
-            // SoftwareSeeder::class,
-            // KomponenIotJaringanSeeder::class,
-            // KomputerSeeder::class,
-            // InventarisIoTJaringanSeeder::class,
-            // KartuKendaliSeeder::class,
-            // PemeliharaanKomputerSeeder::class,
-            // PeminjamanInventarisIoTJaringanSeeder::class,
-            // LaporanKendalaKomputerSeeder::class,
             UserSeeder::class,
+            LaboratorySeeder::class,
+            AcademicYearSeeder::class,
+            HardwareSeeder::class,
+            SoftwareSeeder::class,
+            ComponentSeeder::class,
+            BoxSeeder::class,
+            BoxUsageSeeder::class,
+            ComputerSeeder::class,
+            TicketSeeder::class,
+            DeviceCheckSeeder::class,
         ]);
     }
 }

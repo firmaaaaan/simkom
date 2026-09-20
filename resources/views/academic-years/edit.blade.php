@@ -1,0 +1,90 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Tahun Ajaran')
+@section('header', 'Edit Tahun Ajaran')
+
+@section('content')
+<div class="max-w-2xl">
+    <div class="mb-6">
+        <a href="{{ route('academic-years.index') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Kembali
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800 mb-6">Form Edit Tahun Ajaran</h2>
+
+        @if($errors->any())
+            <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('academic-years.update', $academicYear) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="name" value="{{ old('name', $academicYear->name) }}" required
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                        placeholder="Contoh: Tahun Ajaran 2026/2027">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_year" class="block text-sm font-medium text-gray-700 mb-1">Tahun Mulai <span class="text-red-500">*</span></label>
+                        <input type="number" name="start_year" id="start_year" value="{{ old('start_year', $academicYear->start_year) }}" required min="2000" max="2100"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="2026">
+                    </div>
+                    <div>
+                        <label for="end_year" class="block text-sm font-medium text-gray-700 mb-1">Tahun Selesai <span class="text-red-500">*</span></label>
+                        <input type="number" name="end_year" id="end_year" value="{{ old('end_year', $academicYear->end_year) }}" required min="2000" max="2100"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="2027">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $academicYear->start_date?->format('Y-m-d')) }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $academicYear->end_date?->format('Y-m-d')) }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                    <select name="status" id="status" required
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="Non Aktif" {{ old('status', $academicYear->status) === 'Non Aktif' ? 'selected' : '' }}>Non Aktif</option>
+                        <option value="Aktif" {{ old('status', $academicYear->status) === 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
+                <button type="submit" class="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    Perbarui
+                </button>
+                <a href="{{ route('academic-years.index') }}" class="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
