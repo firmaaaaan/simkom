@@ -124,7 +124,7 @@
             </div>
         </div>
 
-        <p class="text-center text-xs text-gray-400 mt-4">SimLab - Sistem Informasi Laboratorium</p>
+        <p class="text-center text-xs text-gray-400 mt-4">SimKom - Sistem Informasi Laboratorium</p>
     </div>
 
     <script>

@@ -12,31 +12,31 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Firmansyah, S.Kom',
-                'email' => 'firmansyah@simlab.com',
+                'email' => 'firmansyah@simkom.com',
                 'password' => bcrypt('password'),
                 'role' => 'admin',
             ],
             [
                 'name' => 'Dewi Lestari, S.T.',
-                'email' => 'dewi@simlab.com',
+                'email' => 'dewi@simkom.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Rudi Hartono',
-                'email' => 'rudi@simlab.com',
+                'email' => 'rudi@simkom.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Siti Nurhaliza',
-                'email' => 'siti@simlab.com',
+                'email' => 'siti@simkom.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Andi Pratama',
-                'email' => 'andi@simlab.com',
+                'email' => 'andi@simkom.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],

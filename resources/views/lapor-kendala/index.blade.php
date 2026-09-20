@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lapor Kendala - {{ config('app.name', 'SimLab') }}</title>
+    <title>Lapor Kendala - {{ config('app.name', 'SimKom') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -145,7 +145,7 @@
     {{-- Footer --}}
     <footer class="mt-12 bg-white border-t border-gray-200 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimLab - Sistem Manajemen Laboratorium</p>
+            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Laboratorium</p>
         </div>
     </footer>
 

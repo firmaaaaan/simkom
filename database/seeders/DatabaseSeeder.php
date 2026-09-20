@@ -21,23 +21,23 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::factory()->create([
             'name' => 'Admin',
-            'email' => 'admin@simlab.com',
+            'email' => 'admin@simkom.com',
             'password' => bcrypt('password'),
         ]);
         $admin->roles()->attach(1); // admin role
 
         $this->call([
             UserSeeder::class,
-            LaboratorySeeder::class,
-            AcademicYearSeeder::class,
-            HardwareSeeder::class,
-            SoftwareSeeder::class,
-            ComponentSeeder::class,
-            BoxSeeder::class,
-            BoxUsageSeeder::class,
-            ComputerSeeder::class,
-            TicketSeeder::class,
-            DeviceCheckSeeder::class,
+            // LaboratorySeeder::class,
+            // AcademicYearSeeder::class,
+            // HardwareSeeder::class,
+            // SoftwareSeeder::class,
+            // ComponentSeeder::class,
+            // BoxSeeder::class,
+            // BoxUsageSeeder::class,
+            // ComputerSeeder::class,
+            // TicketSeeder::class,
+            // DeviceCheckSeeder::class,
         ]);
     }
 }
