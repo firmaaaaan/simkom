@@ -2,41 +2,61 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
-class Setting extends Model
+class Setting
 {
-    use HasUuids;
-    /**
-     * Key untuk saklar tombol "Lihat Spesifikasi" di halaman publik.
-     */
     public const PUBLIC_SPEC = 'public_spec_enabled';
-
-    /**
-     * Key untuk URL jadwal real-time yang ditampilkan di halaman jadwal publik.
-     */
     public const REALTIME_SCHEDULE_URL = 'realtime_schedule_url';
 
-    protected $fillable = [
-        'key',
-        'value',
-    ];
+    protected static ?array $cache = null;
+
+    protected static function filePath(): string
+    {
+        return storage_path('app/settings.json');
+    }
+
+    protected static function all(): array
+    {
+        if (static::$cache !== null) {
+            return static::$cache;
+        }
+
+        $path = static::filePath();
+
+        if (!File::exists($path)) {
+            return static::$cache = [];
+        }
+
+        $data = json_decode(File::get($path), true);
+
+        return static::$cache = is_array($data) ? $data : [];
+    }
+
+    protected static function save(array $data): void
+    {
+        static::$cache = $data;
+        File::put(static::filePath(), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        try {
-            $value = static::query()->where('key', $key)->value('value');
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $default;
-        }
+        $all = static::all();
 
-        return $value ?? $default;
+        return $all[$key] ?? $default;
     }
 
     public static function set(string $key, ?string $value): void
     {
-        static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
+        $all = static::all();
+
+        if ($value === null) {
+            unset($all[$key]);
+        } else {
+            $all[$key] = $value;
+        }
+
+        static::save($all);
     }
 
     public static function bool(string $key, bool $default = false): bool
