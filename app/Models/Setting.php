@@ -2,78 +2,52 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\File;
+use Illuminate\Database\Eloquent\Model;
 
-class Setting
+class Setting extends Model
 {
-    public const PUBLIC_SPEC = 'public_spec_enabled';
-    public const REALTIME_SCHEDULE_URL = 'realtime_schedule_url';
+    protected $fillable = [
+        'value',
+    ];
 
-    protected static ?array $cache = null;
+    protected $casts = [
+        'value' => 'string',
+    ];
 
-    protected static function filePath(): string
+    public const PUBLIC_SPEC_ID = 1;
+    public const REALTIME_SCHEDULE_URL_ID = 2;
+
+    public static function get(int $id, ?string $default = null): ?string
     {
-        return storage_path('app/settings.json');
-    }
-
-    protected static function all(): array
-    {
-        if (static::$cache !== null) {
-            return static::$cache;
+        try {
+            $setting = static::find($id);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $default;
         }
 
-        $path = static::filePath();
-
-        if (!File::exists($path)) {
-            return static::$cache = [];
-        }
-
-        $data = json_decode(File::get($path), true);
-
-        return static::$cache = is_array($data) ? $data : [];
+        return $setting?->value ?? $default;
     }
 
-    protected static function save(array $data): void
+    public static function set(int $id, ?string $value): void
     {
-        static::$cache = $data;
-        File::put(static::filePath(), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        static::updateOrCreate(['id' => $id], ['value' => $value]);
     }
 
-    public static function get(string $key, ?string $default = null): ?string
+    public static function bool(int $id, bool $default = false): bool
     {
-        $all = static::all();
-
-        return $all[$key] ?? $default;
-    }
-
-    public static function set(string $key, ?string $value): void
-    {
-        $all = static::all();
-
-        if ($value === null) {
-            unset($all[$key]);
-        } else {
-            $all[$key] = $value;
-        }
-
-        static::save($all);
-    }
-
-    public static function bool(string $key, bool $default = false): bool
-    {
-        $value = static::get($key);
+        $value = static::get($id);
 
         return $value === null ? $default : filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     public static function publicSpecEnabled(): bool
     {
-        return static::bool(self::PUBLIC_SPEC, true);
+        return static::bool(self::PUBLIC_SPEC_ID, true);
     }
 
     public static function realtimeScheduleUrl(): ?string
     {
-        $url = static::get(self::REALTIME_SCHEDULE_URL);
+        $url = static::get(self::REALTIME_SCHEDULE_URL_ID);
 
         return ($url !== null && $url !== '') ? $url : null;
     }

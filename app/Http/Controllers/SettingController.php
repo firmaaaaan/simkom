@@ -14,7 +14,7 @@ class SettingController extends Controller
     {
         $enabled = ! Setting::publicSpecEnabled();
 
-        Setting::set(Setting::PUBLIC_SPEC, $enabled ? '1' : '0');
+        Setting::set(Setting::PUBLIC_SPEC_ID, $enabled ? '1' : '0');
 
         return back()->with('success', $enabled
             ? 'Tombol "Lihat Spesifikasi" ditampilkan di halaman publik.'
@@ -34,7 +34,7 @@ class SettingController extends Controller
         ]);
 
         $url = $validated['realtime_url'] ?? null;
-        Setting::set(Setting::REALTIME_SCHEDULE_URL, $url);
+        Setting::set(Setting::REALTIME_SCHEDULE_URL_ID, $url);
 
         return back()->with('success', $url
             ? 'Tautan jadwal real-time disimpan dan tampil di halaman jadwal publik.'
