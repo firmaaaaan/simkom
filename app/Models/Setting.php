@@ -25,7 +25,11 @@ class Setting extends Model
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        $value = static::query()->where('key', $key)->value('value');
+        try {
+            $value = static::query()->where('key', $key)->value('value');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $default;
+        }
 
         return $value ?? $default;
     }
