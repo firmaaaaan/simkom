@@ -21,6 +21,20 @@ class Component extends Model
         'description',
     ];
 
+    public static function generateCode(): string
+    {
+        $last = static::where('code', 'like', 'KMP-%')
+            ->orderByRaw("CAST(SUBSTR(code, 5) AS INTEGER) DESC")
+            ->value('code');
+
+        $next = 1;
+        if ($last && preg_match('/^KMP-(\d+)$/', $last, $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        return 'KMP-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+    }
+
     public function getImageUrlAttribute(): ?string
     {
         return $this->image ? asset('storage/' . $this->image) : null;

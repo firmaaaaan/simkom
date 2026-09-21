@@ -18,6 +18,46 @@
         <h2 class="text-lg font-bold text-gray-800 mb-2">Import Software dari Excel</h2>
         <p class="text-sm text-gray-500 mb-6">Upload file Excel (.xlsx, .xls, .csv) untuk mengimport data software secara batch.</p>
 
+        @if(session('import_error'))
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-red-800">Import Gagal</p>
+                        <p class="text-sm text-red-700 mt-1">{{ session('import_error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-green-800">Import Berhasil</p>
+                        <p class="text-sm text-green-700 mt-1">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('import_errors') && count(session('import_errors')) > 0)
+            <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                    <div>
+                        <p class="text-sm font-semibold text-amber-800">{{ count(session('import_errors')) }} Baris Gagal</p>
+                        <ul class="mt-1 text-sm text-amber-700 list-disc list-inside space-y-0.5">
+                            @foreach(session('import_errors') as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -26,7 +66,7 @@
                 <div>
                     <p class="text-sm font-medium text-blue-800">Format kolom yang diperlukan:</p>
                     <p class="text-xs text-blue-700 mt-1">Kode, Nama, Versi, Kategori, Jenis Lisensi, Jumlah Lisensi, Status, Keterangan</p>
-                    <p class="text-xs text-blue-700 mt-1">Kode harus unik. Jika kode sudah ada, data akan diupdate.</p>
+                    <p class="text-xs text-blue-700 mt-1">Kode bersifat opsional. Jika kosong, kode akan di-generate otomatis (SW-001, SW-002, ...).</p>
                 </div>
             </div>
         </div>

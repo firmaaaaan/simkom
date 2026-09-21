@@ -25,12 +25,14 @@ class HardwareController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:hardware,code',
+            'code' => 'nullable|string|max:50|unique:hardware,code',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'category' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
+
+        $validated['code'] = $validated['code'] ?: Hardware::generateCode();
 
         Hardware::create($validated);
 
@@ -103,8 +105,24 @@ class HardwareController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        Excel::import(new HardwareImport, $request->file('file'));
+        $import = new HardwareImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('hardware.import')
+                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+        }
 
-        return redirect()->route('hardware.index')->with('success', 'Data hardware berhasil diimport.');
+        $message = "Berhasil mengimpor {$import->getImportedCount()} data hardware";
+        if ($errors = $import->getErrors()) {
+            $message .= '. ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+            }
+        }
+
+        return redirect()->route('hardware.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 }

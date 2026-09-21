@@ -37,10 +37,11 @@
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-red-500">*</span></label>
-                    <input type="text" name="code" value="{{ old('code') }}" required
-                        placeholder="Contoh: KMP-001"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode</label>
+                    <input type="text" name="code" value="{{ old('code') }}"
+                        placeholder="Kosongkan untuk kode otomatis (KMP-001)"
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <p class="mt-1 text-xs text-gray-400">Kosongkan untuk auto-generate</p>
                 </div>
             </div>
 

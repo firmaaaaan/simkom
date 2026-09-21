@@ -25,13 +25,15 @@ class SoftwareController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:software,code',
+            'code' => 'nullable|string|max:50|unique:software,code',
             'version' => 'nullable|string|max:50',
             'license_type' => 'nullable|string|max:100',
             'category' => 'required|string|max:255',
             'status' => 'required|in:Aktif,Expired,Trial,Non Aktif',
             'description' => 'nullable|string',
         ]);
+
+        $validated['code'] = $validated['code'] ?: Software::generateCode();
 
         Software::create($validated);
 
@@ -105,8 +107,24 @@ class SoftwareController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        Excel::import(new SoftwareImport, $request->file('file'));
+        $import = new SoftwareImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('software.import')
+                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+        }
 
-        return redirect()->route('software.index')->with('success', 'Data software berhasil diimport.');
+        $message = "Berhasil mengimpor {$import->getImportedCount()} data software";
+        if ($errors = $import->getErrors()) {
+            $message .= '. ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+            }
+        }
+
+        return redirect()->route('software.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 }

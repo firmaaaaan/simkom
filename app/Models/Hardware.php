@@ -18,6 +18,20 @@ class Hardware extends Model
         'description',
     ];
 
+    public static function generateCode(): string
+    {
+        $last = static::where('code', 'like', 'HW-%')
+            ->orderByRaw("CAST(SUBSTR(code, 4) AS INTEGER) DESC")
+            ->value('code');
+
+        $next = 1;
+        if ($last && preg_match('/^HW-(\d+)$/', $last, $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        return 'HW-' . str_pad($next, 3, '0', STR_PAD_LEFT);
+    }
+
     public function computers(): BelongsToMany
     {
         return $this->belongsToMany(Computer::class, 'computer_hardware')->withTimestamps();
