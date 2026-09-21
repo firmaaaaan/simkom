@@ -93,10 +93,10 @@ class BoxController extends Controller
             'components.*' => 'required|string',
         ]);
 
-        $lastNumber = (int) Box::where('code', 'like', 'BOX-%')
+        $lastCode = Box::where('code', 'like', 'BOX-%')
             ->orderByRaw("CAST(SUBSTR(code, 5) AS INTEGER) DESC")
             ->value('code');
-        $lastNum = $lastNumber ? (int) substr($lastNumber, 4) : 0;
+        $lastNum = $lastCode ? (int) substr($lastCode, 4) : 0;
 
         $componentsData = [];
         if (!empty($validated['components'])) {

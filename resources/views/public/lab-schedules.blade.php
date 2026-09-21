@@ -39,9 +39,6 @@
                         </svg>
                         <span class="hidden sm:inline">Denah Lab</span>
                     </a>
-                    <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm">
-                        Masuk Admin
-                    </a>
                 </div>
             </div>
         </div>

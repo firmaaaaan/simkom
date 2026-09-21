@@ -25,8 +25,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-4.25-11.396c.251.023.501.05.75.082M12 21a8.966 8.966 0 005.982-2.275M12 21a8.966 8.966 0 01-5.982-2.275M15.75 3.186a24.284 24.284 0 012.038.443M8.25 3.186a24.284 24.284 0 00-2.038.443M18 14.5l-6 6-6-6" />
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">Sim<span class="text-green-600">Lab</span></h1>
-            <p class="text-sm text-gray-500 mt-1">Sistem Manajemen Laboratorium</p>
+            <h1 class="text-2xl font-bold text-gray-800">Sim<span class="text-green-600">Kom</span></h1>
+            <p class="text-sm text-gray-500 mt-1">Sistem Manajemen Komputer</p>
         </div>
 
         {{-- Card --}}

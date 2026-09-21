@@ -9,6 +9,7 @@ use App\Models\DeviceCheckItem;
 use App\Models\Laboratory;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DeviceCheckSeeder extends Seeder
 {
@@ -57,6 +58,7 @@ class DeviceCheckSeeder extends Seeder
                 foreach ($computers as $computer) {
                     foreach ($itemKeys as $itemKey) {
                         $rows[] = [
+                            'id' => Str::uuid(),
                             'device_check_id' => $check->id,
                             'computer_id' => $computer->id,
                             'item_key' => $itemKey,

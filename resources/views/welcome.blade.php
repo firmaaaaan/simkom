@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'SimKom') }} - Sistem Manajemen Laboratorium</title>
+    <title>{{ config('app.name', 'SimKom') }} - Sistem Manajemen Komputer</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +40,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-4.25-11.396c.251.023.501.05.75.082M12 21a8.966 8.966 0 005.982-2.275M12 21a8.966 8.966 0 01-5.982-2.275M15.75 3.186a24.284 24.284 0 012.038.443M8.25 3.186a24.284 24.284 0 00-2.038.443M18 14.5l-6 6-6-6" />
                         </svg>
                     </div>
-                    <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Lab</span></span>
+                    <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Kom</span></span>
                 </a>
                 <div class="flex items-center gap-2 sm:gap-3">
                     <a href="{{ route('jadwal-lab.index') }}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 transition-colors">
@@ -55,9 +55,6 @@
                         </svg>
                         <span class="hidden sm:inline">Lacak Laporan</span>
                     </a>
-                    <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm">
-                        Masuk Admin
-                    </a>
                 </div>
             </div>
         </div>
@@ -69,7 +66,7 @@
             <div class="max-w-2xl">
                 <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/15 border border-white/25 rounded-full mb-5">
                     <span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
-                    <span class="text-sm font-medium text-white">Sistem Manajemen Laboratorium</span>
+                    <span class="text-sm font-medium text-white">Sistem Manajemen Komputer</span>
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
                     Lapor Kendala &amp; Pinjam Komputer Laboratorium
@@ -300,10 +297,9 @@
     {{-- Footer --}}
     <footer class="mt-12 bg-white border-t border-gray-200 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Laboratorium</p>
+            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Komputer</p>
             <div class="flex items-center gap-4">
                 <a href="{{ route('track.index') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Lacak Laporan</a>
-                <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Masuk Admin</a>
             </div>
         </div>
     </footer>

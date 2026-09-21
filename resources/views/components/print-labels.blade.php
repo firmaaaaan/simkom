@@ -96,6 +96,14 @@
             flex-shrink: 0;
         }
 
+        .label-institution {
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: #222;
+            line-height: 1.2;
+            margin-bottom: 0.5mm;
+        }
+
         .label-notes {
             border-top: 0.5px solid #ccc;
             padding-top: 1.5mm;
@@ -309,6 +317,7 @@
             <div class="label">
                 <div class="label-content">
                     <div class="label-top">
+                        <div class="label-institution">UPT LABORATORIUM TERPADU UNIVERSITAS 'AISYIYAH YOGYAKARTA</div>
                         <div class="label-info">
                             <div class="label-code">{{ $box->code }}</div>
                             <div class="label-name">{{ $box->name }}</div>

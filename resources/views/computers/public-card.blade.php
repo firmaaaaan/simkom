@@ -106,10 +106,9 @@
     {{-- Footer --}}
     <footer class="mt-12 bg-white border-t border-gray-200 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Laboratorium</p>
+            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Komputer</p>
             <div class="flex items-center gap-4">
                 <a href="{{ route('track.index') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Lacak Laporan</a>
-                <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-green-600 transition-colors">Masuk Admin</a>
             </div>
         </div>
     </footer>
