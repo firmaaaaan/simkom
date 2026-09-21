@@ -68,7 +68,6 @@
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Nama</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Versi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kategori</th>
-                    <th class="text-left px-6 py-3 font-medium text-gray-500">Lisensi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
@@ -99,21 +98,26 @@
                                 {{ $item->category }}
                             </span>
                         </td>
-                        <td data-label="Lisensi" class="px-6 py-4 text-gray-600">
-                            {{ $item->license_count }}
-                        </td>
                         <td data-label="Status" class="px-6 py-4">
-                            @if($item->status === 'active')
+                            @if($item->status === 'Aktif')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                     Aktif
                                 </span>
-                            @elseif($item->status === 'inactive')
+                            @elseif($item->status === 'Non Aktif')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                    Tidak Aktif
+                                    Non Aktif
+                                </span>
+                            @elseif($item->status === 'Expired')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                    Expired
+                                </span>
+                            @elseif($item->status === 'Trial')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                                    Trial
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                                    {{ ucfirst($item->status) }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                    {{ $item->status }}
                                 </span>
                             @endif
                         </td>
@@ -141,7 +145,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-12 text-center">
+                        <td colspan="8" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0-2.25l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />

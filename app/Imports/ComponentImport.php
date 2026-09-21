@@ -30,7 +30,7 @@ class ComponentImport implements ToModel, WithHeadingRow, WithValidation
         return [
             'kode' => 'required|string|max:50',
             'nama' => 'required|string|max:255',
-            'kategori' => 'required|string|in:IoT,Jaringan',
+            'kategori' => 'required|string|in:IoT,Jaringan,Lain-lain',
             'merk' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'jumlah' => 'nullable|integer|min:0',

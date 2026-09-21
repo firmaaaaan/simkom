@@ -15,8 +15,6 @@ class Hardware extends Model
         'brand',
         'model',
         'category',
-        'quantity',
-        'status',
         'description',
     ];
 

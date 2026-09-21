@@ -18,8 +18,6 @@ class HardwareImport implements ToModel, WithHeadingRow, WithValidation
                 'brand' => $row['merk'] ?? null,
                 'model' => $row['model'] ?? null,
                 'category' => $row['kategori'],
-                'quantity' => $row['jumlah'] ?? 0,
-                'status' => $row['status'] ?? 'Tersedia',
                 'description' => $row['keterangan'] ?? null,
             ]
         );
@@ -33,8 +31,6 @@ class HardwareImport implements ToModel, WithHeadingRow, WithValidation
             'merk' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'kategori' => 'required|string|max:255',
-            'jumlah' => 'nullable|integer|min:0',
-            'status' => 'nullable|string|in:Tersedia,Digunakan,Rusak,Maintenance',
             'keterangan' => 'nullable|string',
         ];
     }

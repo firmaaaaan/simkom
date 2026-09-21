@@ -26,7 +26,7 @@
                     <p class="text-sm text-gray-500 mt-1">Kode: {{ $component->code }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $component->category === 'IoT' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' }}">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $component->category === 'IoT' ? 'bg-blue-100 text-blue-700' : ($component->category === 'Jaringan' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700') }}">
                         {{ $component->category }}
                     </span>
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium

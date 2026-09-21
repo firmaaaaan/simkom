@@ -74,6 +74,7 @@
                         <option value="">Semua Kategori</option>
                         <option value="IoT" {{ request('category') === 'IoT' ? 'selected' : '' }}>IoT</option>
                         <option value="Jaringan" {{ request('category') === 'Jaringan' ? 'selected' : '' }}>Jaringan</option>
+                        <option value="Lain-lain" {{ request('category') === 'Lain-lain' ? 'selected' : '' }}>Lain-lain</option>
                     </select>
                     <select name="status" class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
                         <option value="">Semua Status</option>

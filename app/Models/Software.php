@@ -15,7 +15,6 @@ class Software extends Model
         'version',
         'license_type',
         'category',
-        'license_count',
         'status',
         'description',
     ];

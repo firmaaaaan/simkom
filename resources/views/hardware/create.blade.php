@@ -60,43 +60,26 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
-                        <select name="category" id="category" required
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="">-- Pilih --</option>
-                            <option value="Processor" {{ old('category') === 'Processor' ? 'selected' : '' }}>Processor (CPU)</option>
-                            <option value="RAM" {{ old('category') === 'RAM' ? 'selected' : '' }}>Memory (RAM)</option>
-                            <option value="Storage" {{ old('category') === 'Storage' ? 'selected' : '' }}>Storage (HDD/SSD)</option>
-                            <option value="Motherboard" {{ old('category') === 'Motherboard' ? 'selected' : '' }}>Motherboard</option>
-                            <option value="Power Supply" {{ old('category') === 'Power Supply' ? 'selected' : '' }}>Power Supply (PSU)</option>
-                            <option value="VGA" {{ old('category') === 'VGA' ? 'selected' : '' }}>VGA (GPU)</option>
-                            <option value="Monitor" {{ old('category') === 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                            <option value="Keyboard" {{ old('category') === 'Keyboard' ? 'selected' : '' }}>Keyboard</option>
-                            <option value="Mouse" {{ old('category') === 'Mouse' ? 'selected' : '' }}>Mouse</option>
-                            <option value="Printer" {{ old('category') === 'Printer' ? 'selected' : '' }}>Printer</option>
-                            <option value="Scanner" {{ old('category') === 'Scanner' ? 'selected' : '' }}>Scanner</option>
-                            <option value="Headset" {{ old('category') === 'Headset' ? 'selected' : '' }}>Headset/Microphone</option>
-                            <option value="Kabel" {{ old('category') === 'Kabel' ? 'selected' : '' }}>Kabel/Adapter</option>
-                            <option value="Lainnya" {{ old('category') === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah <span class="text-red-500">*</span></label>
-                        <input type="number" name="quantity" id="quantity" value="{{ old('quantity', 0) }}" required min="0"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400">
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
-                        <select name="status" id="status" required
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="Tersedia" {{ old('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
-                            <option value="Digunakan" {{ old('status') === 'Digunakan' ? 'selected' : '' }}>Digunakan</option>
-                            <option value="Rusak" {{ old('status') === 'Rusak' ? 'selected' : '' }}>Rusak</option>
-                            <option value="Maintenance" {{ old('status') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
-                        </select>
-                    </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
+                    <select name="category" id="category" required
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <option value="">-- Pilih --</option>
+                        <option value="Processor" {{ old('category') === 'Processor' ? 'selected' : '' }}>Processor (CPU)</option>
+                        <option value="RAM" {{ old('category') === 'RAM' ? 'selected' : '' }}>Memory (RAM)</option>
+                        <option value="Storage" {{ old('category') === 'Storage' ? 'selected' : '' }}>Storage (HDD/SSD)</option>
+                        <option value="Motherboard" {{ old('category') === 'Motherboard' ? 'selected' : '' }}>Motherboard</option>
+                        <option value="Power Supply" {{ old('category') === 'Power Supply' ? 'selected' : '' }}>Power Supply (PSU)</option>
+                        <option value="VGA" {{ old('category') === 'VGA' ? 'selected' : '' }}>VGA (GPU)</option>
+                        <option value="Monitor" {{ old('category') === 'Monitor' ? 'selected' : '' }}>Monitor</option>
+                        <option value="Keyboard" {{ old('category') === 'Keyboard' ? 'selected' : '' }}>Keyboard</option>
+                        <option value="Mouse" {{ old('category') === 'Mouse' ? 'selected' : '' }}>Mouse</option>
+                        <option value="Printer" {{ old('category') === 'Printer' ? 'selected' : '' }}>Printer</option>
+                        <option value="Scanner" {{ old('category') === 'Scanner' ? 'selected' : '' }}>Scanner</option>
+                        <option value="Headset" {{ old('category') === 'Headset' ? 'selected' : '' }}>Headset/Microphone</option>
+                        <option value="Kabel" {{ old('category') === 'Kabel' ? 'selected' : '' }}>Kabel/Adapter</option>
+                        <option value="Lainnya" {{ old('category') === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                    </select>
                 </div>
 
                 <div>

@@ -18,7 +18,7 @@ class SoftwareExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function headings(): array
     {
-        return ['Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi', 'Jumlah Lisensi', 'Status', 'Keterangan'];
+        return ['Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi', 'Status', 'Keterangan'];
     }
 
     public function map($software): array
@@ -29,7 +29,6 @@ class SoftwareExport implements FromCollection, WithHeadings, WithMapping, WithS
             $software->version,
             $software->category,
             $software->license_type,
-            $software->license_count,
             $software->status,
             $software->description,
         ];

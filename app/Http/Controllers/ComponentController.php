@@ -77,7 +77,7 @@ class ComponentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:components,code',
-            'category' => 'required|in:IoT,Jaringan',
+            'category' => 'required|in:IoT,Jaringan,Lain-lain',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -113,7 +113,7 @@ class ComponentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:components,code,' . $component->id,
-            'category' => 'required|in:IoT,Jaringan',
+            'category' => 'required|in:IoT,Jaringan,Lain-lain',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',

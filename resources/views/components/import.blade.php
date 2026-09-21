@@ -18,7 +18,7 @@
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
             <h4 class="text-sm font-semibold text-blue-800 mb-2">Format Kolom Excel:</h4>
-            <p class="text-xs text-blue-700">Kode | Nama | Kategori (IoT/Jaringan) | Merk | Model | Jumlah | Status (Tersedia/Digunakan/Rusak/Maintenance) | Keterangan</p>
+            <p class="text-xs text-blue-700">Kode | Nama | Kategori (IoT/Jaringan/Lain-lain) | Merk | Model | Jumlah | Status (Tersedia/Digunakan/Rusak/Maintenance) | Keterangan</p>
             <a href="{{ route('components.template') }}" class="inline-flex items-center gap-2 mt-3 text-sm font-medium text-blue-600 hover:text-blue-700">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />

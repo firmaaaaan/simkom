@@ -42,10 +42,6 @@
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     {{ $hardware->code }}
                 </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    {{ $hardware->status === 'Tersedia' ? 'bg-green-100 text-green-800' : ($hardware->status === 'Digunakan' ? 'bg-blue-100 text-blue-800' : ($hardware->status === 'Rusak' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')) }}">
-                    {{ $hardware->status }}
-                </span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -64,10 +60,6 @@
                 <div>
                     <p class="text-xs text-gray-400 mb-1">Model</p>
                     <p class="text-sm text-gray-800">{{ $hardware->model ?? '-' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">Jumlah</p>
-                    <p class="text-sm text-gray-800">{{ $hardware->quantity }}</p>
                 </div>
             </div>
 

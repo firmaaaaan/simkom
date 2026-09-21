@@ -73,9 +73,9 @@
                     <td data-label="Lokasi" class="px-6 py-4">{{ $lab->location }}</td>
                     <td data-label="Kapasitas" class="px-6 py-4">{{ $lab->capacity }} orang</td>
                     <td data-label="Status" class="px-6 py-4">
-                        @if($lab->status === 'active')
+                        @if($lab->status === 'Aktif')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
-                        @elseif($lab->status === 'maintenance')
+                        @elseif($lab->status === 'Maintenance')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Maintenance</span>
                         @else
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Nonaktif</span>

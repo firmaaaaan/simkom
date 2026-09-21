@@ -65,10 +65,6 @@
                     <p class="text-xs text-gray-400 mb-1">Jenis Lisensi</p>
                     <p class="text-sm text-gray-800">{{ $software->license_type ?? '-' }}</p>
                 </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">Jumlah Lisensi</p>
-                    <p class="text-sm text-gray-800">{{ $software->license_count }}</p>
-                </div>
             </div>
 
             @if($software->description)

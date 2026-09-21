@@ -71,7 +71,7 @@
                     <td data-label="Tahun" class="px-6 py-4 text-gray-600">{{ $year->start_year }}/{{ $year->end_year }}</td>
                     <td data-label="Periode" class="px-6 py-4 text-gray-600">{{ $year->start_year }} - {{ $year->end_year }}</td>
                     <td data-label="Status" class="px-6 py-4">
-                        @if($year->is_active)
+                        @if($year->status === 'Aktif')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Aktif</span>
                         @else
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Tidak Aktif</span>

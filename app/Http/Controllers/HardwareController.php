@@ -29,8 +29,6 @@ class HardwareController extends Controller
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'category' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|in:Tersedia,Digunakan,Rusak,Maintenance',
             'description' => 'nullable|string',
         ]);
 
@@ -57,8 +55,6 @@ class HardwareController extends Controller
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
             'category' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|in:Tersedia,Digunakan,Rusak,Maintenance',
             'description' => 'nullable|string',
         ]);
 

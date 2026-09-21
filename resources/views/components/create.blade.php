@@ -51,6 +51,7 @@
                         <option value="">Pilih Kategori</option>
                         <option value="IoT" {{ old('category') === 'IoT' ? 'selected' : '' }}>IoT</option>
                         <option value="Jaringan" {{ old('category') === 'Jaringan' ? 'selected' : '' }}>Jaringan</option>
+                        <option value="Lain-lain" {{ old('category') === 'Lain-lain' ? 'selected' : '' }}>Lain-lain</option>
                     </select>
                 </div>
                 <div>

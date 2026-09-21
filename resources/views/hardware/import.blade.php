@@ -25,7 +25,7 @@
                 </svg>
                 <div>
                     <p class="text-sm font-medium text-blue-800">Format kolom yang diperlukan:</p>
-                    <p class="text-xs text-blue-700 mt-1">Kode, Nama, Merk, Model, Kategori, Jumlah, Status, Keterangan</p>
+                    <p class="text-xs text-blue-700 mt-1">Kode, Nama, Merk, Model, Kategori, Keterangan</p>
                     <p class="text-xs text-blue-700 mt-1">Kode harus unik. Jika kode sudah ada, data akan diupdate.</p>
                 </div>
             </div>

@@ -45,7 +45,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="version" class="block text-sm font-medium text-gray-700 mb-1">Versi</label>
                         <input type="text" name="version" id="version" value="{{ old('version') }}"
@@ -65,11 +65,6 @@
                             <option value="Open Source" {{ old('license_type') === 'Open Source' ? 'selected' : '' }}>Open Source</option>
                             <option value="Trial" {{ old('license_type') === 'Trial' ? 'selected' : '' }}>Trial (Uji Coba)</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="license_count" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Lisensi <span class="text-red-500">*</span></label>
-                        <input type="number" name="license_count" id="license_count" value="{{ old('license_count', 0) }}" required min="0"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400">
                     </div>
                 </div>
 

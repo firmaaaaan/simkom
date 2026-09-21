@@ -18,7 +18,7 @@ class HardwareExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function headings(): array
     {
-        return ['Kode', 'Nama', 'Merk', 'Model', 'Kategori', 'Jumlah', 'Status', 'Keterangan'];
+        return ['Kode', 'Nama', 'Merk', 'Model', 'Kategori', 'Keterangan'];
     }
 
     public function map($hardware): array
@@ -29,8 +29,6 @@ class HardwareExport implements FromCollection, WithHeadings, WithMapping, WithS
             $hardware->brand,
             $hardware->model,
             $hardware->category,
-            $hardware->quantity,
-            $hardware->status,
             $hardware->description,
         ];
     }

@@ -68,8 +68,6 @@
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Nama</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Merk/Model</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kategori</th>
-                    <th class="text-left px-6 py-3 font-medium text-gray-500">Stok</th>
-                    <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
             </thead>
@@ -89,20 +87,6 @@
                         <td data-label="Merk/Model" class="px-6 py-4 text-gray-600">{{ $item->brand }} {{ $item->model }}</td>
                         <td data-label="Kategori" class="px-6 py-4">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">{{ $item->category }}</span>
-                        </td>
-                        <td data-label="Stok" class="px-6 py-4 font-semibold text-gray-800">{{ $item->quantity }}</td>
-                        <td data-label="Status" class="px-6 py-4">
-                            @if($item->status === 'Tersedia')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Tersedia</span>
-                            @elseif($item->status === 'Digunakan')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">Digunakan</span>
-                            @elseif($item->status === 'Rusak')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rusak</span>
-                            @elseif($item->status === 'Maintenance')
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">Maintenance</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">{{ $item->status }}</span>
-                            @endif
                         </td>
                         <td data-label="Aksi" class="px-6 py-4">
                             <div class="flex items-center gap-2">
@@ -130,7 +114,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-16 text-center">
+                        <td colspan="7" class="px-6 py-16 text-center">
                             <div class="flex flex-col items-center gap-4">
                                 <svg class="w-16 h-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />

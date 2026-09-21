@@ -29,7 +29,6 @@ class SoftwareController extends Controller
             'version' => 'nullable|string|max:50',
             'license_type' => 'nullable|string|max:100',
             'category' => 'required|string|max:255',
-            'license_count' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Expired,Trial,Non Aktif',
             'description' => 'nullable|string',
         ]);
@@ -57,7 +56,6 @@ class SoftwareController extends Controller
             'version' => 'nullable|string|max:50',
             'license_type' => 'nullable|string|max:100',
             'category' => 'required|string|max:255',
-            'license_count' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Expired,Trial,Non Aktif',
             'description' => 'nullable|string',
         ]);
