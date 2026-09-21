@@ -64,10 +64,6 @@
     <header class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
             <div class="max-w-2xl">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/15 border border-white/25 rounded-full mb-5">
-                    <span class="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
-                    <span class="text-sm font-medium text-white">Sistem Manajemen Komputer</span>
-                </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
                     Lapor Kendala &amp; Pinjam Komputer Laboratorium
                 </h1>
