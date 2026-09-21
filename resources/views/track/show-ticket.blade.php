@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <title>Tiket {{ $ticket->tracking_code }} - {{ config('app.name', 'SimKom') }}</title>
+    <title>Tiket {{ $ticket->tracking_code }} - SimKom - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -60,11 +60,21 @@
                 <div>
                     <p class="text-sm text-orange-100 mb-1">Kode Tracking Tiket Kendala</p>
                     <p class="text-3xl font-black tracking-wider">{{ $ticket->tracking_code }}</p>
+                    <p class="text-xs text-orange-100/80 mt-2">Simpan kode ini untuk melacak status laporan Anda</p>
                 </div>
-                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
+                <div class="flex flex-col items-center gap-2">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <button type="button" onclick="copyCode(this, '{{ $ticket->tracking_code }}')"
+                        class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                        </svg>
+                        <span>Salin Kode</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -226,5 +236,18 @@
         </div>
     </div>
 
+    <script>
+        function copyCode(btn, code) {
+            navigator.clipboard.writeText(code).then(() => {
+                const span = btn.querySelector('span');
+                span.textContent = 'Tersalin!';
+                btn.classList.add('bg-white/40');
+                setTimeout(() => {
+                    span.textContent = 'Salin Kode';
+                    btn.classList.remove('bg-white/40');
+                }, 2000);
+            });
+        }
+    </script>
 </body>
 </html>
