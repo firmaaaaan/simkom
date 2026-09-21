@@ -119,7 +119,7 @@
                         @forelse($components as $index => $item)
                             <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                                 <td class="hidden md:table-cell px-6 py-3" data-label="Checkbox">
-                                    <input type="checkbox" class="rounded border-gray-300 text-green-600 focus:ring-green-500" value="{{ $item->id }}" @change="toggleSelection({{ $item->id }})">
+                                    <input type="checkbox" class="rounded border-gray-300 text-green-600 focus:ring-green-500" value="{{ $item->id }}" @change="toggleSelection('{{ $item->id }}')">
                                 </td>
                                 <td class="px-6 py-3" data-label="No">
                                     {{ $components->firstItem() + $index }}

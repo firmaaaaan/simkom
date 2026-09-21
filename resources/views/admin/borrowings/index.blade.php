@@ -165,12 +165,12 @@
                         <td data-label="Aksi" class="px-6 py-4">
                             @if($borrowing->status === 'Pending')
                                 <div class="flex items-center gap-1">
-                                    <button onclick="openApproveModal('{{ $borrowing->tracking_code }}', {{ $borrowing->id }}, 'Approved')" class="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title="Setujui">
+                                    <button onclick="openApproveModal('{{ $borrowing->tracking_code }}', '{{ $borrowing->id }}', 'Approved')" class="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors" title="Setujui">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </button>
-                                    <button onclick="openApproveModal('{{ $borrowing->tracking_code }}', {{ $borrowing->id }}, 'Rejected')" class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Tolak">
+                                    <button onclick="openApproveModal('{{ $borrowing->tracking_code }}', '{{ $borrowing->id }}', 'Rejected')" class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Tolak">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
