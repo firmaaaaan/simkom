@@ -297,10 +297,15 @@ class ComputerController extends Controller
         $selectedLab = null;
 
         if ($labId = $request->laboratory_id) {
-            $selectedLab = Laboratory::find($labId);
-            $computers = Computer::where('laboratory_id', $labId)
-                ->orderBy('code')
-                ->get();
+            if ($labId === 'all') {
+                $computers = Computer::orderBy('code')->get();
+                $selectedLab = (object) ['id' => 'all', 'name' => 'Semua Laboratorium'];
+            } else {
+                $selectedLab = Laboratory::find($labId);
+                $computers = Computer::where('laboratory_id', $labId)
+                    ->orderBy('code')
+                    ->get();
+            }
         }
 
         return view('computers.qr-stiker', compact('laboratories', 'computers', 'selectedLab'));
