@@ -153,6 +153,63 @@ class ComputerController extends Controller
         return redirect()->route('computers.index')->with('success', count($request->ids) . ' komputer berhasil dihapus.');
     }
 
+    public function bulkAssign(Request $request)
+    {
+        $laboratories = Laboratory::orderBy('name')->get();
+        $hardware = Hardware::orderBy('name')->get();
+        $software = Software::orderBy('name')->get();
+
+        $query = Computer::with('laboratory');
+        if ($labId = $request->laboratory_id) {
+            $query->where('laboratory_id', $labId);
+        }
+        if ($search = $request->search) {
+            $query->where('code', 'like', "%{$search}%");
+        }
+        $computers = $query->orderBy('code')->get();
+
+        return view('computers.bulk-assign', compact('laboratories', 'hardware', 'software', 'computers'));
+    }
+
+    public function storeBulkAssign(Request $request)
+    {
+        $validated = $request->validate([
+            'hardware_ids'   => 'nullable|array',
+            'hardware_ids.*' => 'exists:hardware,id',
+            'software_ids'   => 'nullable|array',
+            'software_ids.*' => 'exists:software,id',
+            'computer_ids'   => 'required|array|min:1',
+            'computer_ids.*' => 'exists:computers,id',
+        ]);
+
+        $hardwareIds = $validated['hardware_ids'] ?? [];
+        $softwareIds = $validated['software_ids'] ?? [];
+
+        if (empty($hardwareIds) && empty($softwareIds)) {
+            return back()->with('error', 'Pilih minimal satu hardware atau software.');
+        }
+
+        $computers = Computer::whereIn('id', $validated['computer_ids'])->get();
+        $assigned = 0;
+
+        foreach ($computers as $computer) {
+            if (!empty($hardwareIds)) {
+                $computer->hardware()->syncWithoutDetaching($hardwareIds);
+            }
+            if (!empty($softwareIds)) {
+                $computer->software()->syncWithoutDetaching($softwareIds);
+            }
+            $assigned++;
+        }
+
+        $parts = [];
+        if (!empty($hardwareIds)) $parts[] = count($hardwareIds) . ' hardware';
+        if (!empty($softwareIds)) $parts[] = count($softwareIds) . ' software';
+
+        return redirect()->route('computers.index')
+            ->with('success', implode(' dan ', $parts) . ' berhasil ditugaskan ke ' . $assigned . ' komputer.');
+    }
+
     public function generate()
     {
         $laboratories = Laboratory::orderBy('name')->get();

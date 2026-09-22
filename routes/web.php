@@ -208,6 +208,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/computers/qr-stiker', [ComputerController::class, 'qrStiker'])->name('computers.qr-stiker');
         Route::get('/computers/praktikum-labels', [ComputerController::class, 'praktikumLabels'])->name('computers.praktikum-labels');
         Route::delete('/computers/bulk-destroy', [ComputerController::class, 'bulkDestroy'])->name('computers.bulk-destroy');
+        Route::get('/computers/bulk-assign', [ComputerController::class, 'bulkAssign'])->name('computers.bulk-assign');
+        Route::post('/computers/bulk-assign', [ComputerController::class, 'storeBulkAssign'])->name('computers.store-bulk-assign');
 
         // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
         Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
