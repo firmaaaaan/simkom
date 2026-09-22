@@ -331,11 +331,11 @@
                                     {{ $box->location }}
                                 </div>
                             @endif
-                            <div class="label-location">
-                                <span style="font-weight:600;">Nama:</span>&nbsp;_________________________
+                            <div class="label-location" style="margin-top:1mm;">
+                                <span style="font-weight:600;">Nama:</span>&nbsp;
                             </div>
                             <div class="label-location">
-                                <span style="font-weight:600;">Kelas:</span>&nbsp;_________________________
+                                <span style="font-weight:600;">Kelas:</span>&nbsp;
                             </div>
                         </div>
                     </div>
