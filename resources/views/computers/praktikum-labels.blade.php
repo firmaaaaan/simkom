@@ -11,15 +11,15 @@
     <style>
         [x-cloak] { display: none !important; }
         @media print {
+            @page { size: A3 portrait; margin: 12mm; }
             .no-print { display: none !important; }
             body { margin: 0; padding: 0; }
             .stiker-grid { gap: 10px; }
             .stiker-item { break-inside: avoid; page-break-inside: avoid; }
-            @page { size: A4; margin: 12mm; }
         }
         .stiker-grid {
             display: grid;
-            grid-template-columns: repeat(2, 9cm);
+            grid-template-columns: repeat(3, 9cm);
             gap: 4px;
             justify-content: center;
         }
@@ -100,7 +100,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 no-print">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">Label Praktikum</h1>
-                <p class="text-sm text-gray-500 mt-1">Cetak label nomor meja dengan QR Code lapor kendala (10 x 5cm, 2 kolom)</p>
+                <p class="text-sm text-gray-500 mt-1">Cetak label nomor meja dengan QR Code lapor kendala (3 kolom, A3)</p>
             </div>
             <form method="GET" action="{{ route('computers.praktikum-labels') }}" class="p-6">
                 <div class="flex items-end gap-4">

@@ -11,14 +11,15 @@
     <style>
         [x-cloak] { display: none !important; }
         @media print {
+            @page { size: A3 portrait; margin: 10mm; }
             .no-print { display: none !important; }
-            body { margin: 0; padding: 10px; }
+            body { margin: 0; padding: 0; }
             .stiker-grid { gap: 8px; }
             .stiker-item { break-inside: avoid; }
         }
         .stiker-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 12px;
         }
         .stiker-item {
