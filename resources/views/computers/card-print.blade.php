@@ -21,7 +21,7 @@
         }
         .print-btn:hover { background: #15803d; }
 
-        .header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 8px; }
+        .header { text-align: center; margin-bottom: 14px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
         .header h2 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
 
