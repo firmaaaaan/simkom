@@ -82,11 +82,29 @@
             Pilih Semua
         </label>
     </div>
-    <form action="{{ route('computers.index') }}" method="GET" class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari komputer..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-64">
+    <form action="{{ route('computers.index') }}" method="GET" class="flex items-center gap-2 flex-wrap">
+        <select name="laboratory_id" onchange="this.form.submit()"
+            class="text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent py-2">
+            <option value="">Semua Lab</option>
+            @foreach($laboratories as $lab)
+                <option value="{{ $lab->id }}" @selected(request('laboratory_id') === $lab->id)>{{ $lab->name }}</option>
+            @endforeach
+        </select>
+        <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari komputer..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-52">
+        </div>
+        <select name="per_page" onchange="this.form.submit()"
+            class="text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent py-2">
+            @foreach([10, 25, 50, 100] as $size)
+                <option value="{{ $size }}" @selected(request('per_page', 10) == $size)>{{ $size }} / halaman</option>
+            @endforeach
+        </select>
+        @if(request('laboratory_id') || request('search'))
+            <a href="{{ route('computers.index') }}" class="text-sm text-gray-500 hover:text-red-600 transition-colors whitespace-nowrap">Reset</a>
+        @endif
     </form>
 </div>
 

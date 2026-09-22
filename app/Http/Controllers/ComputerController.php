@@ -18,10 +18,12 @@ class ComputerController extends Controller
 {
     public function index(Request $request)
     {
-        $computers = $this->filteredQuery($request)->latest()->paginate(10);
+        $perPage = in_array($request->per_page, [10, 25, 50, 100]) ? (int) $request->per_page : 10;
+        $computers = $this->filteredQuery($request)->latest()->paginate($perPage);
+        $laboratories = Laboratory::orderBy('name')->get();
         $publicSpecEnabled = Setting::publicSpecEnabled();
 
-        return view('computers.index', compact('computers', 'publicSpecEnabled'));
+        return view('computers.index', compact('computers', 'laboratories', 'publicSpecEnabled'));
     }
 
     /**
@@ -31,6 +33,10 @@ class ComputerController extends Controller
     private function filteredQuery(Request $request)
     {
         $query = Computer::with(['laboratory', 'hardware', 'software']);
+
+        if ($labId = $request->laboratory_id) {
+            $query->where('laboratory_id', $labId);
+        }
 
         if ($search = $request->search) {
             $query->where('code', 'like', "%{$search}%")
