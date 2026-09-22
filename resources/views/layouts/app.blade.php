@@ -290,6 +290,8 @@
                 unreadCount: 0,
                 notifications: [],
                 timer: null,
+                prevUnread: 0,
+                audioCtx: null,
                 init() {
                     this.poll();
                     this.timer = setInterval(() => this.poll(), 2000);
@@ -297,16 +299,35 @@
                 destroy() {
                     clearInterval(this.timer);
                 },
+                playNotifSound() {
+                    try {
+                        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const ctx = this.audioCtx;
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(880, ctx.currentTime);
+                        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1);
+                        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.4);
+                    } catch (e) {}
+                },
                 async poll() {
                     try {
                         const res = await fetch('{{ route('notifications.poll') }}');
                         if (!res.ok) return;
                         const data = await res.json();
+                        if (data.unread_count > this.prevUnread && this.prevUnread > 0) {
+                            this.playNotifSound();
+                        }
+                        this.prevUnread = data.unread_count;
                         this.unreadCount = data.unread_count;
                         this.notifications = data.notifications;
-                    } catch (e) {
-                        // koneksi gagal / sedang logout — abaikan, coba lagi di tick berikutnya
-                    }
+                    } catch (e) {}
                 },
                 async markAllRead() {
                     try {
@@ -318,6 +339,7 @@
                             },
                         });
                         this.unreadCount = 0;
+                        this.prevUnread = 0;
                         this.poll();
                     } catch (e) {}
                 },
