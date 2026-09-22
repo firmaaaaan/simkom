@@ -19,13 +19,13 @@
         }
         .stiker-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
         }
         .stiker-item {
             border: 1px solid #d1d5db;
             border-radius: 8px;
-            padding: 12px;
+            padding: 8px;
             text-align: center;
             background: white;
         }
@@ -134,8 +134,8 @@
             @foreach($computers as $computer)
                 new QRCode(document.getElementById("qr-{{ $computer->id }}"), {
                     text: "{{ route('kartu.show', $computer->id) }}",
-                    width: 120,
-                    height: 120,
+                    width: 100,
+                    height: 100,
                     colorDark: "#000000",
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.M
