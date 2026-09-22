@@ -19,23 +19,23 @@
         }
         .stiker-grid {
             display: grid;
-            grid-template-columns: repeat(2, 13cm);
-            gap: 6px;
+            grid-template-columns: repeat(3, 9.2cm);
+            gap: 4px;
             justify-content: center;
         }
         .stiker-item {
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            padding: 8px;
+            padding: 6px;
             background: white;
-            width: 13cm;
-            height: 6cm;
+            width: 9cm;
+            height: 5cm;
             box-sizing: border-box;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 32px;
+            gap: 24px;
         }
         .number-section {
             flex: 0 0 auto;
@@ -45,14 +45,14 @@
             justify-content: center;
         }
         .meja-label {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #374151;
             letter-spacing: 1px;
             margin-bottom: -2px;
         }
         .meja-number {
-            font-size: 160px;
+            font-size: 140px;
             font-weight: 800;
             color: #1f2937;
             line-height: 1;
