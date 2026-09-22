@@ -20,6 +20,10 @@
         }
         .print-btn:hover { background: #15803d; }
 
+        .kop { text-align: center; margin-bottom: 14px; }
+        .kop h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+        .kop h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
+
         .info { margin-bottom: 12px; }
         .info table { border-collapse: collapse; }
         .info td { padding: 2px 8px 2px 0; font-size: 12px; vertical-align: top; }
@@ -59,6 +63,12 @@
         </svg>
         Cetak
     </button>
+
+    <div class="kop">
+        <h1>PENGECEKAN PERANGKAT LABORATORIUM KOMPUTER</h1>
+        <h2>UPT LABORATORIUM TERPADU</h2>
+        <h2>UNIVERSITAS 'AISYIYAH YOGYAKARTA</h2>
+    </div>
 
     <div class="info">
         <table>
