@@ -86,6 +86,7 @@ class BoxController extends Controller
     {
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
+            'prefix'     => 'required|string|max:10',
             'location'   => 'nullable|string|max:255',
             'notes'      => 'nullable|string',
             'quantity'   => 'required|integer|min:1|max:100',
@@ -93,10 +94,12 @@ class BoxController extends Controller
             'components.*' => 'required|string',
         ]);
 
-        $lastCode = Box::where('code', 'like', 'BOX-%')
-            ->orderByRaw("CAST(SUBSTR(code, 5) AS INTEGER) DESC")
+        $prefix = strtoupper($validated['prefix']);
+        $prefixLength = strlen($prefix);
+        $lastCode = Box::where('code', 'like', "BOX-{$prefix}-%")
+            ->orderByRaw("CAST(SUBSTR(code, " . ($prefixLength + 5) . ") AS UNSIGNED) DESC")
             ->value('code');
-        $lastNum = $lastCode ? (int) substr($lastCode, 4) : 0;
+        $lastNum = $lastCode ? (int) substr($lastCode, $prefixLength + 5) : 0;
 
         $componentsData = [];
         if (!empty($validated['components'])) {
@@ -115,7 +118,7 @@ class BoxController extends Controller
             for ($i = 1; $i <= $validated['quantity']; $i++) {
                 $box = Box::create([
                     'name'        => $validated['name'],
-                    'code'        => 'BOX-' . str_pad($lastNum + $i, 3, '0', STR_PAD_LEFT),
+                    'code'        => 'BOX-' . $prefix . '-' . str_pad($lastNum + $i, 3, '0', STR_PAD_LEFT),
                     'location'    => $validated['location'] ?? null,
                     'notes'       => $validated['notes'] ?? null,
                     'description' => null,

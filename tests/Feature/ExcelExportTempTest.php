@@ -113,7 +113,7 @@ class ExcelExportTempTest extends TestCase
         $component = Component::create([
             'name' => 'RAM DDR4 8GB', 'code' => 'C-001', 'category' => 'RAM', 'quantity' => 4, 'status' => 'Tersedia',
         ]);
-        $box = Box::create(['name' => 'Box RAM', 'code' => 'BOX-001', 'location' => 'Rak 1']);
+        $box = Box::create(['name' => 'Box RAM', 'code' => 'BOX-RAM-001', 'location' => 'Rak 1']);
         $box->components()->attach($component->id, ['quantity' => 2]);
 
         return compact('lab', 'computer', 'year', 'check', 'box');
@@ -224,7 +224,7 @@ class ExcelExportTempTest extends TestCase
 
         // Box: isi komponen + total unit.
         $boxes = $this->rows($this->actingAs($admin)->get(route('boxes.export')));
-        $this->assertSame('BOX-001', $boxes[1][0]);
+        $this->assertSame('BOX-RAM-001', $boxes[1][0]);
         $this->assertSame(1, $boxes[1][3]);
         $this->assertSame(2, $boxes[1][4]);
         $this->assertSame('RAM DDR4 8GB (2 unit)', $boxes[1][5]);

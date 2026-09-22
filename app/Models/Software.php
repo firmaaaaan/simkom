@@ -22,7 +22,7 @@ class Software extends Model
     public static function generateCode(): string
     {
         $last = static::where('code', 'like', 'SW-%')
-            ->orderByRaw("CAST(SUBSTR(code, 4) AS INTEGER) DESC")
+            ->orderByRaw("CAST(SUBSTR(code, 4) AS UNSIGNED) DESC")
             ->value('code');
 
         $next = 1;

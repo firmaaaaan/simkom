@@ -118,8 +118,22 @@
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prefix Kode <span class="text-red-500">*</span></label>
+                    <input type="text" name="prefix" required placeholder="Contoh: IOT" maxlength="10"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 uppercase"
+                        oninput="document.getElementById('prefixPreview').textContent = this.value.toUpperCase() || 'XXX'">
+                    <p class="text-xs text-gray-400 mt-1">Kode: BOX-<span id="prefixPreview">XXX</span>-001</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
                     <input type="text" name="location" placeholder="Contoh: Rak A-1"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Box <span class="text-red-500">*</span></label>
+                    <input type="number" name="quantity" value="1" min="1" max="100" required
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 </div>
             </div>
@@ -127,11 +141,6 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
                 <textarea name="notes" rows="2" placeholder="Catatan untuk label (opsional)"
                     class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Box <span class="text-red-500">*</span></label>
-                <input type="number" name="quantity" value="1" min="1" max="100" required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
             </div>
 
             <div class="border-t border-gray-100 pt-4">

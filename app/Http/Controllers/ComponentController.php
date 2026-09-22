@@ -90,10 +90,9 @@ class ComponentController extends Controller
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('components', 'public');
+        } else {
+            $validated['image'] = null;
         }
-
-        unset($validated['image']);
-        $validated['image'] = $validated['image'] ?? null;
 
         Component::create($validated);
 

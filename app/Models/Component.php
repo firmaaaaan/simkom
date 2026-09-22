@@ -24,7 +24,7 @@ class Component extends Model
     public static function generateCode(): string
     {
         $last = static::where('code', 'like', 'KMP-%')
-            ->orderByRaw("CAST(SUBSTR(code, 5) AS INTEGER) DESC")
+            ->orderByRaw("CAST(SUBSTR(code, 5) AS UNSIGNED) DESC")
             ->value('code');
 
         $next = 1;
