@@ -132,7 +132,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             @foreach($computers as $computer)
                 new QRCode(document.getElementById("qr-{{ $computer->id }}"), {
-                    text: "{{ route('kartu.show', $computer->id) }}",
+                    text: "{{ route('computers.card', $computer->id) }}",
                     width: 100,
                     height: 100,
                     colorDark: "#000000",

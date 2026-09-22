@@ -205,7 +205,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const qrUrl = "{{ route('kartu.show', $computer) }}";
+        const qrUrl = "{{ route('computers.card', $computer) }}";
         const qrContainer = document.getElementById('qrCode');
         qrContainer.innerHTML = '';
         
