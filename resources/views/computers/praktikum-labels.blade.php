@@ -11,25 +11,25 @@
     <style>
         [x-cloak] { display: none !important; }
         @media print {
-            @page { size: A3 portrait; margin: 12mm; }
+            @page { size: A3 portrait; margin: 8mm; }
             .no-print { display: none !important; }
             body { margin: 0; padding: 0; }
-            .stiker-grid { gap: 10px; }
+            .stiker-grid { gap: 6px; }
             .stiker-item { break-inside: avoid; page-break-inside: avoid; }
         }
         .stiker-grid {
             display: grid;
-            grid-template-columns: repeat(3, 9cm);
+            grid-template-columns: repeat(3, 9.2cm);
             gap: 4px;
             justify-content: center;
         }
         .stiker-item {
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            padding: 3px;
+            padding: 6px;
             background: white;
-            width: 8.5cm;
-            height: 4cm;
+            width: 9cm;
+            height: 5cm;
             box-sizing: border-box;
             display: flex;
             flex-direction: row;
@@ -52,7 +52,7 @@
             margin-bottom: -2px;
         }
         .meja-number {
-            font-size: 120px;
+            font-size: 140px;
             font-weight: 800;
             color: #1f2937;
             line-height: 1;
