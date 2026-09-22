@@ -11,7 +11,7 @@
         .page { padding: 15mm; }
         .header { text-align: center; margin-bottom: 14px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-        .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .header h2 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
         .info { margin-bottom: 15px; font-size: 12px; }
         .info table td { padding: 2px 8px 2px 0; vertical-align: top; }
         .info table td:first-child { font-weight: bold; width: 100px; }
