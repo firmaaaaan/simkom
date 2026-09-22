@@ -54,6 +54,7 @@
 
     <div class="header">
         <h1>Kartu Kendali Komputer</h1>
+        <h2>UPT LABORATORIUM TERPADU</h2>
         <h2>Universitas 'Aisyiyah Yogyakarta</h2>
     </div>
 
