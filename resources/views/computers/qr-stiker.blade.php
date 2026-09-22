@@ -92,7 +92,6 @@
                         </div>
                         <p class="font-bold text-gray-800 text-sm">Kartu Kendali</p>
                         <p class="font-bold text-gray-800 text-sm">{{ $computer->code }}</p>
-                        <p class="text-xs text-gray-500 mb-2">{{ $computer->laboratory->name ?? '-' }}</p>
                         <button type="button" @click="previewUrl = '{{ route('kartu.show', $computer->id) }}'"
                             class="text-xs text-green-600 hover:text-green-700 font-medium no-print">
                             👁️ Preview
