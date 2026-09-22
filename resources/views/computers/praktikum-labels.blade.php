@@ -67,11 +67,12 @@
             gap: 6px;
         }
         .scan-label {
-            font-size: 10px;
+            font-size: 8px;
             color: #16a34a;
             font-weight: 600;
             text-transform: uppercase;
-            white-space: nowrap;
+            text-align: center;
+            line-height: 1.3;
         }
         .qr-container {
             flex-shrink: 0;
@@ -147,7 +148,7 @@
                             <div class="meja-number">{{ str_pad($computer->nomor_meja, 2, '0', STR_PAD_LEFT) }}</div>
                         </div>
                         <div class="qr-section">
-                            <div class="scan-label">LAPOR KENDALA PRAKTIKUM</div>
+                            <div class="scan-label">LAPOR KENDALA<br>PRAKTIKUM</div>
                             <div class="qr-container">
                                 <div id="qr-{{ $computer->id }}"></div>
                             </div>
