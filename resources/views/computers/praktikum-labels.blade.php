@@ -147,7 +147,7 @@
                             <div class="meja-number">{{ str_pad($computer->nomor_meja, 2, '0', STR_PAD_LEFT) }}</div>
                         </div>
                         <div class="qr-section">
-                            <div class="scan-label">Scan untuk Lapor</div>
+                            <div class="scan-label">Scan untuk Lapor Kendala Praktikum</div>
                             <div class="qr-container">
                                 <div id="qr-{{ $computer->id }}"></div>
                             </div>
