@@ -45,6 +45,7 @@
     <div class="page">
         <div class="header">
             <h1>Kartu Kendali</h1>
+            <h2>UPT LABORATORIUM TERPADU</h2>
             <h2>Universitas 'Aisyiyah Yogyakarta</h2>
         </div>
 
