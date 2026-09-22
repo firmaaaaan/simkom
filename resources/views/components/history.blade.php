@@ -1,6 +1,7 @@
 @php
     $statusFilter = request('usage_status');
     $search = request('usage_search');
+    $boxFilter = request('usage_box');
 @endphp
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -68,6 +69,15 @@
                 </div>
             </div>
             <div class="w-48">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Box</label>
+                <select name="usage_box" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <option value="">Semua Box</option>
+                    @foreach($boxes as $box)
+                        <option value="{{ $box->id }}" {{ ($boxFilter ?? '') == $box->id ? 'selected' : '' }}>{{ $box->code }} - {{ $box->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="w-48">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
                 <select name="usage_status" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     <option value="">Semua Status</option>
@@ -78,7 +88,7 @@
             <button type="submit" class="px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors">
                 Filter
             </button>
-            @if($search || $statusFilter)
+            @if($search || $statusFilter || $boxFilter)
                 <a href="{{ route('components.index', ['tab' => 'history']) }}" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
                     Reset
                 </a>

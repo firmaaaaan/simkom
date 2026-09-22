@@ -44,6 +44,7 @@ class ComponentController extends Controller
 
         $usageStatus = $request->input('usage_status');
         $usageSearch = $request->input('usage_search');
+        $usageBox = $request->input('usage_box');
 
         if ($usageStatus && in_array($usageStatus, ['Using', 'Returned'])) {
             $usageQuery->where('status', $usageStatus);
@@ -54,6 +55,10 @@ class ComponentController extends Controller
                 $q->where('user_name', 'like', "%{$usageSearch}%")
                   ->orWhere('user_nim', 'like', "%{$usageSearch}%");
             });
+        }
+
+        if ($usageBox) {
+            $usageQuery->where('box_id', $usageBox);
         }
 
         $usages = $usageQuery->latest('used_at')->paginate(15)->withQueryString();
