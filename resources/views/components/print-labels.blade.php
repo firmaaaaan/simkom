@@ -331,6 +331,12 @@
                                     {{ $box->location }}
                                 </div>
                             @endif
+                            <div class="label-location">
+                                <span style="font-weight:600;">Nama:</span>&nbsp;_________________________
+                            </div>
+                            <div class="label-location">
+                                <span style="font-weight:600;">Kelas:</span>&nbsp;_________________________
+                            </div>
                         </div>
                     </div>
                     @if($box->notes)
