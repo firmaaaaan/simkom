@@ -9,9 +9,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', serif; font-size: 12px; color: #000; }
         .page { padding: 15mm; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-        .header h2 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+        .header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 8px; }
+        .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+        .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .info { margin-bottom: 15px; font-size: 12px; }
         .info table td { padding: 2px 8px 2px 0; vertical-align: top; }
         .info table td:first-child { font-weight: bold; width: 100px; }
