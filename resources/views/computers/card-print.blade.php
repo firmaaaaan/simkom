@@ -23,7 +23,7 @@
 
         .header { text-align: center; margin-bottom: 14px; border-bottom: 2px solid #000; padding-bottom: 8px; }
         .header h1 { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-        .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .header h2 { font-size: 14px; font-weight: bold; text-transform: uppercase; }
 
         .info-table { width: 100%; border-collapse: collapse; margin: 0 auto 14px auto; page-break-inside: avoid; table-layout: fixed; }
         .info-table td { padding: 4px 8px; font-size: 11px; border: 1px solid #000; vertical-align: top; }
