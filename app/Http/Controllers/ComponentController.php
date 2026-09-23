@@ -40,7 +40,7 @@ class ComponentController extends Controller
             ->orderBy('code')
             ->get();
 
-        $usageQuery = BoxUsage::with('box');
+        $usageQuery = BoxUsage::with(['box', 'returnNote']);
 
         $usageStatus = $request->input('usage_status');
         $usageSearch = $request->input('usage_search');

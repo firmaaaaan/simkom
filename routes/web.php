@@ -89,7 +89,9 @@ Route::prefix('box-scan')->name('box-scan.')->group(function () {
     Route::get('/{boxCode}', [BoxScanController::class, 'scan'])->name('scan');
     Route::post('/{boxCode}/use', [BoxScanController::class, 'useBox'])->name('use');
     Route::post('/{boxCode}/quick-use', [BoxScanController::class, 'quickUse'])->name('quick-use');
-    Route::post('/return/{boxUsageId}', [BoxScanController::class, 'returnBox'])->name('return');
+    Route::get('/{boxCode}/available', [BoxScanController::class, 'available'])->name('available');
+    Route::post('/multi-use', [BoxScanController::class, 'multiUse'])->name('multi-use');
+    Route::post('/multi-quick-use', [BoxScanController::class, 'multiQuickUse'])->name('multi-quick-use');
 });
 
 // Public Routes (Jadwal Lab - tanpa login, read-only)
@@ -264,5 +266,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('lab-schedules', LabScheduleController::class)
             ->parameters(['lab-schedules' => 'schedule'])
             ->except(['create', 'edit']);
+    });
+
+    // Pengembalian Box — HANYA ADMIN
+    Route::middleware('role:admin')->group(function () {
+        Route::post('box-scan/return/{boxUsageId}', [BoxScanController::class, 'returnBox'])
+            ->name('box-scan.return');
+        Route::post('box-scan/multi-return', [BoxScanController::class, 'multiReturn'])
+            ->name('box-scan.multi-return');
+        Route::get('box-scan/{boxCode}/active-usages', [BoxScanController::class, 'activeUsagesByNim'])
+            ->name('box-scan.active-usages');
     });
 });

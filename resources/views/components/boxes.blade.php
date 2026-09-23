@@ -390,47 +390,6 @@
     </div>
 </div>
 
-<div id="returnModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display:none">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <div>
-                <h3 class="text-lg font-bold text-gray-900">Kembalikan Box</h3>
-                <p class="text-sm text-gray-500">Konfirmasi pengembalian box</p>
-            </div>
-            <button onclick="closeReturnModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div class="p-6 space-y-4">
-            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                    </svg>
-                    <span class="text-sm font-semibold text-yellow-800">Box Sedang Digunakan</span>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-sm text-yellow-700"><strong>Pengguna:</strong> <span id="returnUserName"></span></p>
-                    <p class="text-sm text-yellow-700"><strong>NIM:</strong> <span id="returnUserNim"></span></p>
-                    <p class="text-sm text-yellow-700"><strong>Kelas:</strong> <span id="returnUserKelas"></span></p>
-                    <p class="text-sm text-yellow-700"><strong>Sejak:</strong> <span id="returnUsedAt"></span></p>
-                </div>
-            </div>
-            <div id="returnError" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"></div>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center gap-3">
-            <button id="returnConfirmBtn" onclick="confirmReturnBox()" class="flex-1 px-4 py-2.5 bg-yellow-600 text-white text-sm font-semibold rounded-lg hover:bg-yellow-700 transition-colors">
-                Kembalikan
-            </button>
-            <button onclick="closeReturnModal()" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                Batal
-            </button>
-        </div>
-    </div>
-</div>
-
 <div id="editBoxModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display:none">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg" onclick="event.stopPropagation()">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -768,12 +727,14 @@
                                 ${kelas}
                                 <p class="text-xs text-yellow-600">Sejak ${new Date(data.active_usage.used_at).toLocaleString('id-ID')}</p>
                             </div>
-                            <button onclick="returnBox(${data.active_usage.id}, '${data.active_usage.user_name}', '${data.active_usage.user_nim}', '${data.active_usage.user_kelas || ''}', '${new Date(data.active_usage.used_at).toLocaleString('id-ID')}')" class="px-4 py-2 bg-yellow-600 text-white text-sm font-semibold rounded-lg hover:bg-yellow-700 transition-colors">
-                                Kembalikan
-                            </button>
+                            <a href="{{ route('components.index', ['tab' => 'history', 'usage_status' => 'Using']) }}" class="px-4 py-2 bg-yellow-600 text-white text-sm font-semibold rounded-lg hover:bg-yellow-700 transition-colors whitespace-nowrap">
+                                Ke Riwayat
+                            </a>
                         </div>
                     </div>
                 `;
+            } else {
+                document.getElementById('boxUsageStatus').innerHTML = '';
             }
 
             renderBoxComponents(data.box.box_components);
@@ -890,64 +851,6 @@
         modal.classList.add('hidden');
     }
 
-    let currentReturnUsageId = null;
-
-    function returnBox(usageId, userName, userNim, userKelas, usedAt) {
-        currentReturnUsageId = usageId;
-        document.getElementById('returnUserName').textContent = userName;
-        document.getElementById('returnUserNim').textContent = userNim;
-        document.getElementById('returnUserKelas').textContent = userKelas || '-';
-        document.getElementById('returnUsedAt').textContent = usedAt;
-        document.getElementById('returnError').classList.add('hidden');
-        document.getElementById('returnConfirmBtn').disabled = false;
-        document.getElementById('returnConfirmBtn').textContent = 'Kembalikan';
-
-        const modal = document.getElementById('returnModal');
-        modal.style.display = 'flex';
-        modal.classList.remove('hidden');
-    }
-
-    function closeReturnModal() {
-        const modal = document.getElementById('returnModal');
-        modal.style.display = 'none';
-        modal.classList.add('hidden');
-    }
-
-    async function confirmReturnBox() {
-        const btn = document.getElementById('returnConfirmBtn');
-        const errorEl = document.getElementById('returnError');
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-        errorEl.classList.add('hidden');
-
-        try {
-            const response = await fetch(`/box-scan/return/${currentReturnUsageId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                closeReturnModal();
-                viewBox(currentBoxId);
-            } else {
-                errorEl.textContent = data.message || 'Gagal mengembalikan box';
-                errorEl.classList.remove('hidden');
-                btn.disabled = false;
-                btn.textContent = 'Kembalikan';
-            }
-        } catch (err) {
-            errorEl.textContent = 'Terjadi kesalahan jaringan';
-            errorEl.classList.remove('hidden');
-            btn.disabled = false;
-            btn.textContent = 'Kembalikan';
-        }
-    }
-
     async function deleteBox(id, code) {
         if (!confirm(`Yakin ingin menghapus ${code}? Semua komponen dalam box akan dikembalikan stoknya.`)) return;
 
@@ -986,10 +889,6 @@
 
     document.getElementById('qrModal').addEventListener('click', function(e) {
         if (e.target === this) closeQRModal();
-    });
-
-    document.getElementById('returnModal').addEventListener('click', function(e) {
-        if (e.target === this) closeReturnModal();
     });
 
     document.getElementById('editBoxModal').addEventListener('click', function(e) {

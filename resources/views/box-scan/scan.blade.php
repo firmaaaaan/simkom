@@ -53,6 +53,12 @@
 
                 <div class="border-t border-gray-100 pt-5">
                     @if($activeUsage)
+                        @php
+                            $otherActiveUsages = \App\Models\BoxUsage::with('box')
+                                ->where('user_nim', $activeUsage->user_nim)
+                                ->where('status', 'Using')
+                                ->get();
+                        @endphp
                         <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                             <div class="flex items-center gap-2 mb-2">
                                 <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -69,7 +75,25 @@
                             <p class="text-xs text-yellow-600 mt-1">
                                 Sejak {{ $activeUsage->used_at->format('d M Y H:i') }}
                             </p>
-                            <p class="text-xs text-yellow-600 mt-2 italic">Hubungi admin untuk pengembalian</p>
+
+                            @if($otherActiveUsages->count() > 1)
+                                <div class="mt-3 pt-3 border-t border-yellow-200">
+                                    <p class="text-xs font-semibold text-yellow-800 mb-1">Box yang sedang digunakan ({{ $otherActiveUsages->count() }}):</p>
+                                    <ul class="space-y-0.5">
+                                        @foreach($otherActiveUsages as $other)
+                                            <li class="text-xs text-yellow-700 flex items-center gap-1">
+                                                <span class="font-mono">{{ $other->box->code }}</span>
+                                                <span class="text-yellow-500">—</span>
+                                                <span>{{ $other->box->name }}</span>
+                                                @if($other->box_id === $box->id)
+                                                    <span class="text-[9px] bg-yellow-200 text-yellow-800 px-1 rounded">(ini)</span>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                            <p class="text-xs text-yellow-600 mt-3 italic">Hubungi admin/lab untuk pengembalian box</p>
                         </div>
                     @else
                         <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
@@ -87,10 +111,20 @@
                                     Halo <strong>{{ $lastUsageByNim->user_name }}</strong> ({{ $lastUsageByNim->user_nim }})
                                     <br><span class="text-xs text-blue-600">Anda telah menggunakan box ini sebelumnya.</span>
                                 </p>
+                                <div id="selectedBoxesInfo" class="hidden mb-3 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
+                                    <p class="text-xs font-semibold text-purple-700 mb-1">Box terpilih: <span id="selectedCount">1</span></p>
+                                    <ul id="selectedBoxesList" class="text-xs text-purple-600 space-y-0.5"></ul>
+                                </div>
+                                <div class="flex gap-2 mb-3">
+                                    <button onclick="openAddBoxModal()" id="addBoxBtnQuick"
+                                        class="flex-1 px-3 py-2 bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-200 transition-colors border border-purple-200">
+                                        + Tambah Box
+                                    </button>
+                                </div>
                                 <div id="quickUseError" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-3"></div>
                                 <button onclick="quickUse()" id="quickUseBtn"
                                     class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                                    Gunakan
+                                    <span id="quickUseBtnText">Gunakan</span>
                                 </button>
                             </div>
                         @else
@@ -112,10 +146,20 @@
                                         <input type="text" name="user_kelas" required placeholder="Contoh: TI-2A"
                                             class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                                     </div>
+                                    <div id="selectedBoxesInfo" class="hidden bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
+                                        <p class="text-xs font-semibold text-purple-700 mb-1">Box terpilih: <span id="selectedCount">1</span></p>
+                                        <ul id="selectedBoxesList" class="text-xs text-purple-600 space-y-0.5"></ul>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button type="button" onclick="openAddBoxModal()" id="addBoxBtnForm"
+                                            class="flex-1 px-3 py-2 bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-200 transition-colors border border-purple-200">
+                                            + Tambah Box
+                                        </button>
+                                    </div>
                                     <div id="useError" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"></div>
                                     <button type="submit" id="useBtn"
                                         class="w-full px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors">
-                                        Gunakan
+                                        <span id="useBtnText">Gunakan</span>
                                     </button>
                                 </form>
                             </div>
@@ -128,31 +172,182 @@
         <p class="text-center text-xs text-gray-400 mt-4">SimKom - Sistem Informasi Laboratorium</p>
     </div>
 
+    {{-- Modal Tambah Box --}}
+    <div id="addBoxModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display:none">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Tambah Box Lain</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Filter prefix: <span id="modalPrefix" class="font-mono font-semibold text-purple-600"></span></p>
+                </div>
+                <button onclick="closeAddBoxModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-5">
+                <div id="availableBoxesList" class="space-y-2">
+                    <p class="text-sm text-gray-400 italic text-center py-4">Memuat data box...</p>
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs text-gray-500">Total dipilih:</span>
+                    <span id="modalSelectedCount" class="text-sm font-bold text-purple-700">0 box</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="confirmAddBoxes()" id="confirmAddBtn"
+                        class="flex-1 px-4 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Tambahkan
+                    </button>
+                    <button onclick="closeAddBoxModal()" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const boxCode = '{{ $box->code }}';
+        const isQuickUseMode = @json($lastUsageByNim && !$activeUsage);
+        let selectedExtraBoxes = [];
 
         function getCsrfToken() {
             return document.querySelector('meta[name="csrf-token"]').content;
         }
 
+        // === Modal Tambah Box ===
+        async function openAddBoxModal() {
+            const modal = document.getElementById('addBoxModal');
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            document.getElementById('availableBoxesList').innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">Memuat data box...</p>';
+            document.getElementById('confirmAddBtn').disabled = true;
+
+            try {
+                const response = await fetch(`/box-scan/${boxCode}/available`, {
+                    headers: { 'Accept': 'application/json' },
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('modalPrefix').textContent = `BOX-${data.prefix}-*`;
+
+                    if (data.boxes.length === 0) {
+                        document.getElementById('availableBoxesList').innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">Tidak ada box lain yang tersedia dengan prefix ini.</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.boxes.forEach(b => {
+                        const checked = selectedExtraBoxes.includes(b.code) ? 'checked' : '';
+                        html += `
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-purple-50 p-3 rounded-lg border border-gray-100 transition-colors">
+                                <input type="checkbox" value="${b.code}" ${checked}
+                                    onchange="toggleBoxSelection('${b.code}', this)"
+                                    class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-medium text-gray-800 font-mono">${b.code}</span>
+                                    <p class="text-xs text-gray-500 truncate">${b.name}${b.location ? ' — ' + b.location : ''}</p>
+                                </div>
+                            </label>
+                        `;
+                    });
+                    document.getElementById('availableBoxesList').innerHTML = html;
+                    updateModalCount();
+                }
+            } catch (err) {
+                document.getElementById('availableBoxesList').innerHTML = '<p class="text-sm text-red-500 text-center py-4">Gagal memuat data box</p>';
+            }
+        }
+
+        function closeAddBoxModal() {
+            const modal = document.getElementById('addBoxModal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        }
+
+        function toggleBoxSelection(code, checkbox) {
+            if (checkbox.checked) {
+                if (!selectedExtraBoxes.includes(code)) selectedExtraBoxes.push(code);
+            } else {
+                selectedExtraBoxes = selectedExtraBoxes.filter(c => c !== code);
+            }
+            updateModalCount();
+        }
+
+        function updateModalCount() {
+            const total = selectedExtraBoxes.length;
+            document.getElementById('modalSelectedCount').textContent = `${total} box`;
+            document.getElementById('confirmAddBtn').disabled = total === 0;
+        }
+
+        function confirmAddBoxes() {
+            updateSelectedBoxesUI();
+            closeAddBoxModal();
+        }
+
+        function updateSelectedBoxesUI() {
+            const infoEl = document.getElementById('selectedBoxesInfo');
+            const countEl = document.getElementById('selectedCount');
+            const listEl = document.getElementById('selectedBoxesList');
+            const useBtnText = document.getElementById('useBtnText');
+            const quickBtnText = document.getElementById('quickUseBtnText');
+
+            const totalCount = selectedExtraBoxes.length + 1;
+
+            if (selectedExtraBoxes.length > 0) {
+                infoEl.classList.remove('hidden');
+                countEl.textContent = totalCount;
+                listEl.innerHTML = `<li class="font-mono">${boxCode} (box ini)</li>` +
+                    selectedExtraBoxes.map(c => `<li class="font-mono">${c}</li>`).join('');
+
+                if (useBtnText) useBtnText.textContent = `Gunakan Semua (${totalCount} box)`;
+                if (quickBtnText) quickBtnText.textContent = `Gunakan Semua (${totalCount} box)`;
+            } else {
+                infoEl.classList.add('hidden');
+                if (useBtnText) useBtnText.textContent = 'Gunakan';
+                if (quickBtnText) quickBtnText.textContent = 'Gunakan';
+            }
+        }
+
+        // === Multi-use / Single-use submit ===
         document.getElementById('useForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             const errorEl = document.getElementById('useError');
             const btn = document.getElementById('useBtn');
             errorEl.classList.add('hidden');
             btn.disabled = true;
-            btn.textContent = 'Memproses...';
+            document.getElementById('useBtnText').textContent = 'Memproses...';
 
             const formData = new FormData(this);
+            const isMulti = selectedExtraBoxes.length > 0;
 
             try {
-                const response = await fetch(`/box-scan/${boxCode}/use`, {
+                let url, body;
+                if (isMulti) {
+                    url = '/box-scan/multi-use';
+                    body = JSON.stringify({
+                        box_codes: [boxCode, ...selectedExtraBoxes],
+                        user_name: formData.get('user_name'),
+                        user_nim: formData.get('user_nim'),
+                        user_kelas: formData.get('user_kelas'),
+                    });
+                } else {
+                    url = `/box-scan/${boxCode}/use`;
+                    body = formData;
+                }
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': getCsrfToken(),
                         'Accept': 'application/json',
+                        ...(isMulti ? { 'Content-Type': 'application/json' } : {}),
                     },
-                    body: formData,
+                    body: body,
                 });
 
                 const data = await response.json();
@@ -163,32 +358,47 @@
                     errorEl.textContent = data.message || 'Terjadi kesalahan';
                     errorEl.classList.remove('hidden');
                     btn.disabled = false;
-                    btn.textContent = 'Gunakan';
+                    document.getElementById('useBtnText').textContent = isMulti ? `Gunakan Semua (${selectedExtraBoxes.length + 1} box)` : 'Gunakan';
                 }
             } catch (err) {
                 errorEl.textContent = 'Terjadi kesalahan jaringan';
                 errorEl.classList.remove('hidden');
                 btn.disabled = false;
-                btn.textContent = 'Gunakan';
+                document.getElementById('useBtnText').textContent = isMulti ? `Gunakan Semua (${selectedExtraBoxes.length + 1} box)` : 'Gunakan';
             }
         });
 
+        // === Quick-use / Multi-quick-use submit ===
         async function quickUse() {
             const btn = document.getElementById('quickUseBtn');
             const errorEl = document.getElementById('quickUseError');
             btn.disabled = true;
-            btn.textContent = 'Memproses...';
+            document.getElementById('quickUseBtnText').textContent = 'Memproses...';
             errorEl.classList.add('hidden');
 
+            const isMulti = selectedExtraBoxes.length > 0;
+
             try {
-                const response = await fetch(`/box-scan/${boxCode}/quick-use`, {
+                let url, body;
+                if (isMulti) {
+                    url = '/box-scan/multi-quick-use';
+                    body = JSON.stringify({
+                        nim: '{{ $nim ?? "" }}',
+                        box_codes: [boxCode, ...selectedExtraBoxes],
+                    });
+                } else {
+                    url = `/box-scan/${boxCode}/quick-use`;
+                    body = JSON.stringify({ nim: '{{ $nim ?? "" }}' });
+                }
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': getCsrfToken(),
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ nim: '{{ $nim ?? "" }}' }),
+                    body: body,
                 });
 
                 const data = await response.json();
@@ -199,13 +409,13 @@
                     errorEl.textContent = data.message || 'Terjadi kesalahan';
                     errorEl.classList.remove('hidden');
                     btn.disabled = false;
-                    btn.textContent = 'Gunakan';
+                    document.getElementById('quickUseBtnText').textContent = isMulti ? `Gunakan Semua (${selectedExtraBoxes.length + 1} box)` : 'Gunakan';
                 }
             } catch (err) {
                 errorEl.textContent = 'Terjadi kesalahan jaringan';
                 errorEl.classList.remove('hidden');
                 btn.disabled = false;
-                btn.textContent = 'Gunakan';
+                document.getElementById('quickUseBtnText').textContent = isMulti ? `Gunakan Semua (${selectedExtraBoxes.length + 1} box)` : 'Gunakan';
             }
         }
     </script>
