@@ -49,7 +49,7 @@
 
         {{-- Header --}}
         <div class="mb-6">
-            <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Jadwal Penggunaan Laboratorium</h1>
+            <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Jadwal Tetap Penggunaan Laboratorium</h1>
             <p class="text-gray-500 mt-1 text-sm sm:text-base">
                 Jadwal perkuliahan dan praktikum per slot waktu — tanpa perlu login.
             </p>
