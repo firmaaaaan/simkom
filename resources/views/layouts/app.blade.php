@@ -115,7 +115,7 @@
                 @endif
                 @endif
 
-                @if(auth()->user()->hasPermission('manage-academic-years') || auth()->user()->hasPermission('manage-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('manage-tickets') || auth()->user()->hasPermission('manage-borrowings'))
+                @if(auth()->user()->hasPermission('manage-academic-years') || auth()->user()->hasPermission('manage-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('manage-tickets') || auth()->user()->hasPermission('manage-borrowings') || auth()->user()->hasPermission('manage-lab-usages'))
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
                 @if(auth()->user()->hasPermission('manage-academic-years'))
                 <a href="{{ route('academic-years.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('academic-years.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
@@ -175,6 +175,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H21M3.375 14.25h3.75l1.125 6.75h10.5l1.125-6.75h3.75M3.375 14.25V5.625c0-.621.504-1.125 1.125-1.125h15c.621 0 1.125.504 1.125 1.125v8.625" />
                     </svg>
                     Peminjaman
+                </a>
+                @endif
+                @if(auth()->user()->hasPermission('manage-lab-usages'))
+                <a href="{{ route('lab-usages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('lab-usages.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                    </svg>
+                    Penggunaan Lab
                 </a>
                 @endif
                 @endif

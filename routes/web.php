@@ -27,6 +27,8 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\LabScheduleController;
+use App\Http\Controllers\LabScanController;
+use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (\Illuminate\Http\Request $request) {
@@ -93,6 +95,12 @@ Route::prefix('box-scan')->name('box-scan.')->group(function () {
     Route::get('/{boxCode}/available', [BoxScanController::class, 'available'])->name('available');
     Route::post('/multi-use', [BoxScanController::class, 'multiUse'])->name('multi-use');
     Route::post('/multi-quick-use', [BoxScanController::class, 'multiQuickUse'])->name('multi-quick-use');
+});
+
+// Public Routes (Lab Scan - check-in penggunaan lab via QR, tanpa login)
+Route::prefix('lab-scan')->name('lab-scan.')->group(function () {
+    Route::get('/{labCode}', [LabScanController::class, 'scan'])->name('scan');
+    Route::post('/{labCode}/check-in', [LabScanController::class, 'checkIn'])->name('check-in');
 });
 
 // Public Routes (Jadwal Lab - tanpa login, read-only)
@@ -257,6 +265,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/borrowings/export', [AdminBorrowingController::class, 'export'])->name('borrowings.export');
         Route::get('/borrowings', [AdminBorrowingController::class, 'index'])->name('borrowings.index');
         Route::patch('/borrowings/{borrowing}/status', [AdminBorrowingController::class, 'updateStatus'])->name('borrowings.update-status');
+    });
+
+    // Penggunaan Laboratorium - check-in via QR, validasi keluar oleh admin/laboran
+    Route::middleware('permission:manage-lab-usages')->group(function () {
+        Route::get('/lab-usages/qr-stiker', [AdminLabUsageController::class, 'qrStiker'])->name('lab-usages.qr-stiker');
+        Route::get('/lab-usages', [AdminLabUsageController::class, 'index'])->name('lab-usages.index');
+        Route::post('/lab-usages/{usage}/validate-out', [AdminLabUsageController::class, 'validateOut'])->name('lab-usages.validate-out');
     });
 
     // Jadwal Penggunaan Laboratorium (Admin only)
