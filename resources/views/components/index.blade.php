@@ -4,7 +4,7 @@
 @section('header', 'Data Komponen')
 
 @section('content')
-<div x-data="{ activeTab: '{{ in_array(request('tab'), ['boxes', 'history']) ? request('tab') : 'components' }}', selected: [], toggleSelection(id) { if (this.selected.includes(id)) { this.selected = this.selected.filter(i => i !== id); } else { this.selected.push(id); } } }">
+<div x-data="{ activeTab: '{{ in_array(request('tab'), ['boxes', 'history', 'borrowings']) ? request('tab') : 'components' }}', selected: [], toggleSelection(id) { if (this.selected.includes(id)) { this.selected = this.selected.filter(i => i !== id); } else { this.selected.push(id); } } }">
     <div class="mb-6">
         <p class="text-sm text-gray-500">Kelola seluruh data komponen dan box penyimpanan laboratorium</p>
     </div>
@@ -21,6 +21,10 @@
         <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
             class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
             Riwayat Penggunaan
+        </button>
+        <button @click="activeTab = 'borrowings'" :class="activeTab === 'borrowings' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+            class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
+            Pinjam Komponen
         </button>
     </div>
 
@@ -185,6 +189,19 @@
                                 </td>
                                 <td class="px-6 py-3" data-label="Aksi">
                                     <div class="flex items-center gap-2">
+                                        @if($item->quantity > 0)
+                                            <button type="button"
+                                                class="js-borrow-component inline-flex items-center justify-center w-8 h-8 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
+                                                title="Pinjam"
+                                                data-component-id="{{ $item->id }}"
+                                                data-component-code="{{ $item->code }}"
+                                                data-component-name="{{ $item->name }}"
+                                                data-component-stock="{{ $item->quantity }}">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                            </button>
+                                        @endif
                                         <a href="{{ route('components.edit', $item) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -238,5 +255,166 @@
     <div x-show="activeTab === 'history'" x-cloak>
         @include('components.history')
     </div>
+
+    <div x-show="activeTab === 'borrowings'" x-cloak>
+        @include('components.borrowings')
+    </div>
 </div>
+
+{{-- Modal Pinjam Komponen --}}
+<div id="borrowComponentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display:none">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900">Pinjam Komponen</h3>
+                <p class="text-sm text-gray-500">Stok akan berkurang saat dipinjam</p>
+            </div>
+            <button type="button" id="closeBorrowModalBtn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form id="borrowComponentForm" class="p-6 space-y-4">
+            <input type="hidden" id="borrowComponentId" name="component_id">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="text-sm font-semibold text-gray-800" id="borrowComponentName"></p>
+                <p class="text-xs text-gray-500 mt-0.5">Kode: <span id="borrowComponentCode" class="font-mono"></span> · Stok: <span id="borrowComponentStock" class="font-bold"></span></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Qty) *</label>
+                    <input type="number" name="quantity" id="borrowQuantity" min="1" value="1" required
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal *</label>
+                    <input type="date" name="borrowed_at" id="borrowDate" value="{{ now()->format('Y-m-d') }}" readonly
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">NIM *</label>
+                <input type="text" name="user_nim" id="borrowNim" required maxlength="50" placeholder="Contoh: 2210512001"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama *</label>
+                <input type="text" name="user_name" id="borrowName" required maxlength="255" placeholder="Nama peminjam"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+            </div>
+
+            <div id="borrowError" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl"></div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" id="borrowSubmitBtn" class="flex-1 px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                    Pinjam Sekarang
+                </button>
+                <button type="button" id="cancelBorrowBtn" class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    Batal
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    (function() {
+        const modal = document.getElementById('borrowComponentModal');
+        const form = document.getElementById('borrowComponentForm');
+        const errorEl = document.getElementById('borrowError');
+        const submitBtn = document.getElementById('borrowSubmitBtn');
+
+        function openBorrowModal(btn) {
+            document.getElementById('borrowComponentId').value = btn.dataset.componentId;
+            document.getElementById('borrowComponentName').textContent = btn.dataset.componentName;
+            document.getElementById('borrowComponentCode').textContent = btn.dataset.componentCode;
+            document.getElementById('borrowComponentStock').textContent = btn.dataset.componentStock;
+            document.getElementById('borrowQuantity').value = 1;
+            document.getElementById('borrowQuantity').max = btn.dataset.componentStock;
+            document.getElementById('borrowNim').value = '';
+            document.getElementById('borrowName').value = '';
+            document.getElementById('borrowDate').value = '{{ now()->format('Y-m-d') }}';
+            errorEl.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Pinjam Sekarang';
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+        }
+
+        function closeBorrowModal() {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        }
+
+        document.querySelectorAll('.js-borrow-component').forEach(btn => {
+            btn.addEventListener('click', () => openBorrowModal(btn));
+        });
+
+        document.getElementById('closeBorrowModalBtn').addEventListener('click', closeBorrowModal);
+        document.getElementById('cancelBorrowBtn').addEventListener('click', closeBorrowModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) closeBorrowModal();
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const stock = parseInt(document.getElementById('borrowComponentStock').textContent) || 0;
+            const qty = parseInt(document.getElementById('borrowQuantity').value) || 0;
+            errorEl.classList.add('hidden');
+
+            if (qty < 1) {
+                errorEl.textContent = 'Jumlah minimal 1';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            if (qty > stock) {
+                errorEl.textContent = 'Jumlah melebihi stok tersedia (' + stock + ')';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+
+            try {
+                const response = await fetch('{{ route('component-borrowings.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        component_id: document.getElementById('borrowComponentId').value,
+                        quantity: qty,
+                        user_nim: document.getElementById('borrowNim').value.trim(),
+                        user_name: document.getElementById('borrowName').value.trim(),
+                        borrowed_at: document.getElementById('borrowDate').value,
+                    }),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    closeBorrowModal();
+                    location.reload();
+                } else {
+                    errorEl.textContent = data.message || 'Terjadi kesalahan';
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Pinjam Sekarang';
+                }
+            } catch (err) {
+                errorEl.textContent = 'Terjadi kesalahan jaringan';
+                errorEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Pinjam Sekarang';
+            }
+        });
+    })();
+</script>
+@endpush
 @endsection

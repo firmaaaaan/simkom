@@ -8,6 +8,7 @@ use App\Http\Controllers\BoxComponentController;
 use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\DeviceCheckController;
 use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\ComponentBorrowingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
@@ -185,6 +186,10 @@ Route::middleware('auth')->group(function () {
         // Box component routes
         Route::post('boxes/{box}/components', [BoxComponentController::class, 'store'])->name('boxes.components.store');
         Route::delete('boxes/{box}/components/{boxComponent}', [BoxComponentController::class, 'destroy'])->name('boxes.components.destroy');
+
+        // Component borrowing routes
+        Route::post('component-borrowings', [ComponentBorrowingController::class, 'store'])->name('component-borrowings.store');
+        Route::post('component-borrowings/{borrowing}/return', [ComponentBorrowingController::class, 'returnBorrowing'])->name('component-borrowings.return');
     });
 
     // Reports (Admin + Laboran)

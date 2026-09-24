@@ -45,6 +45,11 @@ class Component extends Model
         return $this->hasMany(BoxComponent::class);
     }
 
+    public function componentBorrowings(): HasMany
+    {
+        return $this->hasMany(ComponentBorrowing::class);
+    }
+
     public function boxes()
     {
         return $this->belongsToMany(Box::class, 'box_components', 'component_id', 'box_id')

@@ -7,6 +7,7 @@ use App\Imports\ComponentImport;
 use App\Models\Box;
 use App\Models\BoxUsage;
 use App\Models\Component;
+use App\Models\ComponentBorrowing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -69,7 +70,31 @@ class ComponentController extends Controller
             'returned' => BoxUsage::where('status', 'Returned')->count(),
         ];
 
-        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats'));
+        $borrowingQuery = ComponentBorrowing::with('component');
+
+        $borrowingStatus = $request->input('borrow_status');
+        $borrowingSearch = $request->input('borrow_search');
+
+        if ($borrowingStatus && in_array($borrowingStatus, ['Using', 'Returned'])) {
+            $borrowingQuery->where('status', $borrowingStatus);
+        }
+
+        if ($borrowingSearch) {
+            $borrowingQuery->where(function ($q) use ($borrowingSearch) {
+                $q->where('user_name', 'like', "%{$borrowingSearch}%")
+                  ->orWhere('user_nim', 'like', "%{$borrowingSearch}%");
+            });
+        }
+
+        $borrowings = $borrowingQuery->latest('borrowed_at')->paginate(15)->withQueryString();
+
+        $borrowingStats = [
+            'total'    => ComponentBorrowing::count(),
+            'using'    => ComponentBorrowing::where('status', 'Using')->count(),
+            'returned' => ComponentBorrowing::where('status', 'Returned')->count(),
+        ];
+
+        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats', 'borrowings', 'borrowingStats'));
     }
 
     public function create()
