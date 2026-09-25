@@ -15,10 +15,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
-            // Idempoten: aman dipanggil ulang untuk DB yang sudah ada sebelum
-            // permission manage-lab-schedules diperkenalkan.
-            LabSchedulePermissionSeeder::class,
-            LabUsagePermissionSeeder::class,
             SettingSeeder::class,
         ]);
 
