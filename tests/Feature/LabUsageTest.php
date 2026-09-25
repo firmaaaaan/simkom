@@ -212,4 +212,49 @@ class LabUsageTest extends TestCase
             ->post(route('lab-usages.validate-out', $usage))
             ->assertSessionHasErrors('usage');
     }
+
+    public function test_general_scan_page_is_public_and_lists_labs_in_dropdown(): void
+    {
+        $lab = $this->lab();
+
+        $this->get(route('lab-scan.pick'))
+            ->assertOk()
+            ->assertSee('Pilih Laboratorium')
+            ->assertSee($lab->name)
+            ->assertSee('Hari & waktu terisi otomatis dari sistem.', false)
+            ->assertDontSee('Isi Data Diri');
+    }
+
+    public function test_general_scan_page_with_lab_param_shows_check_in_form(): void
+    {
+        $lab = $this->lab();
+
+        $this->get(route('lab-scan.pick', ['lab' => $lab->code]))
+            ->assertOk()
+            ->assertSee('Isi Data Diri')
+            ->assertSee(route('lab-scan.check-in', $lab->code), false)
+            ->assertSee($lab->name);
+    }
+
+    public function test_invalid_lab_param_falls_back_to_selection_state(): void
+    {
+        $this->lab();
+
+        $this->get(route('lab-scan.pick', ['lab' => 'TIDAK-ADA']))
+            ->assertOk()
+            ->assertSee('Pilih Laboratorium')
+            ->assertDontSee('Isi Data Diri');
+    }
+
+    public function test_stiker_contains_general_and_per_lab_qr_urls(): void
+    {
+        $admin = $this->admin();
+        $lab = $this->lab();
+
+        $this->actingAs($admin)
+            ->get(route('lab-usages.qr-stiker'))
+            ->assertOk()
+            ->assertSee(route('lab-scan.pick'), false)
+            ->assertSee(route('lab-scan.scan', $lab->code), false);
+    }
 }

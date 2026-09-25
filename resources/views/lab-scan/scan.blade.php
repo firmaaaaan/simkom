@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Check-in Lab - {{ $lab->name }}</title>
+    <title>Check-in Lab - {{ $lab?->name ?? 'Pilih Laboratorium' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -22,16 +22,43 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold">{{ $lab->name }}</h1>
-                        <p class="text-green-100 text-sm">{{ $lab->code }} &middot; {{ $lab->location ?? 'Lokasi tidak ditentukan' }}</p>
+                        <h1 class="text-xl font-bold">{{ $lab?->name ?? 'Check-in Penggunaan Lab' }}</h1>
+                        <p class="text-green-100 text-sm">
+                            @if($lab)
+                                {{ $lab->code }} &middot; {{ $lab->location ?? 'Lokasi tidak ditentukan' }}
+                            @else
+                                Pilih laboratorium terlebih dahulu
+                            @endif
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="p-6 space-y-5">
+                <div>
+                    <label for="lab-select" class="block text-xs font-medium text-gray-500 mb-1">Laboratorium <span class="text-red-500">*</span></label>
+                    <form method="GET" action="{{ route('lab-scan.pick') }}">
+                        <select id="lab-select" name="lab" onchange="this.form.submit()"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white">
+                            <option value="">— Pilih Laboratorium —</option>
+                            @foreach($laboratories as $item)
+                                <option value="{{ $item->code }}" @selected($lab?->code === $item->code)>
+                                    {{ $item->name }} ({{ $item->code }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
                 <div class="bg-green-50 border border-green-200 rounded-xl p-4">
                     <p class="text-sm font-semibold text-green-800 mb-1">Check-in Penggunaan Laboratorium</p>
-                    <p class="text-xs text-green-600">Isi data diri Anda untuk mencatat kehadiran di laboratorium.</p>
+                    <p class="text-xs text-green-600">
+                        @if($lab)
+                            Isi data diri Anda untuk mencatat kehadiran di laboratorium.
+                        @else
+                            Pilih laboratorium pada dropdown di atas untuk mulai check-in.
+                        @endif
+                    </p>
                 </div>
 
                 @if(session('success'))
@@ -62,41 +89,43 @@
                     <p class="text-[11px] text-gray-400 italic pt-1">Hari & waktu terisi otomatis dari sistem.</p>
                 </div>
 
-                <div class="border-t border-gray-100 pt-5">
-                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Isi Data Diri</h3>
+                @if($lab)
+                    <div class="border-t border-gray-100 pt-5">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">Isi Data Diri</h3>
 
-                    @if($errors->any())
-                        <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-3">
-                            @foreach($errors->all() as $error)
-                                <p>{{ $error }}</p>
-                            @endforeach
-                        </div>
-                    @endif
+                        @if($errors->any())
+                            <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-3">
+                                @foreach($errors->all() as $error)
+                                    <p>{{ $error }}</p>
+                                @endforeach
+                            </div>
+                        @endif
 
-                    <form method="POST" action="{{ route('lab-scan.check-in', $lab->code) }}" class="space-y-3">
-                        @csrf
-                        <p class="text-xs text-gray-500 -mb-1">Semua kolom wajib diisi.</p>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
-                            <input type="text" name="user_name" value="{{ old('user_name') }}" required placeholder="Contoh: Budi Santoso"
-                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Prodi <span class="text-red-500">*</span></label>
-                            <input type="text" name="user_prodi" value="{{ old('user_prodi') }}" required placeholder="Contoh: Teknik Informatika"
-                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Keperluan <span class="text-red-500">*</span></label>
-                            <input type="text" name="purpose" value="{{ old('purpose') }}" required placeholder="Contoh: Praktikum Jaringan"
-                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        </div>
-                        <button type="submit"
-                            class="w-full px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors">
-                            Check-in
-                        </button>
-                    </form>
-                </div>
+                        <form method="POST" action="{{ route('lab-scan.check-in', $lab->code) }}" class="space-y-3">
+                            @csrf
+                            <p class="text-xs text-gray-500 -mb-1">Semua kolom wajib diisi.</p>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                                <input type="text" name="user_name" value="{{ old('user_name') }}" required placeholder="Contoh: Budi Santoso"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Prodi <span class="text-red-500">*</span></label>
+                                <input type="text" name="user_prodi" value="{{ old('user_prodi') }}" required placeholder="Contoh: Teknik Informatika"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Keperluan <span class="text-red-500">*</span></label>
+                                <input type="text" name="purpose" value="{{ old('purpose') }}" required placeholder="Contoh: Praktikum Jaringan"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            </div>
+                            <button type="submit"
+                                class="w-full px-4 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                                Check-in
+                            </button>
+                        </form>
+                    </div>
+                @endif
             </div>
         </div>
 

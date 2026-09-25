@@ -34,6 +34,9 @@
             justify-content: center;
             margin-bottom: 8px;
         }
+        .stiker-item-umum {
+            border: 2px solid #059669;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="{ previewUrl: null }">
@@ -46,7 +49,7 @@
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">QR Stiker Penggunaan Lab</h1>
-                    <p class="text-sm text-gray-500 mt-1">Cetak stiker QR Code untuk check-in mahasiswa di setiap laboratorium</p>
+                    <p class="text-sm text-gray-500 mt-1">Cetak stiker QR Code untuk check-in mahasiswa — QR Umum (pilih lab via dropdown) dan QR khusus tiap laboratorium</p>
                 </div>
                 <button type="button" onclick="window.print()" class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 font-medium">
                     Print Stiker
@@ -54,25 +57,37 @@
             </div>
         </div>
 
-        @if($laboratories->count() > 0)
-            <div class="stiker-grid">
-                @foreach($laboratories as $lab)
-                    <div class="stiker-item">
-                        <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('lab-scan.scan', $lab->code) }}'">
-                            <div id="qr-{{ $lab->id }}"></div>
-                        </div>
-                        <p class="font-bold text-gray-800 text-sm">{{ $lab->name }}</p>
-                        <p class="text-xs text-gray-500 font-mono">{{ $lab->code }}</p>
-                        <p class="text-xs text-green-600 font-medium mt-1">Check-in Penggunaan Lab</p>
-                        <button type="button" @click="previewUrl = '{{ route('lab-scan.scan', $lab->code) }}'"
-                            class="text-xs text-green-600 hover:text-green-700 font-medium no-print mt-1">
-                            Preview
-                        </button>
-                    </div>
-                @endforeach
+        <div class="stiker-grid">
+            <div class="stiker-item stiker-item-umum">
+                <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('lab-scan.pick') }}'">
+                    <div id="qr-general"></div>
+                </div>
+                <p class="font-bold text-gray-800 text-sm">QR Umum</p>
+                <p class="text-xs text-gray-500 font-mono">Semua Laboratorium</p>
+                <p class="text-xs text-green-600 font-medium mt-1">Check-in &mdash; Pilih Lab via Dropdown</p>
+                <button type="button" @click="previewUrl = '{{ route('lab-scan.pick') }}'"
+                    class="text-xs text-green-600 hover:text-green-700 font-medium no-print mt-1">
+                    Preview
+                </button>
             </div>
-        @else
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            @foreach($laboratories as $lab)
+                <div class="stiker-item">
+                    <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('lab-scan.scan', $lab->code) }}'">
+                        <div id="qr-{{ $lab->id }}"></div>
+                    </div>
+                    <p class="font-bold text-gray-800 text-sm">{{ $lab->name }}</p>
+                    <p class="text-xs text-gray-500 font-mono">{{ $lab->code }}</p>
+                    <p class="text-xs text-green-600 font-medium mt-1">Check-in Penggunaan Lab</p>
+                    <button type="button" @click="previewUrl = '{{ route('lab-scan.scan', $lab->code) }}'"
+                        class="text-xs text-green-600 hover:text-green-700 font-medium no-print mt-1">
+                        Preview
+                    </button>
+                </div>
+            @endforeach
+        </div>
+
+        @if($laboratories->count() === 0)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center mt-4">
                 <p class="text-gray-500">Belum ada laboratorium.</p>
             </div>
         @endif
@@ -98,9 +113,16 @@
         </div>
     </div>
 
-    @if($laboratories->count() > 0)
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            new QRCode(document.getElementById("qr-general"), {
+                text: "{{ route('lab-scan.pick') }}",
+                width: 130,
+                height: 130,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
             @foreach($laboratories as $lab)
                 new QRCode(document.getElementById("qr-{{ $lab->id }}"), {
                     text: "{{ route('lab-scan.scan', $lab->code) }}",
@@ -113,6 +135,5 @@
             @endforeach
         });
     </script>
-    @endif
 </body>
 </html>

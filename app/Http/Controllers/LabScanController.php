@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LabUsage;
 use App\Models\Laboratory;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class LabScanController extends Controller
 {
@@ -33,16 +34,37 @@ class LabScanController extends Controller
         12 => 'Desember',
     ];
 
+    /**
+     * Halaman check-in umum: pengguna memilih laboratorium via dropdown (?lab=KODE).
+     * Kode tidak dikenal dibiarkan jatuh ke kondisi "belum memilih" (tanpa 404).
+     */
+    public function pick()
+    {
+        $laboratories = Laboratory::orderBy('name')->get(['id', 'name', 'code', 'location']);
+
+        $code = request()->query('lab');
+        $lab = $code ? $laboratories->firstWhere('code', $code) : null;
+
+        return $this->render($lab, $laboratories);
+    }
+
     public function scan($labCode)
     {
         $lab = Laboratory::where('code', $labCode)->firstOrFail();
+
+        return $this->render($lab);
+    }
+
+    private function render(?Laboratory $lab, ?Collection $laboratories = null)
+    {
         $now = now();
 
         return view('lab-scan.scan', [
-            'lab'   => $lab,
-            'day'   => self::DAYS[$now->format('l')] ?? $now->format('l'),
-            'date'  => $now->format('j') . ' ' . (self::MONTHS[(int) $now->format('n')] ?? $now->format('F')) . ' ' . $now->format('Y'),
-            'time'  => $now->format('H:i'),
+            'lab'           => $lab,
+            'laboratories'  => $laboratories ?? Laboratory::orderBy('name')->get(['id', 'name', 'code', 'location']),
+            'day'           => self::DAYS[$now->format('l')] ?? $now->format('l'),
+            'date'          => $now->format('j') . ' ' . (self::MONTHS[(int) $now->format('n')] ?? $now->format('F')) . ' ' . $now->format('Y'),
+            'time'          => $now->format('H:i'),
         ]);
     }
 

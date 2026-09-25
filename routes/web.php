@@ -99,6 +99,7 @@ Route::prefix('box-scan')->name('box-scan.')->group(function () {
 
 // Public Routes (Lab Scan - check-in penggunaan lab via QR, tanpa login)
 Route::prefix('lab-scan')->name('lab-scan.')->group(function () {
+    Route::get('/', [LabScanController::class, 'pick'])->name('pick');
     Route::get('/{labCode}', [LabScanController::class, 'scan'])->name('scan');
     Route::post('/{labCode}/check-in', [LabScanController::class, 'checkIn'])->name('check-in');
 });
