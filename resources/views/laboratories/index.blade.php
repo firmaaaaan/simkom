@@ -58,6 +58,7 @@
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Lokasi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kapasitas</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
+                    <th class="text-left px-6 py-3 font-medium text-gray-500">Jadwal</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
             </thead>
@@ -79,6 +80,13 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Maintenance</span>
                         @else
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Nonaktif</span>
+                        @endif
+                    </td>
+                    <td data-label="Jadwal" class="px-6 py-4">
+                        @if($lab->show_in_schedule)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Tampil</span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Tidak</span>
                         @endif
                     </td>
                     <td data-label="Aksi" class="px-6 py-4">
@@ -104,7 +112,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-12 text-center">
+                    <td colspan="9" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center gap-3">
                             <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />

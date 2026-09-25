@@ -55,8 +55,11 @@ class LaboratoryController extends Controller
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
+            'show_in_schedule' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
+
+        $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
 
         Laboratory::create($validated);
 
@@ -81,8 +84,11 @@ class LaboratoryController extends Controller
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
+            'show_in_schedule' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
+
+        $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
 
         $laboratory->update($validated);
 

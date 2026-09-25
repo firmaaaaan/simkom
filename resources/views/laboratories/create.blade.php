@@ -70,6 +70,19 @@
                 </div>
 
                 <div>
+                    <label class="flex items-start gap-3 cursor-pointer">
+                        <input type="hidden" name="show_in_schedule" value="0">
+                        <input type="checkbox" name="show_in_schedule" value="1" id="show_in_schedule"
+                            @checked(old('show_in_schedule', true))
+                            class="mt-0.5 h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="text-sm text-gray-700">
+                            <span class="font-medium">Tampilkan di halaman Jadwal Lab</span>
+                            <span class="block text-xs text-gray-500">Lab akan tampil di dropdown &amp; kolom jadwal publik (/jadwal-lab).</span>
+                        </span>
+                    </label>
+                </div>
+
+                <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea name="description" id="description" rows="3"
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400 resize-none"

@@ -29,13 +29,15 @@ class PublicLabScheduleController extends Controller
         $nowTime = now()->format('H:i');
 
         $laboratories = Laboratory::where('status', 'Aktif')
+            ->where('show_in_schedule', true)
             ->orderBy('name')
             ->get();
 
         $selectedLab = null;
         $labFilter = $request->query('laboratory_id');
         if ($labFilter !== null && $labFilter !== '') {
-            $selectedLab = $laboratories->firstWhere('id', (int) $labFilter);
+            // Bandingkan sebagai string: id adalah UUID, cast (int) selalu gagal cocok.
+            $selectedLab = $laboratories->firstWhere('id', $labFilter);
         }
 
         $query = LabSchedule::with('laboratory');
