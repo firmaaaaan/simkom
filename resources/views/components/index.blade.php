@@ -157,7 +157,16 @@
                                     {{ $item->quantity }}
                                 </td>
                                 <td class="px-6 py-3" data-label="Box">
-                                    {{ $item->box->name ?? '-' }}
+                                    @php($itemBoxes = $item->boxes)
+                                    @if($itemBoxes->isEmpty())
+                                        -
+                                    @elseif($itemBoxes->count() === 1)
+                                        {{ $itemBoxes->first()->name }}
+                                    @else
+                                        <a href="{{ route('components.show', $item) }}#box" class="text-green-600 hover:underline" title="Lihat semua box">
+                                            {{ $itemBoxes->first()->name }} <span class="text-gray-500">+{{ $itemBoxes->count() - 1 }} lainnya</span>
+                                        </a>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-3" data-label="Status">
                                     @switch($item->status)

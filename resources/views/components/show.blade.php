@@ -62,6 +62,34 @@
                 </div>
             @endif
 
+            <div id="box" class="pt-4 border-t border-gray-100 scroll-mt-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <p class="text-xs text-gray-500">Box Penyimpanan</p>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        {{ $component->boxes->count() }} box
+                    </span>
+                </div>
+                @if($component->boxes->isEmpty())
+                    <p class="text-sm text-gray-400 italic">-</p>
+                @else
+                    <ul class="space-y-2">
+                        @foreach($component->boxes as $box)
+                            <li class="flex items-center justify-between gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        <span class="font-mono text-green-700">{{ $box->code }}</span> · {{ $box->name }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 truncate">{{ $box->location ?? '-' }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                                    {{ $box->pivot->quantity }} item
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+
             <div class="flex items-center gap-3 pt-6 border-t border-gray-100">
                 <a href="{{ route('components.edit', $component) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
