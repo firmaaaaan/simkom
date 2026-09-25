@@ -143,6 +143,76 @@
                 </span>
             </div>
 
+            {{-- Lab Layout Canvas (Published) --}}
+            @if($activeLayout)
+                <div class="mb-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ $activeLayout->name }}</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Published</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-gray-600">
+                                <span>Canvas: {{ $activeLayout->canvas_width }} × {{ $activeLayout->canvas_height }} px</span>
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="welcomeGridToggle" checked onchange="toggleWelcomeGrid(this.checked)" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                    Grid
+                                </label>
+                            </div>
+                        </div>
+                        <div class="p-4 relative" style="background: {{ $activeLayout->background_color }};">
+                            <svg id="welcomeLayoutSvg"
+                                 :viewBox="'0 0 ' + canvasWidth + ' ' + canvasHeight"
+                                 class="w-full h-auto border border-gray-200 rounded-lg"
+                                 style="max-width: 100%; height: auto;"
+                                 x-data="{
+                                     canvasWidth: {{ $activeLayout->canvas_width }},
+                                     canvasHeight: {{ $activeLayout->canvas_height }},
+                                     cellSize: {{ $activeLayout->cell_size }},
+                                     gridCols: {{ $activeLayout->grid_cols }},
+                                     gridRows: {{ $activeLayout->grid_rows }},
+                                     items: @json($activeLayout->items),
+                                     showGrid: true,
+                                     itemW(item) { return item.type === 'computer' ? 80 : 30; },
+                                     itemH(item) { return item.type === 'computer' ? 60 : 80; },
+                                     itemTransform(item) {
+                                         const x = item.grid_x * this.cellSize;
+                                         const y = item.grid_y * this.cellSize;
+                                         const cx = this.itemW(item)/2, cy = this.itemH(item)/2;
+                                         return `translate(${x},${y}) rotate(${item.rotation||0},${cx},${cy})`;
+                                     },
+                                     textTransform(item) {
+                                         const rot = item.rotation || 0;
+                                         if (rot === 0) return '';
+                                         const cx = this.itemW(item)/2, cy = this.itemH(item)/2;
+                                         return `rotate(${-rot},${cx},${cy})`;
+                                     }
+                                 }">
+                                <defs>
+                                    <pattern id="welcomeGridPattern" :width="cellSize" :height="cellSize" patternUnits="userSpaceOnUse">
+                                        <path d="M {{ $activeLayout->cell_size }} 0 L 0 0 0 {{ $activeLayout->cell_size }}" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="100%" height="100%" :fill="showGrid ? 'url(#welcomeGridPattern)' : 'none'" />
+                                
+                                <template x-for="item in items" :key="item.id">
+                                    <g :transform="itemTransform(item)">
+                                        <rect :width="itemW(item)" :height="itemH(item)"
+                                              :class="item.type === 'computer' ? 'fill-blue-100 stroke-blue-500' : 'fill-gray-200 stroke-gray-500'"
+                                              rx="4" stroke-width="2"/>
+                                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+                                              class="text-xs font-medium pointer-events-none"
+                                              :transform="textTransform(item)">
+                                            @{{ item.label }}
+                                        </text>
+                                    </g>
+                                </template>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Daftar Komputer --}}
             @if($computers->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -375,6 +445,15 @@
         })();
     </script>
     @endif
+
+<script>
+function toggleWelcomeGrid(checked) {
+    const svg = document.getElementById('welcomeLayoutSvg');
+    if (svg && svg.__x) {
+        svg.__x.showGrid = checked;
+    }
+}
+</script>
 
 </body>
 </html>

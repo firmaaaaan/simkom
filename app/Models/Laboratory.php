@@ -32,4 +32,14 @@ class Laboratory extends Model
     {
         return $this->hasMany(Computer::class);
     }
+
+    public function layouts(): HasMany
+    {
+        return $this->hasMany(LabLayout::class);
+    }
+
+    public function activeLayout(): HasMany
+    {
+        return $this->hasMany(LabLayout::class)->published()->latest();
+    }
 }

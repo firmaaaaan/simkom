@@ -27,6 +27,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\LabScheduleController;
+use App\Http\Controllers\LabLayoutController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use Illuminate\Support\Facades\Route;
@@ -58,7 +59,9 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
             ->get();
     }
 
-    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec'));
+    $activeLayout = $selectedLab ? $selectedLab->activeLayout()->first() : null;
+
+    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec', 'activeLayout'));
 });
 
 // Auth Routes (guest only)
@@ -287,6 +290,19 @@ Route::middleware('auth')->group(function () {
         Route::resource('lab-schedules', LabScheduleController::class)
             ->parameters(['lab-schedules' => 'schedule'])
             ->except(['create', 'edit']);
+    });
+
+    // Lab Layouts (Admin only)
+    Route::middleware('permission:manage-lab-layouts')->prefix('lab-layouts')->name('lab-layouts.')->group(function () {
+        Route::get('/', [LabLayoutController::class, 'index'])->name('index');
+        Route::get('create', [LabLayoutController::class, 'create'])->name('create');
+        Route::post('/', [LabLayoutController::class, 'store'])->name('store');
+        Route::get('{labLayout}', [LabLayoutController::class, 'show'])->name('show');
+        Route::get('{labLayout}/edit', [LabLayoutController::class, 'edit'])->name('edit');
+        Route::put('{labLayout}', [LabLayoutController::class, 'update'])->name('update');
+        Route::delete('{labLayout}', [LabLayoutController::class, 'destroy'])->name('destroy');
+        Route::post('{labLayout}/publish', [LabLayoutController::class, 'publish'])->name('publish');
+        Route::post('{labLayout}/duplicate', [LabLayoutController::class, 'duplicate'])->name('duplicate');
     });
 
     // Pengembalian Box — HANYA ADMIN
