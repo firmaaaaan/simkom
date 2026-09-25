@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     protected $fillable = [
+        'id',
+        'key',
         'value',
     ];
 
     protected $casts = [
         'value' => 'string',
     ];
+
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     public const PUBLIC_SPEC_ID = 1;
     public const REALTIME_SCHEDULE_URL_ID = 2;
