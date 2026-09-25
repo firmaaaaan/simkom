@@ -36,20 +36,20 @@
             <nav class="flex -mb-px" aria-label="Tabs">
                 <button type="button"
                         class="tab-btn px-6 py-3 text-sm font-medium border-b-2 transition-colors
-                               {{ request()->get('tab', 'drafts') === 'drafts' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
+                               {{ $tab === 'drafts' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
                         onclick="window.location='{{ route('lab-layouts.index', ['tab' => 'drafts']) }}'">
                     Draft
                     <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {{ $layouts->filter(fn($l) => $l->is_draft && !$l->is_published)->count() }}
+                        {{ $tab === 'drafts' ? $layouts->total() : App\Models\LabLayout::where('is_draft', true)->where('is_published', false)->count() }}
                     </span>
                 </button>
                 <button type="button"
                         class="tab-btn px-6 py-3 text-sm font-medium border-b-2 transition-colors
-                               {{ request()->get('tab', 'drafts') === 'published' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
+                               {{ $tab === 'published' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}"
                         onclick="window.location='{{ route('lab-layouts.index', ['tab' => 'published']) }}'">
                     Published
                     <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {{ $layouts->filter(fn($l) => $l->is_published)->count() }}
+                        {{ $tab === 'published' ? $layouts->total() : App\Models\LabLayout::where('is_published', true)->count() }}
                     </span>
                 </button>
             </nav>
@@ -82,14 +82,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @foreach($layouts as $layout)
-                                @php
-                                    $isCurrentTab = request()->get('tab', 'drafts');
-                                    $isDraft = $layout->is_draft && !$layout->is_published;
-                                    $isPublished = $layout->is_published;
-                                    $showInTab = ($isCurrentTab === 'drafts' && $isDraft) || ($isCurrentTab === 'published' && $isPublished);
-                                @endphp
-                                @if($showInTab)
-                                <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50">
                                     <td class="py-4 font-medium text-gray-900">{{ $layout->name }}</td>
                                     <td class="py-4 text-gray-600">{{ $layout->laboratory->name ?? '-' }} <span class="text-xs text-gray-400">({{ $layout->laboratory->code ?? '-' }})</span></td>
                                     <td class="py-4 text-gray-600">{{ $layout->grid_cols }} x {{ $layout->grid_rows }} ({{ $layout->cell_size }}px)</td>
@@ -163,8 +156,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @endif
-                            @endforeach
+@endforeach
                         </tbody>
                     </table>
                 </div>
