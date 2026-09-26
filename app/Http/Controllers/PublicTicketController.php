@@ -7,7 +7,6 @@ use App\Models\Computer;
 use App\Models\Laboratory;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class PublicTicketController extends Controller
 {

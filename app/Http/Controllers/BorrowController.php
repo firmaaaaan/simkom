@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ComputerBorrowing;
 use App\Models\Computer;
-use App\Models\Laboratory;
 use Illuminate\Http\Request;
 
 class BorrowController extends Controller

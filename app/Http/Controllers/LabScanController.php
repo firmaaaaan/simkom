@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\LabUsage;
 use App\Models\Laboratory;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class LabScanController extends Controller
