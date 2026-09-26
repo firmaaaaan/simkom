@@ -4,10 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\AcademicYear;
 use App\Models\Box;
+use App\Models\BoxComponent;
 use App\Models\Component;
 use App\Models\Computer;
 use App\Models\ComputerBorrowing;
-use App\Models\ComputerCheck;
 use App\Models\DeviceCheck;
 use App\Models\DeviceCheckItem;
 use App\Models\Laboratory;
@@ -67,38 +67,46 @@ class ExcelExportTempTest extends TestCase
             'start_date' => '2026-08-01', 'end_date' => '2027-06-30',
         ]);
 
+        $reporter = User::firstOrCreate(
+            ['email' => 'pelapor@uji.test'],
+            ['name' => 'Budi Pelapor', 'password' => 'rahasia123']
+        );
+
         $maintenance = MaintenanceChecklist::create([
             'laboratory_id' => $lab->id, 'academic_year_id' => $year->id,
             'maintenance_date' => '2026-09-10', 'inspector_name' => 'Firmansyah',
             'notes_computer' => 'Debu dibersihkan',
         ]);
-        MaintenanceChecklistItem::insert([
-            ['maintenance_checklist_id' => $maintenance->id, 'computer_id' => $computer->id, 'category' => 'A', 'item_number' => 1, 'is_checked' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['maintenance_checklist_id' => $maintenance->id, 'computer_id' => $computer->id, 'category' => 'A', 'item_number' => 2, 'is_checked' => false, 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach ([[1, true], [2, false]] as [$number, $checked]) {
+            MaintenanceChecklistItem::create([
+                'maintenance_checklist_id' => $maintenance->id,
+                'computer_id' => $computer->id,
+                'category' => 'A',
+                'item_number' => $number,
+                'is_checked' => $checked,
+            ]);
+        }
 
         $check = DeviceCheck::create([
             'laboratory_id' => $lab->id, 'academic_year_id' => $year->id,
             'check_date' => '2026-09-19', 'officer_name' => 'Firmansyah', 'notes' => 'Mouse diganti',
         ]);
-        $rows = [];
         foreach (DeviceCheck::itemKeys() as $index => $key) {
-            $rows[] = [
+            DeviceCheckItem::create([
                 'device_check_id' => $check->id, 'computer_id' => $computer->id, 'item_key' => $key,
-                'is_checked' => $index < 5, 'created_at' => now(), 'updated_at' => now(),
-            ];
+                'is_checked' => $index < 5,
+            ]);
         }
-        DeviceCheckItem::insert($rows);
 
         Ticket::create([
             'tracking_code' => 'TKT-001', 'laboratory_id' => $lab->id, 'computer_id' => $computer->id,
-            'academic_year_id' => $year->id, 'reported_by' => 1, 'reporter_name' => 'Budi',
+            'academic_year_id' => $year->id, 'reported_by' => $reporter->id, 'reporter_name' => 'Budi',
             'category' => 'Hardware', 'title' => 'Mouse tidak berfungsi', 'description' => 'Klik kiri mati',
             'priority' => 'Tinggi', 'status' => 'Open',
         ]);
         Ticket::create([
             'tracking_code' => 'TKT-002', 'laboratory_id' => $lab->id, 'computer_id' => $computer->id,
-            'academic_year_id' => $year->id, 'reported_by' => 1, 'reporter_name' => 'Sari',
+            'academic_year_id' => $year->id, 'reported_by' => $reporter->id, 'reporter_name' => 'Sari',
             'category' => 'Software', 'title' => 'Aplikasi tidak bisa dibuka', 'description' => 'Error',
             'priority' => 'Sedang', 'status' => 'Resolved',
         ]);
@@ -114,7 +122,9 @@ class ExcelExportTempTest extends TestCase
             'name' => 'RAM DDR4 8GB', 'code' => 'C-001', 'category' => 'RAM', 'quantity' => 4, 'status' => 'Tersedia',
         ]);
         $box = Box::create(['name' => 'Box RAM', 'code' => 'BOX-RAM-001', 'location' => 'Rak 1']);
-        $box->components()->attach($component->id, ['quantity' => 2]);
+        BoxComponent::create([
+            'box_id' => $box->id, 'component_id' => $component->id, 'quantity' => 2,
+        ]);
 
         return compact('lab', 'computer', 'year', 'check', 'box');
     }

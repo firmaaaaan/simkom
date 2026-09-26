@@ -11,6 +11,7 @@ use App\Models\Laboratory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DeviceCheckController extends Controller
@@ -307,6 +308,7 @@ class DeviceCheckController extends Controller
         foreach ($computerIds as $computerId) {
             foreach ($itemKeys as $itemKey) {
                 $rows[] = [
+                    'id' => (string) Str::uuid7(),
                     'device_check_id' => $check->id,
                     'computer_id' => $computerId,
                     'item_key' => $itemKey,
