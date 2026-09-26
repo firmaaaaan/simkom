@@ -20,10 +20,6 @@ return new class extends Migration
             'label' => 'Kelola Jadwal Lab',
             'roles' => ['admin'],
         ],
-        'manage-lab-layouts' => [
-            'label' => 'Kelola Denah Lab',
-            'roles' => ['admin'],
-        ],
     ];
 
     public function up(): void

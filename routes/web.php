@@ -59,9 +59,7 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
             ->get();
     }
 
-    $activeLayout = $selectedLab ? $selectedLab->activeLayout()->first() : null;
-
-    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec', 'activeLayout'));
+    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec'));
 });
 
 // Auth Routes (guest only)
