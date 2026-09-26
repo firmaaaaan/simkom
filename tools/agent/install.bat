@@ -22,10 +22,17 @@ if not exist "%SRC%SimKomAgent.exe" (
     exit /b 1
 )
 
+REM --- Matikan instance lama DULU agar file tidak terkunci ---
+taskkill /IM SimKomAgent.exe /F >nul 2>&1
+timeout /t 1 /nobreak >nul
+
 mkdir "%TARGET%" 2>nul
 copy /Y "%SRC%SimKomAgent.exe" "%TARGET%\SimKomAgent.exe" >nul
 if errorlevel 1 (
     echo [ERROR] Gagal menyalin exe ke %TARGET%
+    echo         Pastikan SimKomAgent.exe tidak sedang berjalan:
+    echo         taskkill /IM SimKomAgent.exe /F
+    echo         lalu jalankan install.bat ini lagi.
     pause
     exit /b 1
 )
@@ -40,8 +47,7 @@ if exist "%TARGET%\config.json" (
 REM --- Auto-start saat login (HKCU, tidak perlu hak admin) ---
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v SimKomAgent /t REG_SZ /d "\"%TARGET%\SimKomAgent.exe\"" /f >nul
 
-REM --- Hentikan instance lama, jalankan yang baru ---
-taskkill /IM SimKomAgent.exe /F >nul 2>&1
+REM --- Jalankan versi baru ---
 start "" "%TARGET%\SimKomAgent.exe"
 
 echo.
