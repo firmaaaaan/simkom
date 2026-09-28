@@ -58,6 +58,10 @@ class LabUsageController extends Controller
 
         $usage->update([
             'status'       => 'Out',
+            // Assignment eksplisit: MySQL tidak auto-update kolom TIMESTAMP yang
+            // di-ASSIGN dalam UPDATE, sehingga checked_in_at tetap aman meski
+            // migration fix timestamp auto-update belum dijalankan.
+            'checked_in_at' => $usage->checked_in_at,
             'validated_at' => now(),
             'validated_by' => $request->user()->id,
             'exit_note'    => $validated['exit_note'] ?? null,

@@ -257,4 +257,80 @@ class LabUsageTest extends TestCase
             ->assertSee(route('lab-scan.pick'), false)
             ->assertSee(route('lab-scan.scan', $lab->code), false);
     }
+
+    public function test_validate_out_preserves_checked_in_time(): void
+    {
+        $lab = $this->lab();
+        $checkIn = now()->subHour();
+        $usage = LabUsage::create([
+            'laboratory_id' => $lab->id,
+            'user_name'     => 'Budi Santoso',
+            'user_prodi'    => 'Informatika',
+            'purpose'       => 'Praktikum',
+            'day'           => 'Senin',
+            'status'        => 'In',
+            'checked_in_at' => $checkIn,
+        ]);
+
+        $admin = $this->admin();
+        $this->actingAs($admin)
+            ->post(route('lab-usages.validate-out', $usage), ['exit_note' => 'Selesai'])
+            ->assertRedirect();
+
+        $fresh = $usage->fresh();
+        $this->assertSame('Out', $fresh->status);
+        $this->assertSame(
+            $checkIn->format('Y-m-d H:i:s'),
+            $fresh->checked_in_at->format('Y-m-d H:i:s')
+        );
+        $this->assertNotNull($fresh->validated_at);
+        $this->assertNotSame(
+            $fresh->checked_in_at->format('Y-m-d H:i:s'),
+            $fresh->validated_at->format('Y-m-d H:i:s')
+        );
+    }
+
+    public function test_timestamp_fix_migration_repairs_corrupted_check_in_time(): void
+    {
+        $lab = $this->lab();
+
+        $createdAt = now()->subHours(3);
+        $checkoutTime = now();
+        $corrupted = LabUsage::create([
+            'laboratory_id' => $lab->id,
+            'user_name'     => 'Korupsi',
+            'user_prodi'    => 'Informatika',
+            'purpose'       => 'Praktikum',
+            'day'           => 'Senin',
+            'status'        => 'Out',
+            'checked_in_at' => $checkoutTime,
+            'validated_at'  => $checkoutTime,
+        ]);
+        $corrupted->created_at = $createdAt;
+        $corrupted->save();
+
+        $healthyCheckIn = now()->subHour();
+        $healthy = LabUsage::create([
+            'laboratory_id' => $lab->id,
+            'user_name'     => 'Sehat',
+            'user_prodi'    => 'Informatika',
+            'purpose'       => 'Praktikum',
+            'day'           => 'Senin',
+            'status'        => 'Out',
+            'checked_in_at' => $healthyCheckIn,
+            'validated_at'  => now(),
+        ]);
+
+        $migration = include database_path('migrations/2026_09_28_000002_fix_implicit_timestamp_auto_update.php');
+        $migration->up();
+
+        $this->assertSame(
+            $createdAt->format('Y-m-d H:i:s'),
+            $corrupted->fresh()->checked_in_at->format('Y-m-d H:i:s')
+        );
+        $this->assertSame(
+            $healthyCheckIn->format('Y-m-d H:i:s'),
+            $healthy->fresh()->checked_in_at->format('Y-m-d H:i:s')
+        );
+    }
 }
