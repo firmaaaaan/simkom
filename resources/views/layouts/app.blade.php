@@ -246,6 +246,9 @@
                                     </a>
                                 </template>
                             </div>
+                            <a href="{{ route('notifications.index') }}" class="block px-4 py-2.5 text-center text-xs font-medium text-green-600 hover:bg-green-50 border-t border-gray-100 transition-colors">
+                                Lihat semua notifikasi &rarr;
+                            </a>
                         </div>
                     </div>
                     <div class="w-px h-6 bg-gray-200"></div>

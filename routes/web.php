@@ -128,6 +128,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
+    // Halaman semua notifikasi + hapus (global, semua user login)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::delete('/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
     // User Management (Admin only)
     Route::middleware('permission:manage-users')->group(function () {
         Route::get('users/export', [UserController::class, 'export'])->name('users.export');
