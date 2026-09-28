@@ -10,6 +10,7 @@ use App\Models\Computer;
 use App\Models\ComputerBorrowing;
 use App\Models\DeviceCheck;
 use App\Models\DeviceCheckItem;
+use App\Models\LabUsage;
 use App\Models\Laboratory;
 use App\Models\MaintenanceChecklist;
 use App\Models\MaintenanceChecklistItem;
@@ -37,6 +38,7 @@ class ExcelExportTempTest extends TestCase
         'tickets.export',
         'borrowings.export',
         'boxes.export',
+        'lab-usages.export',
     ];
 
     private function admin(): User
@@ -46,7 +48,7 @@ class ExcelExportTempTest extends TestCase
         foreach ([
             'manage-users', 'manage-roles', 'manage-laboratories', 'manage-academic-years',
             'manage-computers', 'manage-maintenance', 'manage-tickets', 'manage-borrowings',
-            'manage-components',
+            'manage-components', 'manage-lab-usages',
         ] as $name) {
             $role->permissions()->attach(Permission::firstOrCreate(['name' => $name], ['label' => $name]));
         }
@@ -126,6 +128,33 @@ class ExcelExportTempTest extends TestCase
             'box_id' => $box->id, 'component_id' => $component->id, 'quantity' => 2,
         ]);
 
+        $validator = User::firstOrCreate(
+            ['email' => 'validator@uji.test'],
+            ['name' => 'Sari Validator', 'password' => 'rahasia123']
+        );
+
+        LabUsage::create([
+            'laboratory_id' => $lab->id,
+            'user_name' => 'Budi Mahasiswa',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Praktikum',
+            'day' => 'Senin',
+            'status' => 'Out',
+            'checked_in_at' => now()->subHours(3),
+            'validated_at' => now()->subHour(),
+            'validated_by' => $validator->id,
+            'exit_note' => 'Komputer rapi',
+        ]);
+        LabUsage::create([
+            'laboratory_id' => $lab->id,
+            'user_name' => 'Siti Mahasiswi',
+            'user_prodi' => 'Sistem Informasi',
+            'purpose' => 'Tugas',
+            'day' => 'Selasa',
+            'status' => 'In',
+            'checked_in_at' => now(),
+        ]);
+
         return compact('lab', 'computer', 'year', 'check', 'box');
     }
 
@@ -187,6 +216,24 @@ class ExcelExportTempTest extends TestCase
 
         $users = $this->rows($this->actingAs($admin)->get(route('users.export', ['search' => 'admin@e.test'])));
         $this->assertCount(2, $users);
+
+        // Penggunaan lab: filter status & judul kolom.
+        $usages = $this->rows($this->actingAs($admin)->get(route('lab-usages.export')));
+        $this->assertCount(3, $usages); // judul + 2 penggunaan
+        $this->assertSame(
+            ['Nama', 'Prodi', 'Keperluan', 'Laboratorium', 'Hari', 'Check-in', 'Durasi', 'Status', 'Divalidasi', 'Oleh', 'Catatan Keluar'],
+            $usages[0]
+        );
+
+        $outs = $this->rows($this->actingAs($admin)->get(route('lab-usages.export', ['status' => 'Out'])));
+        $this->assertCount(2, $outs);
+        $this->assertSame('Budi Mahasiswa', $outs[1][0]);
+        $this->assertSame('Out', $outs[1][7]);
+        $this->assertSame('Komputer rapi', $outs[1][10]);
+
+        $ins = $this->rows($this->actingAs($admin)->get(route('lab-usages.export', ['status' => 'In'])));
+        $this->assertCount(2, $ins);
+        $this->assertSame('Siti Mahasiswi', $ins[1][0]);
     }
 
     public function test_export_content_is_complete_and_safe(): void

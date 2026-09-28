@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\LabUsageExport;
 use App\Http\Controllers\Controller;
 use App\Models\LabUsage;
 use App\Models\Laboratory;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LabUsageController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Query daftar penggunaan lab dengan filter aktif — dipakai halaman daftar & export.
+     */
+    private function filteredQuery(Request $request)
     {
         $query = LabUsage::with(['laboratory', 'validatedBy']);
 
@@ -33,7 +38,12 @@ class LabUsageController extends Controller
             });
         }
 
-        $labUsages = $query->latest('checked_in_at')->paginate(15)->withQueryString();
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $labUsages = $this->filteredQuery($request)->latest('checked_in_at')->paginate(15)->withQueryString();
         $laboratories = Laboratory::orderBy('name')->get(['id', 'name', 'code']);
 
         $stats = [
@@ -44,6 +54,14 @@ class LabUsageController extends Controller
         ];
 
         return view('lab-usages.index', compact('labUsages', 'laboratories', 'stats'));
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(
+            new LabUsageExport($this->filteredQuery($request)),
+            'penggunaan-lab-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function validateOut(Request $request, LabUsage $usage)

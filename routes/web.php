@@ -270,6 +270,7 @@ Route::middleware('auth')->group(function () {
 
     // Penggunaan Laboratorium - check-in via QR, validasi keluar oleh admin/laboran
     Route::middleware('permission:manage-lab-usages')->group(function () {
+        Route::get('/lab-usages/export', [AdminLabUsageController::class, 'export'])->name('lab-usages.export');
         Route::get('/lab-usages/qr-stiker', [AdminLabUsageController::class, 'qrStiker'])->name('lab-usages.qr-stiker');
         Route::get('/lab-usages', [AdminLabUsageController::class, 'index'])->name('lab-usages.index');
         Route::post('/lab-usages/{usage}/validate-out', [AdminLabUsageController::class, 'validateOut'])->name('lab-usages.validate-out');
