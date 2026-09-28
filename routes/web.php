@@ -28,7 +28,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\LabScanController;
-use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use Illuminate\Support\Facades\Route;
 
@@ -119,9 +118,6 @@ Route::get('/computers/{computer}/card', [ComputerController::class, 'card'])->n
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Monitoring PC — tanpa permission/role, cukup login
-    Route::get('/monitoring-pc', [MonitoringPcController::class, 'index'])->name('monitoring-pc.index');
 
     // Profil (akun sendiri): ganti email & password
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

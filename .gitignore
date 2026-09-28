@@ -23,8 +23,3 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-# Artefak build PyInstaller (tools/agent)
-tools/agent/build/
-tools/agent/dist/
-tools/agent/__pycache__/
-tools/agent/*.spec
