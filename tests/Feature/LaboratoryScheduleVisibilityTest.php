@@ -139,4 +139,59 @@ class LaboratoryScheduleVisibilityTest extends TestCase
             ->assertSee('Tampil')
             ->assertSee('Tidak');
     }
+
+    public function test_hidden_lab_is_not_listed_on_denah(): void
+    {
+        $visible = $this->lab();
+        $hidden = $this->lab([
+            'name' => 'Lab Rahasia',
+            'code' => 'LR1',
+            'show_in_schedule' => false,
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($visible->name)
+            ->assertDontSee($hidden->name)
+            ->assertDontSee($hidden->code);
+    }
+
+    public function test_non_active_lab_is_not_listed_on_denah(): void
+    {
+        $visible = $this->lab();
+        $maintenance = $this->lab([
+            'name' => 'Lab Maintenance',
+            'code' => 'LM1',
+            'status' => 'Maintenance',
+        ]);
+        $inactive = $this->lab([
+            'name' => 'Lab Mati',
+            'code' => 'LMA1',
+            'status' => 'Tidak Aktif',
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($visible->name)
+            ->assertDontSee($maintenance->name)
+            ->assertDontSee($maintenance->code)
+            ->assertDontSee($inactive->name)
+            ->assertDontSee($inactive->code);
+    }
+
+    public function test_hidden_lab_id_query_falls_back_to_first_visible_lab_on_denah(): void
+    {
+        $visible = $this->lab();
+        $hidden = $this->lab([
+            'name' => 'Lab Rahasia',
+            'code' => 'LR1',
+            'show_in_schedule' => false,
+        ]);
+
+        $this->get('/?laboratory_id=' . $hidden->id)
+            ->assertOk()
+            ->assertSee($visible->name)
+            ->assertDontSee($hidden->name)
+            ->assertDontSee($hidden->code);
+    }
 }

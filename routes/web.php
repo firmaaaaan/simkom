@@ -33,23 +33,23 @@ use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (\Illuminate\Http\Request $request) {
-    $laboratories = \App\Models\Laboratory::orderBy('name')->get();
-    $selectedLabId = $request->laboratory_id;
-    $computers = collect();
-    $selectedLab = null;
+    $laboratories = \App\Models\Laboratory::where('status', 'Aktif')
+        ->where('show_in_schedule', true)
+        ->orderBy('name')
+        ->get();
     $showSpec = \App\Models\Setting::publicSpecEnabled();
 
-    if ($selectedLabId) {
-        $selectedLab = \App\Models\Laboratory::find($selectedLabId);
-        $computers = \App\Models\Computer::where('laboratory_id', $selectedLabId)
-            ->with($showSpec ? ['laboratory', 'hardware', 'software'] : ['laboratory'])
-            ->withCount(['tickets' => function ($q) {
-                $q->whereIn('status', ['Open', 'In Progress']);
-            }])
-            ->orderBy('code')
-            ->get();
-    } elseif ($laboratories->isNotEmpty()) {
+    $selectedLabId = $request->laboratory_id;
+    $selectedLab = null;
+    if ($selectedLabId !== null && $selectedLabId !== '') {
+        $selectedLab = $laboratories->firstWhere('id', $selectedLabId);
+    }
+    if (! $selectedLab && $laboratories->isNotEmpty()) {
         $selectedLab = $laboratories->first();
+    }
+
+    $computers = collect();
+    if ($selectedLab) {
         $computers = \App\Models\Computer::where('laboratory_id', $selectedLab->id)
             ->with($showSpec ? ['laboratory', 'hardware', 'software'] : ['laboratory'])
             ->withCount(['tickets' => function ($q) {
@@ -285,6 +285,8 @@ Route::middleware('auth')->group(function () {
         Route::post('lab-schedules/import', [LabScheduleController::class, 'import'])->name('lab-schedules.import');
         // Drag & drop: pindah/tukar slot jadwal.
         Route::post('lab-schedules/{schedule}/move', [LabScheduleController::class, 'move'])->name('lab-schedules.move');
+        // Sembunyikan/tampilkan satu entri jadwal di halaman publik /jadwal-lab.
+        Route::patch('lab-schedules/{schedule}/visibility', [LabScheduleController::class, 'toggleVisibility'])->name('lab-schedules.toggle-visibility');
         // show dipakai modal Edit (fetch JSON detail jadwal).
         // parameters(): nama param route diubah ke "schedule" agar cocok dengan
         // signature controller (show/update/destroy), bukan model kosong dari DI.

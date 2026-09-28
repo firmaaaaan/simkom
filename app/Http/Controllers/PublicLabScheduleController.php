@@ -40,7 +40,7 @@ class PublicLabScheduleController extends Controller
             $selectedLab = $laboratories->firstWhere('id', $labFilter);
         }
 
-        $query = LabSchedule::with('laboratory');
+        $query = LabSchedule::with('laboratory')->where('show_in_schedule', true);
         if (! $allDays) {
             $query->where('day', $day);
         }

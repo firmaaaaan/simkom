@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class LabSchedule extends Model
 {
     use HasUuids;
+
+    protected $attributes = [
+        'show_in_schedule' => true,
+    ];
+
     protected $fillable = [
         'laboratory_id',
         'day',
@@ -19,7 +24,12 @@ class LabSchedule extends Model
         'semester',
         'instructor',
         'class_group',
+        'show_in_schedule',
         'created_by',
+    ];
+
+    protected $casts = [
+        'show_in_schedule' => 'boolean',
     ];
 
     // Kolom TIME disimpan/dibaca sebagai string "H:i:s" agar konsisten di semua

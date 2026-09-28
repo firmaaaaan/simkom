@@ -114,7 +114,7 @@
                                         $schedule = $schedules->get($cellKey);
                                     @endphp
                                     @if($schedule)
-                                        <td class="group border border-gray-200 bg-green-50/40 text-left p-2.5 align-top cursor-grab active:cursor-grabbing" id="cell-{{ $cellKey }}"
+                                        <td class="group border border-gray-200 {{ $schedule->show_in_schedule ? 'bg-green-50/40' : 'bg-gray-50/70' }} text-left p-2.5 align-top cursor-grab active:cursor-grabbing" id="cell-{{ $cellKey }}"
                                             draggable="true"
                                             ondragstart="handleDragStart(event, '{{ $schedule->id }}')"
                                             ondragend="dragReset()"
@@ -126,8 +126,14 @@
                                             data-lab-id="{{ $lab->id }}"
                                             data-lab-name="{{ $lab->name }}"
                                             data-lab-code="{{ $lab->code }}">
-                                            <div class="space-y-0.5">
+                                            <div class="space-y-0.5 {{ $schedule->show_in_schedule ? '' : 'opacity-70' }}">
                                                 <p class="font-bold text-blue-800 text-xs leading-tight">{{ $schedule->course_name }}</p>
+                                                @if(! $schedule->show_in_schedule)
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[9px] font-semibold rounded uppercase tracking-wide">
+                                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.774 3.162 10.066 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243"/></svg>
+                                                        Disembunyikan
+                                                    </span>
+                                                @endif
                                                 <p class="text-emerald-700 text-[10px] font-medium">{{ $schedule->study_program }}</p>
                                                 @if($schedule->semester || $schedule->class_group)
                                                     <p class="text-gray-500 text-[10px]">
@@ -156,6 +162,17 @@
                                                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
                                                     Salin
                                                 </button>
+                                                @if($schedule->show_in_schedule)
+                                                    <button type="button" onclick="toggleScheduleVisibility('{{ $schedule->id }}')" title="Sembunyikan dari jadwal publik" class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-medium rounded hover:bg-amber-600 transition-colors">
+                                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.774 3.162 10.066 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243"/></svg>
+                                                        Sembunyikan
+                                                    </button>
+                                                @else
+                                                    <button type="button" onclick="toggleScheduleVisibility('{{ $schedule->id }}')" title="Tampilkan di jadwal publik" class="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500 text-white text-[10px] font-medium rounded hover:bg-teal-600 transition-colors">
+                                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                        Tampilkan
+                                                    </button>
+                                                @endif
                                                 <button type="button" onclick="deleteSchedule('{{ $schedule->id }}', @js($schedule->course_name.' ('.$schedule->time_label.')'))" class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500 text-white text-[10px] font-medium rounded hover:bg-red-600 transition-colors">
                                                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                                     Hapus
@@ -231,6 +248,18 @@
                         <div>
                             <label for="instructor" class="block text-sm font-medium text-gray-700 mb-1">Dosen Pengampu</label>
                             <input type="text" name="instructor" id="instructor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm" placeholder="Masukkan nama dosen">
+                        </div>
+                        <div>
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="hidden" name="show_in_schedule" value="0">
+                                <input type="checkbox" name="show_in_schedule" value="1" id="show_in_schedule"
+                                    checked
+                                    class="mt-0.5 h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                                <span class="text-sm text-gray-700">
+                                    <span class="font-medium">Tampilkan di halaman jadwal publik</span>
+                                    <span class="block text-xs text-gray-500">Jadwal ini tampil untuk pengunjung di /jadwal-lab. Batalkan centang untuk menyembunyikannya.</span>
+                                </span>
+                            </label>
                         </div>
                     </div>
 
@@ -490,6 +519,8 @@
             document.getElementById('class_group').value = '';
         }
 
+        document.getElementById('show_in_schedule').checked = true;
+
         document.getElementById('conflict-warning').classList.add('hidden');
         document.getElementById('btn-delete-modal').classList.add('hidden');
         document.getElementById('form-method').value = 'POST';
@@ -521,6 +552,7 @@
             document.getElementById('semester').value = s.semester || '';
             document.getElementById('instructor').value = s.instructor || '';
             document.getElementById('class_group').value = s.class_group || '';
+            document.getElementById('show_in_schedule').checked = s.show_in_schedule !== false;
             document.getElementById('schedule-modal').classList.remove('hidden');
         })
         .catch(error => { showToast('error', 'Gagal memuat data: ' + error.message); });
@@ -621,6 +653,19 @@
         document.getElementById('schedule-modal').classList.add('hidden');
         isEditMode = false;
         currentScheduleId = null;
+    }
+
+    function toggleScheduleVisibility(id) {
+        fetch(BASE_URL + '/' + id + '/visibility', {
+            method: 'PATCH',
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (ok && data.success) { showToast('success', data.message || 'Visibilitas jadwal diperbarui'); setTimeout(() => location.reload(), 800); }
+            else { showToast('error', (data && data.message) || 'Gagal memperbarui visibilitas jadwal'); }
+        })
+        .catch(error => { showToast('error', 'Terjadi kesalahan: ' + error.message); });
     }
 
     function openImportModal() {

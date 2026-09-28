@@ -68,7 +68,11 @@ class LabScheduleController extends Controller
             'semester' => 'nullable|string|max:50',
             'instructor' => 'nullable|string|max:255',
             'class_group' => 'nullable|string|max:100',
+            'show_in_schedule' => 'nullable|boolean',
         ]);
+        if ($request->has('show_in_schedule')) {
+            $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
+        }
 
         $conflict = LabSchedule::checkConflict(
             $validated['laboratory_id'],
@@ -105,7 +109,11 @@ class LabScheduleController extends Controller
             'semester' => 'nullable|string|max:50',
             'instructor' => 'nullable|string|max:255',
             'class_group' => 'nullable|string|max:100',
+            'show_in_schedule' => 'nullable|boolean',
         ]);
+        if ($request->has('show_in_schedule')) {
+            $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
+        }
 
         $conflict = LabSchedule::checkConflict(
             $validated['laboratory_id'],
@@ -135,6 +143,20 @@ class LabScheduleController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Jadwal berhasil dihapus',
+        ]);
+    }
+
+    public function toggleVisibility(LabSchedule $schedule)
+    {
+        $schedule->show_in_schedule = ! $schedule->show_in_schedule;
+        $schedule->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $schedule->show_in_schedule
+                ? 'Jadwal ditampilkan kembali di halaman publik'
+                : 'Jadwal disembunyikan dari halaman publik',
+            'data' => $this->formatSchedule($schedule),
         ]);
     }
 
@@ -333,6 +355,7 @@ class LabScheduleController extends Controller
             'semester' => $schedule->semester,
             'instructor' => $schedule->instructor,
             'class_group' => $schedule->class_group,
+            'show_in_schedule' => (bool) $schedule->show_in_schedule,
             'cell_content' => $schedule->cell_content,
         ];
     }
