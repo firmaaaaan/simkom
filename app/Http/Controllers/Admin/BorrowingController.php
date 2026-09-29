@@ -42,7 +42,7 @@ class BorrowingController extends Controller
 
     public function index(Request $request)
     {
-        $borrowings = $this->filteredQuery($request)->latest()->paginate(15)->withQueryString();
+        $borrowings = $this->filteredQuery($request)->latest()->get();
 
         $stats = [
             'total' => ComputerBorrowing::count(),

@@ -196,12 +196,10 @@
         </table>
     </div>
 
-    {{-- PAGINATION --}}
-    @if($borrowings->hasPages())
-        <div class="px-6 py-3 border-t border-gray-100">
-            {{ $borrowings->links() }}
-        </div>
-    @endif
+    {{-- FOOTER: TOTAL DATA --}}
+    <div class="px-6 py-3 border-t border-gray-100 text-sm text-gray-500">
+        Menampilkan {{ $borrowings->count() }} data peminjaman{{ request('search') || request('status') ? ' (hasil filter)' : '' }}
+    </div>
 </div>
 
 {{-- APPROVE/REJECT MODAL --}}
