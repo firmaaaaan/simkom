@@ -83,6 +83,11 @@ class ComputerController extends Controller
         $computer->hardware()->sync($hardwareIds);
         $computer->software()->sync($softwareIds);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('computers.create')
+                ->with('success', 'Komputer berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('computers.index')->with('success', 'Komputer berhasil ditambahkan.');
     }
 

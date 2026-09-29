@@ -27,6 +27,15 @@
             </div>
         @endif
 
+        @if(session('success'))
+            <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+
         <form action="{{ route('computers.store') }}" method="POST">
             @csrf
             <div class="space-y-5">
@@ -100,6 +109,9 @@
             <div class="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
                 <button type="submit" class="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
                     Simpan
+                </button>
+                <button type="submit" name="action" value="save_another" class="px-5 py-2.5 border border-green-600 text-green-700 bg-white text-sm font-medium rounded-lg hover:bg-green-50 transition-colors">
+                    Simpan &amp; Buat Ulang
                 </button>
                 <a href="{{ route('computers.index') }}" class="px-5 py-2.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
                     Batal

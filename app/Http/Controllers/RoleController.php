@@ -44,6 +44,11 @@ class RoleController extends Controller
 
         $role->permissions()->sync($validated['permissions'] ?? []);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('roles.create')
+                ->with('success', 'Role "' . $role->label . '" berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('roles.index')->with('success', 'Role "' . $role->label . '" berhasil ditambahkan.');
     }
 

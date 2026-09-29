@@ -116,7 +116,7 @@ class ComponentController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $validated['code'] = $validated['code'] ?: Component::generateCode();
+        $validated['code'] = ($validated['code'] ?? null) ?: Component::generateCode();
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('components', 'public');
@@ -125,6 +125,11 @@ class ComponentController extends Controller
         }
 
         Component::create($validated);
+
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('components.create')
+                ->with('success', 'Komponen berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
 
         return redirect()->route('components.index')->with('success', 'Komponen berhasil ditambahkan.');
     }

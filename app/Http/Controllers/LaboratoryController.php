@@ -63,6 +63,11 @@ class LaboratoryController extends Controller
 
         Laboratory::create($validated);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('laboratories.create')
+                ->with('success', 'Laboratorium berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('laboratories.index')->with('success', 'Laboratorium berhasil ditambahkan.');
     }
 

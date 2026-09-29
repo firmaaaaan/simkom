@@ -102,6 +102,11 @@ class TicketController extends Controller
 
         Ticket::create($validated);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('tickets.create')
+                ->with('success', 'Tiket kendala berhasil dibuat. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('tickets.index')->with('success', 'Tiket kendala berhasil dibuat.');
     }
 

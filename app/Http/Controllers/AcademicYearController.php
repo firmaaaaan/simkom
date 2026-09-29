@@ -59,6 +59,11 @@ class AcademicYearController extends Controller
 
         AcademicYear::create($validated);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('academic-years.create')
+                ->with('success', 'Tahun ajaran berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('academic-years.index')->with('success', 'Tahun ajaran berhasil ditambahkan.');
     }
 

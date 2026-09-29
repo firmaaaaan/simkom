@@ -33,9 +33,14 @@ class SoftwareController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $validated['code'] = $validated['code'] ?: Software::generateCode();
+        $validated['code'] = ($validated['code'] ?? null) ?: Software::generateCode();
 
         Software::create($validated);
+
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('software.create')
+                ->with('success', 'Software berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
 
         return redirect()->route('software.index')->with('success', 'Software berhasil ditambahkan.');
     }

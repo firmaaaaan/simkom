@@ -71,6 +71,11 @@ class UserController extends Controller
 
         $user->roles()->attach($validated['role_id']);
 
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('users.create')
+                ->with('success', 'User berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
+
         return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
     }
 

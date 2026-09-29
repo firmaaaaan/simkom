@@ -32,9 +32,14 @@ class HardwareController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $validated['code'] = $validated['code'] ?: Hardware::generateCode();
+        $validated['code'] = ($validated['code'] ?? null) ?: Hardware::generateCode();
 
         Hardware::create($validated);
+
+        if ($request->input('action') === 'save_another') {
+            return redirect()->route('hardware.create')
+                ->with('success', 'Hardware berhasil ditambahkan. Silakan isi form untuk data berikutnya.');
+        }
 
         return redirect()->route('hardware.index')->with('success', 'Hardware berhasil ditambahkan.');
     }
