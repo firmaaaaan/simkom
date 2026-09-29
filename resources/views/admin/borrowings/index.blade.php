@@ -112,11 +112,14 @@
                 <tr class="border-b border-gray-100">
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kode Tracking</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Peminjam</th>
+                    <th class="text-left px-6 py-3 font-medium text-gray-500">Prodi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Komputer</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Laboratorium</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Tanggal</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Jam</th>
+                    <th class="text-left px-6 py-3 font-medium text-gray-500">Keperluan</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
+                    <th class="text-left px-6 py-3 font-medium text-gray-500">Dikembalikan</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Catatan Admin</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
@@ -133,10 +136,12 @@
                                 <p class="text-xs text-gray-500">{{ $borrowing->borrower_nim }}</p>
                             </div>
                         </td>
+                        <td data-label="Prodi" class="px-6 py-4 text-gray-600">{{ $borrowing->borrower_prodi ?? '-' }}</td>
                         <td data-label="Komputer" class="px-6 py-4 font-medium text-gray-800">{{ $borrowing->computer->code ?? '-' }}</td>
                         <td data-label="Laboratorium" class="px-6 py-4 text-gray-600">{{ $borrowing->laboratory->name ?? '-' }}</td>
                         <td data-label="Tanggal" class="px-6 py-4 text-gray-600">{{ \Carbon\Carbon::parse($borrowing->borrow_date)->format('d M Y') }}</td>
                         <td data-label="Jam" class="px-6 py-4 text-gray-600">{{ $borrowing->borrow_time_start }} - {{ $borrowing->borrow_time_end }}</td>
+                        <td data-label="Keperluan" class="px-6 py-4 text-gray-600">{{ $borrowing->purpose }}</td>
                         <td data-label="Status" class="px-6 py-4">
                             @php
                                 $statusColors = [
@@ -149,6 +154,14 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$borrowing->status] ?? '' }}">
                                 {{ $borrowing->status }}
                             </span>
+                        </td>
+                        <td data-label="Dikembalikan" class="px-6 py-4 text-gray-600">
+                            @if($borrowing->returned_at)
+                                <p class="text-gray-700">{{ \Carbon\Carbon::parse($borrowing->returned_at)->format('d M Y') }}</p>
+                                <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($borrowing->returned_at)->format('H:i') }} WIB &middot; divalidasi admin</p>
+                            @else
+                                <span class="text-xs text-gray-400">&ndash;</span>
+                            @endif
                         </td>
                         <td data-label="Catatan Admin" class="px-6 py-4">
                             @if(filled($borrowing->admin_notes))
@@ -176,6 +189,17 @@
                                         </svg>
                                     </button>
                                 </div>
+                            @elseif($borrowing->status === 'Approved')
+                                <form method="POST" action="{{ route('borrowings.mark-returned', $borrowing) }}"
+                                      onsubmit="return confirm('Tandai peminjaman {{ $borrowing->tracking_code }} sudah keluar? Pastikan peminjam telah selesai dan meninggalkan laboratorium.')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors" title="Tandai Sudah Keluar">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                                        </svg>
+                                    </button>
+                                </form>
                             @else
                                 <span class="text-xs text-gray-400">-</span>
                             @endif
@@ -183,7 +207,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="12" class="px-6 py-12 text-center text-gray-500">
                             <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>

@@ -272,6 +272,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/borrowings/export', [AdminBorrowingController::class, 'export'])->name('borrowings.export');
         Route::get('/borrowings', [AdminBorrowingController::class, 'index'])->name('borrowings.index');
         Route::patch('/borrowings/{borrowing}/status', [AdminBorrowingController::class, 'updateStatus'])->name('borrowings.update-status');
+        Route::patch('/borrowings/{borrowing}/mark-returned', [AdminBorrowingController::class, 'markReturned'])->name('borrowings.mark-returned');
     });
 
     // Penggunaan Laboratorium - check-in via QR, validasi keluar oleh admin/laboran

@@ -21,6 +21,8 @@ class ComputerBorrowing extends Model
         'borrow_time_end',
         'status',
         'admin_notes',
+        'returned_at',
+        'returned_by',
     ];
 
     protected static function booted(): void

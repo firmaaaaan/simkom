@@ -54,6 +54,21 @@ class BorrowingController extends Controller
         return view('admin.borrowings.index', compact('borrowings', 'stats'));
     }
 
+    public function markReturned(ComputerBorrowing $borrowing)
+    {
+        if ($borrowing->status !== 'Approved') {
+            return back()->withErrors(['status' => 'Hanya peminjaman yang disetujui yang bisa ditandai sudah keluar.']);
+        }
+
+        $borrowing->update([
+            'status' => 'Returned',
+            'returned_at' => now(),
+            'returned_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', "Peminjaman {$borrowing->tracking_code} ditandai sudah keluar.");
+    }
+
     public function updateStatus(Request $request, ComputerBorrowing $borrowing)
     {
         $validated = $request->validate([
