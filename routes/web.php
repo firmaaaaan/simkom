@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BoxScanController;
 use App\Http\Controllers\BoxController;
 use App\Http\Controllers\BoxComponentController;
@@ -296,6 +297,13 @@ Route::middleware('auth')->group(function () {
             ->parameters(['lab-schedules' => 'schedule'])
             ->except(['create', 'edit']);
     });
+
+    // Backup & Restore Data (semua user login, tanpa permission khusus)
+    Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+    Route::get('backups/download', [BackupController::class, 'download'])->name('backups.download');
+    Route::post('backups/restore', [BackupController::class, 'restore'])->name('backups.restore');
+    Route::get('backups/files/{filename}', [BackupController::class, 'downloadFile'])->name('backups.files.download');
+    Route::delete('backups/files/{filename}', [BackupController::class, 'destroyFile'])->name('backups.files.destroy');
 
     // Pengembalian Box — HANYA ADMIN
     Route::middleware('role:admin')->group(function () {
