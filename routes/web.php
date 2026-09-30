@@ -27,6 +27,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
+use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
 use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
@@ -205,6 +206,13 @@ Route::middleware('auth')->group(function () {
         // Component borrowing routes
         Route::post('component-borrowings', [ComponentBorrowingController::class, 'store'])->name('component-borrowings.store');
         Route::post('component-borrowings/{borrowing}/return', [ComponentBorrowingController::class, 'returnBorrowing'])->name('component-borrowings.return');
+
+        // Peminjaman box manual (tambah/edit/hapus) - HANYA ADMIN
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/box-usages', [AdminBoxUsageController::class, 'store'])->name('box-usages.store');
+            Route::put('/box-usages/{usage}', [AdminBoxUsageController::class, 'update'])->name('box-usages.update');
+            Route::delete('/box-usages/{usage}', [AdminBoxUsageController::class, 'destroy'])->name('box-usages.destroy');
+        });
     });
 
     // Reports (Admin + Laboran)

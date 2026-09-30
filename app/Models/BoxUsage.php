@@ -18,6 +18,8 @@ class BoxUsage extends Model
         'status',
         'used_at',
         'returned_at',
+        'source',
+        'created_by',
     ];
 
     protected $casts = [
@@ -33,6 +35,11 @@ class BoxUsage extends Model
     public function returnNote(): HasOne
     {
         return $this->hasOne(BoxReturnNote::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getDurationAttribute(): ?string

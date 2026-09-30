@@ -330,6 +330,137 @@
     </div>
 </div>
 
+{{-- Modal Input Manual / Edit Peminjaman Box (admin) --}}
+<div id="boxUsageFormModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 id="boxUsageFormTitle" class="text-lg font-bold text-gray-900">Input Peminjaman Box</h3>
+                    <p class="text-xs text-gray-500">Pencatatan manual oleh admin (tanpa scan QR)</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeBoxUsageForm()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="boxUsageForm" method="POST" action="{{ route('box-usages.store') }}">
+            @csrf
+            <input type="hidden" name="_method" id="bufMethod" value="">
+            <input type="hidden" name="edit_id" id="bufEditId" value="{{ old('edit_id') }}">
+
+            <div class="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Box <span class="text-red-500">*</span></label>
+                    <select name="box_id" id="bufBox" required
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="">Pilih box</option>
+                        @foreach($boxes as $boxOption)
+                            <option value="{{ $boxOption->id }}" {{ old('box_id') == $boxOption->id ? 'selected' : '' }}>
+                                {{ $boxOption->code }} - {{ $boxOption->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Peminjam <span class="text-red-500">*</span></label>
+                        <input type="text" name="user_name" id="bufName" value="{{ old('user_name') }}" required maxlength="255" placeholder="Nama peminjam"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIM <span class="text-red-500">*</span></label>
+                        <input type="text" name="user_nim" id="bufNim" value="{{ old('user_nim') }}" required maxlength="50" placeholder="Contoh: 2210512001"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <input type="text" name="user_kelas" id="bufKelas" value="{{ old('user_kelas') }}" maxlength="100" placeholder="Contoh: TI-4A (opsional)"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Pinjam <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" name="used_at" id="bufUsedAt" value="{{ old('used_at') }}" required
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
+                        <select name="status" id="bufStatus" onchange="toggleBoxReturnFields()" required
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="Using" {{ old('status', 'Using') === 'Using' ? 'selected' : '' }}>Sedang Dipakai</option>
+                            <option value="Returned" {{ old('status') === 'Returned' ? 'selected' : '' }}>Sudah Dikembalikan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="bufReturnFields" class="space-y-4 bg-green-50 border border-green-200 rounded-xl p-4">
+                    <p class="text-xs font-semibold text-green-800 uppercase tracking-wider">Data Pengembalian</p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Kembali <span class="text-red-500">*</span></label>
+                        <input type="datetime-local" name="returned_at" id="bufReturnedAt" value="{{ old('returned_at') }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Kembali (opsional)</label>
+                        <textarea name="note" id="bufNote" rows="2" maxlength="500" placeholder="Catatan saat pengembalian, jika ada..."
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">{{ old('note') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="closeBoxUsageForm()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    Batal
+                </button>
+                <button type="submit" id="boxUsageFormSubmit" class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Hapus Peminjaman Box --}}
+<div id="boxUsageDeleteModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900">Hapus Data Peminjaman Box</h3>
+        </div>
+        <form id="boxUsageDeleteForm" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600">
+                    Anda yakin ingin menghapus data peminjaman box milik
+                    <span id="boxUsageDeleteName" class="font-semibold text-gray-900"></span>?
+                    Tindakan ini tidak dapat dibatalkan.
+                </p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="closeBoxUsageDeleteModal()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
+                    Hapus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     (function() {
@@ -424,6 +555,129 @@
             }
         });
     })();
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    {{-- Input manual / edit peminjaman box oleh admin --}}
+    const BOX_USAGE_STORE_URL = '{{ route('box-usages.store') }}';
+    const BOX_USAGE_OLD = @json(collect(old())->filter(fn ($v) => $v !== null));
+    // Error validasi berasal dari form peminjaman box jika ada field khas form tersebut.
+    const BOX_USAGE_HAS_ERRORS = {{ $errors->any() ? 'true' : 'false' }}
+        && ('user_nim' in BOX_USAGE_OLD || 'edit_id' in BOX_USAGE_OLD);
+
+    function boxUsagePad(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function boxUsageToLocalInput(value) {
+        if (!value) return '';
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) return value.substring(0, 16);
+        const d = new Date(String(value).replace(/-/g, '/').replace('T', ' '));
+        if (isNaN(d)) return '';
+        return `${d.getFullYear()}-${boxUsagePad(d.getMonth() + 1)}-${boxUsagePad(d.getDate())}T${boxUsagePad(d.getHours())}:${boxUsagePad(d.getMinutes())}`;
+    }
+
+    function boxUsageNowLocal() {
+        const d = new Date();
+        return `${d.getFullYear()}-${boxUsagePad(d.getMonth() + 1)}-${boxUsagePad(d.getDate())}T${boxUsagePad(d.getHours())}:${boxUsagePad(d.getMinutes())}`;
+    }
+
+    function toggleBoxReturnFields() {
+        const isReturned = document.getElementById('bufStatus').value === 'Returned';
+        document.getElementById('bufReturnFields').classList.toggle('hidden', !isReturned);
+        document.getElementById('bufReturnedAt').required = isReturned;
+        if (!isReturned) document.getElementById('bufReturnedAt').value = '';
+    }
+
+    function setBoxUsageFormTarget(id) {
+        const form = document.getElementById('boxUsageForm');
+        const title = document.getElementById('boxUsageFormTitle');
+        const submit = document.getElementById('boxUsageFormSubmit');
+
+        if (id) {
+            form.action = `/box-usages/${id}`;
+            document.getElementById('bufMethod').value = 'PUT';
+            document.getElementById('bufEditId').value = id;
+            title.textContent = 'Edit Peminjaman Box';
+            submit.textContent = 'Simpan Perubahan';
+        } else {
+            form.action = BOX_USAGE_STORE_URL;
+            document.getElementById('bufMethod').value = '';
+            document.getElementById('bufEditId').value = '';
+            title.textContent = 'Input Peminjaman Box';
+            submit.textContent = 'Simpan';
+        }
+    }
+
+    function fillBoxUsageForm(data) {
+        document.getElementById('bufBox').value = data.box_id ?? '';
+        document.getElementById('bufName').value = data.user_name ?? '';
+        document.getElementById('bufNim').value = data.user_nim ?? '';
+        document.getElementById('bufKelas').value = data.user_kelas ?? '';
+        document.getElementById('bufUsedAt').value = boxUsageToLocalInput(data.used_at);
+        document.getElementById('bufStatus').value = data.status ?? 'Using';
+        document.getElementById('bufReturnedAt').value = boxUsageToLocalInput(data.returned_at);
+        document.getElementById('bufNote').value = data.note ?? '';
+        toggleBoxReturnFields();
+    }
+
+    function resetBoxUsageForm() {
+        document.getElementById('boxUsageForm').reset();
+        document.getElementById('bufMethod').value = '';
+        document.getElementById('bufEditId').value = '';
+        document.getElementById('boxUsageForm').action = BOX_USAGE_STORE_URL;
+        document.getElementById('bufUsedAt').value = boxUsageNowLocal();
+        toggleBoxReturnFields();
+    }
+
+    function openBoxUsageForm(el) {
+        const usage = el && el.dataset && el.dataset.usage ? JSON.parse(el.dataset.usage) : null;
+
+        if (usage) {
+            resetBoxUsageForm();
+            fillBoxUsageForm(usage);
+            setBoxUsageFormTarget(usage.id);
+        } else if (BOX_USAGE_HAS_ERRORS && Object.keys(BOX_USAGE_OLD).length) {
+            fillBoxUsageForm(BOX_USAGE_OLD);
+            setBoxUsageFormTarget(BOX_USAGE_OLD.edit_id || null);
+        } else {
+            resetBoxUsageForm();
+            setBoxUsageFormTarget(null);
+        }
+
+        document.getElementById('boxUsageFormModal').classList.remove('hidden');
+    }
+
+    function closeBoxUsageForm() {
+        document.getElementById('boxUsageFormModal').classList.add('hidden');
+    }
+
+    document.getElementById('boxUsageFormModal').addEventListener('click', function (e) {
+        if (e.target === this) closeBoxUsageForm();
+    });
+
+    function openBoxUsageDeleteModal(id, name) {
+        document.getElementById('boxUsageDeleteForm').action = `/box-usages/${id}`;
+        document.getElementById('boxUsageDeleteName').textContent = name;
+        document.getElementById('boxUsageDeleteModal').classList.remove('hidden');
+    }
+
+    function closeBoxUsageDeleteModal() {
+        document.getElementById('boxUsageDeleteModal').classList.add('hidden');
+    }
+
+    document.getElementById('boxUsageDeleteModal').addEventListener('click', function (e) {
+        if (e.target === this) closeBoxUsageDeleteModal();
+    });
+
+    {{-- Buka lagi form input saat kembali dari redirect dengan error validasi --}}
+    document.addEventListener('DOMContentLoaded', function () {
+        if (BOX_USAGE_HAS_ERRORS && Object.keys(BOX_USAGE_OLD).length) {
+            openBoxUsageForm();
+        }
+    });
 </script>
 @endpush
 @endsection

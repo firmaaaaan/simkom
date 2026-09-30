@@ -4,10 +4,40 @@
     $boxFilter = request('usage_box');
 @endphp
 
+@if(session('success'))
+    <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center gap-2">
+        <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {{ session('success') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <ul class="list-disc list-inside">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-base font-semibold text-gray-800">Riwayat Penggunaan Box</h2>
-        <p class="text-sm text-gray-500 mt-1">Pantau penggunaan box oleh mahasiswa</p>
+    <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h2 class="text-base font-semibold text-gray-800">Riwayat Penggunaan Box</h2>
+            <p class="text-sm text-gray-500 mt-1">Pantau penggunaan box oleh mahasiswa</p>
+        </div>
+        @if(auth()->user()->hasRole('admin'))
+            <button type="button" onclick="openBoxUsageForm()"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors self-start">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Input Manual
+            </button>
+        @endif
     </div>
 
     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
@@ -149,6 +179,19 @@
                     </thead>
                     <tbody>
                         @forelse($usages as $usage)
+                            @php
+                                $usageJson = json_encode([
+                                    'id'          => $usage->id,
+                                    'box_id'      => $usage->box_id,
+                                    'user_name'   => $usage->user_name,
+                                    'user_nim'    => $usage->user_nim,
+                                    'user_kelas'  => $usage->user_kelas,
+                                    'status'      => $usage->status,
+                                    'used_at'     => optional($usage->used_at)->toIso8601String(),
+                                    'returned_at' => optional($usage->returned_at)->toIso8601String(),
+                                    'note'        => $usage->returnNote?->note,
+                                ], JSON_HEX_APOS | JSON_HEX_QUOT);
+                            @endphp
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                 @if($hasUsing && $isAdmin)
                                     <td class="px-4 py-3">
@@ -168,7 +211,12 @@
                                     </span>
                                     <div class="text-xs text-gray-500 mt-0.5">{{ $usage->box->name }}</div>
                                 </td>
-                                <td data-label="Pengguna" class="px-4 py-3 font-medium text-gray-900">{{ $usage->user_name }}</td>
+                                <td data-label="Pengguna" class="px-4 py-3 font-medium text-gray-900">
+                                    {{ $usage->user_name }}
+                                    @if(($usage->source ?? 'qr') === 'manual')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700 ml-1 align-middle" title="Dicatat manual oleh admin">Manual</span>
+                                    @endif
+                                </td>
                                 <td data-label="NIM" class="px-4 py-3 text-gray-600 font-mono text-xs">{{ $usage->user_nim }}</td>
                                 <td data-label="Kelas" class="px-4 py-3 text-gray-600 text-sm">{{ $usage->user_kelas ?? '-' }}</td>
                                 <td data-label="Status" class="px-4 py-3 text-center">
@@ -195,14 +243,28 @@
                                 </td>
                                 @if($isAdmin)
                                     <td data-label="Aksi" class="px-4 py-3 text-center">
-                                        @if($usage->status === 'Using')
-                                            <button onclick="returnSingleUsage('{{ $usage->id }}', this)"
-                                                class="px-3 py-1.5 bg-yellow-600 text-white text-xs font-semibold rounded-lg hover:bg-yellow-700 transition-colors">
-                                                Kembalikan
+                                        <div class="flex items-center justify-center gap-1">
+                                            @if($usage->status === 'Using')
+                                                <button onclick="returnSingleUsage('{{ $usage->id }}', this)"
+                                                    class="px-3 py-1.5 bg-yellow-600 text-white text-xs font-semibold rounded-lg hover:bg-yellow-700 transition-colors">
+                                                    Kembalikan
+                                                </button>
+                                            @endif
+                                            <button type="button" data-usage="{{ $usageJson }}"
+                                                onclick="openBoxUsageForm(this)"
+                                                class="p-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors" title="Edit data">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                </svg>
                                             </button>
-                                        @else
-                                            <span class="text-gray-400 text-xs">—</span>
-                                        @endif
+                                            <button type="button"
+                                                onclick="openBoxUsageDeleteModal('{{ $usage->id }}', '{{ e($usage->user_name) }}')"
+                                                class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors" title="Hapus data">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </td>
                                 @endif
                             </tr>
