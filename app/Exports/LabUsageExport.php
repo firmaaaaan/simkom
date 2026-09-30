@@ -11,7 +11,7 @@ class LabUsageExport extends BaseExport implements WithHeadings, WithMapping
     public function collection(): Collection
     {
         return $this->query
-            ->with(['laboratory', 'validatedBy'])
+            ->with(['laboratory', 'validatedBy', 'createdBy'])
             ->latest('checked_in_at')
             ->get();
     }
@@ -30,6 +30,8 @@ class LabUsageExport extends BaseExport implements WithHeadings, WithMapping
             'Divalidasi',
             'Oleh',
             'Catatan Keluar',
+            'Sumber',
+            'Diinput Oleh',
         ];
     }
 
@@ -47,6 +49,8 @@ class LabUsageExport extends BaseExport implements WithHeadings, WithMapping
             $usage->validated_at?->format('d/m/Y H:i') ?? '-',
             $usage->validatedBy->name ?? '-',
             $usage->exit_note ?? '-',
+            ($usage->source ?? 'qr') === 'manual' ? 'Manual' : 'QR',
+            $usage->createdBy->name ?? '-',
         ];
     }
 }

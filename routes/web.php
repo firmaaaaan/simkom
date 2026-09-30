@@ -281,6 +281,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/lab-usages/qr-stiker', [AdminLabUsageController::class, 'qrStiker'])->name('lab-usages.qr-stiker');
         Route::get('/lab-usages', [AdminLabUsageController::class, 'index'])->name('lab-usages.index');
         Route::post('/lab-usages/{usage}/validate-out', [AdminLabUsageController::class, 'validateOut'])->name('lab-usages.validate-out');
+
+        // Input manual (tambah/edit/hapus) - HANYA ADMIN
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/lab-usages', [AdminLabUsageController::class, 'store'])->name('lab-usages.store');
+            Route::put('/lab-usages/{usage}', [AdminLabUsageController::class, 'update'])->name('lab-usages.update');
+            Route::delete('/lab-usages/{usage}', [AdminLabUsageController::class, 'destroy'])->name('lab-usages.destroy');
+        });
     });
 
     // Jadwal Penggunaan Laboratorium (Admin only)

@@ -221,7 +221,7 @@ class ExcelExportTempTest extends TestCase
         $usages = $this->rows($this->actingAs($admin)->get(route('lab-usages.export')));
         $this->assertCount(3, $usages); // judul + 2 penggunaan
         $this->assertSame(
-            ['Nama', 'Prodi', 'Keperluan', 'Laboratorium', 'Hari', 'Check-in', 'Durasi', 'Status', 'Divalidasi', 'Oleh', 'Catatan Keluar'],
+            ['Nama', 'Prodi', 'Keperluan', 'Laboratorium', 'Hari', 'Check-in', 'Durasi', 'Status', 'Divalidasi', 'Oleh', 'Catatan Keluar', 'Sumber', 'Diinput Oleh'],
             $usages[0]
         );
 
