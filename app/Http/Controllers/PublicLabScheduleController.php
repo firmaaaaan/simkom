@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LabSchedule;
 use App\Models\Laboratory;
+use App\Models\LabSchedule;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
@@ -11,21 +11,31 @@ class PublicLabScheduleController extends Controller
 {
     /**
      * Jadwal penggunaan laboratorium versi publik (tanpa login), read-only.
-     * Tanpa ?day= → mode "Semua Hari". ?day=Monday..Friday → satu hari.
+     * Tanpa ?day= → hari aktif (hari ini; akhir pekan → "Semua Hari").
+     * ?day=Monday..Friday → satu hari. ?day=all → mode "Semua Hari".
      * Bisa disaring per lab lewat ?laboratory_id=.
      */
     public function index(Request $request)
     {
         $days = LabSchedule::days();
+        $today = now()->format('l');
 
         $day = $request->query('day');
-        if ($day !== null && $day !== '' && ! array_key_exists($day, $days)) {
+        $allDays = false;
+
+        if ($day === null || $day === '') {
+            // Default: hari aktif (hari ini); akhir pekan → mode "Semua Hari".
+            $day = array_key_exists($today, $days) ? $today : null;
+            $allDays = ($day === null);
+        } elseif ($day === 'all') {
+            $day = null;
+            $allDays = true;
+        } elseif (! array_key_exists($day, $days)) {
             abort(404);
         }
 
-        $allDays = ($day === null || $day === '');
-        $today = now()->format('l');
         $isToday = ! $allDays && $day === $today;
+
         $nowTime = now()->format('H:i');
 
         $laboratories = Laboratory::where('status', 'Aktif')
@@ -50,7 +60,7 @@ class PublicLabScheduleController extends Controller
 
         // Kunci sel: day_start(H:i)_lab — cocok dengan loop slot di blade.
         $schedules = $query->get()
-            ->groupBy(fn ($item) => $item->day . '_' . substr($item->start_time, 0, 5) . '_' . $item->laboratory_id)
+            ->groupBy(fn ($item) => $item->day.'_'.substr($item->start_time, 0, 5).'_'.$item->laboratory_id)
             ->map(fn ($group) => $group->first());
 
         // Highlight slot yang sedang berlangsung: hanya pada hari ini,

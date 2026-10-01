@@ -78,7 +78,7 @@
         {{-- Filter lab --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
             <form id="lab-filter" method="GET" action="{{ route('jadwal-lab.index') }}">
-                <input type="hidden" name="day" value="{{ $day }}">
+                <input type="hidden" name="day" value="{{ $allDays ? 'all' : $day }}">
                 <label class="block text-xs font-medium text-gray-500 mb-1">Filter Laboratorium</label>
                 <select name="laboratory_id" onchange="document.getElementById('lab-filter').submit()"
                     class="w-full sm:w-72 px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500">
@@ -102,7 +102,7 @@
 
         {{-- Tab hari --}}
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-            <a href="{{ route('jadwal-lab.index', array_filter(['laboratory_id' => $selectedLab?->id])) }}"
+            <a href="{{ route('jadwal-lab.index', array_filter(['day' => 'all', 'laboratory_id' => $selectedLab?->id])) }}"
                 class="px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors {{ $allDays ? 'bg-green-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' }}">
                 Semua
             </a>
@@ -248,6 +248,23 @@
                 setTimeout(() => {
                     current.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 300);
+            }
+
+            // Hari aktif berganti (mis. Rabu → Kamis) → muat ulang ke hari terbaru.
+            // Pilihan hari lain (Senin..Jumat / Semua) tetap dipertahankan.
+            const serverToday = @json($today);
+            const dayParam = new URLSearchParams(window.location.search).get('day');
+            const isViewingActiveDay = dayParam === null || dayParam === '' || dayParam === serverToday;
+
+            if (isViewingActiveDay) {
+                setInterval(function () {
+                    const weekday = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                    if (weekday === serverToday) return;
+
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('day');
+                    window.location.replace(url.toString());
+                }, 30000);
             }
         });
     </script>

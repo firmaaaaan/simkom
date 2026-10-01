@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\LabSchedule;
 use App\Models\Laboratory;
+use App\Models\LabSchedule;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -82,7 +82,7 @@ class LabScheduleEntryVisibilityTest extends TestCase
             'show_in_schedule' => false,
         ]);
 
-        $this->get(route('jadwal-lab.index'))
+        $this->get(route('jadwal-lab.index', ['day' => 'all']))
             ->assertOk()
             ->assertSee($visible->course_name)
             ->assertDontSee($hidden->course_name);
