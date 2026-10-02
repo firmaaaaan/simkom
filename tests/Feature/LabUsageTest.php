@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\LabUsage;
 use App\Models\Laboratory;
+use App\Models\LabUsage;
+use App\Models\Notification;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -24,9 +25,11 @@ class LabUsageTest extends TestCase
     private function admin(): User
     {
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        $role->permissions()->attach(
-            Permission::firstOrCreate(['name' => 'manage-lab-usages'], ['label' => 'Kelola Penggunaan Lab'])
-        );
+        foreach (['view-lab-usages', 'create-lab-usages', 'edit-lab-usages', 'delete-lab-usages'] as $name) {
+            $role->permissions()->attach(
+                Permission::firstOrCreate(['name' => $name], ['label' => $name])
+            );
+        }
 
         $user = User::create(['name' => 'Admin', 'email' => 'admin@lab.test', 'password' => 'rahasia123']);
         $user->roles()->attach($role);
@@ -49,9 +52,9 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
 
         $this->post(route('lab-scan.check-in', $lab->code), [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum Jaringan',
+            'purpose' => 'Praktikum Jaringan',
         ])->assertRedirect(route('lab-scan.scan', $lab->code));
 
         $usage = LabUsage::first();
@@ -70,19 +73,19 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
 
         $this->post(route('lab-scan.check-in', $lab->code), [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum Jaringan',
+            'purpose' => 'Praktikum Jaringan',
         ]);
 
         $this->assertDatabaseCount('notifications', 1);
         $this->assertDatabaseHas('notifications', [
-            'title'   => 'Check-in Penggunaan Lab',
-            'type'    => 'lab_usage',
-            'url'     => route('lab-usages.index', ['status' => 'In']),
+            'title' => 'Check-in Penggunaan Lab',
+            'type' => 'lab_usage',
+            'url' => route('lab-usages.index', ['status' => 'In']),
         ]);
 
-        $notification = \App\Models\Notification::first();
+        $notification = Notification::first();
         $this->assertStringContainsString('Budi Santoso', $notification->message);
         $this->assertStringContainsString($lab->name, $notification->message);
         $this->assertNull($notification->read_at);
@@ -93,9 +96,9 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
 
         $payload = [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum',
+            'purpose' => 'Praktikum',
         ];
 
         $this->post(route('lab-scan.check-in', $lab->code), $payload);
@@ -121,9 +124,9 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
 
         $payload = [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum',
+            'purpose' => 'Praktikum',
         ];
 
         $this->post(route('lab-scan.check-in', $lab->code), $payload);
@@ -139,9 +142,9 @@ class LabUsageTest extends TestCase
         $lab2 = Laboratory::create(['name' => 'Lab Komputer 2', 'code' => 'LK2', 'location' => 'Gedung B', 'capacity' => 40]);
 
         $payload = [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum',
+            'purpose' => 'Praktikum',
         ];
 
         $this->post(route('lab-scan.check-in', $lab1->code), $payload);
@@ -156,9 +159,9 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
 
         $payload = [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum',
+            'purpose' => 'Praktikum',
         ];
 
         $this->post(route('lab-scan.check-in', $lab->code), $payload);
@@ -198,13 +201,13 @@ class LabUsageTest extends TestCase
         $lab = $this->lab();
         $usage = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Sari',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Tugas',
-            'day'           => 'Senin',
-            'status'        => 'Out',
+            'user_name' => 'Sari',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Tugas',
+            'day' => 'Senin',
+            'status' => 'Out',
             'checked_in_at' => now(),
-            'validated_at'  => now(),
+            'validated_at' => now(),
         ]);
 
         $admin = $this->admin();
@@ -264,11 +267,11 @@ class LabUsageTest extends TestCase
         $checkIn = now()->subHour();
         $usage = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Budi Santoso',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Praktikum',
-            'day'           => 'Senin',
-            'status'        => 'In',
+            'user_name' => 'Budi Santoso',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Praktikum',
+            'day' => 'Senin',
+            'status' => 'In',
             'checked_in_at' => $checkIn,
         ]);
 
@@ -298,13 +301,13 @@ class LabUsageTest extends TestCase
         $checkoutTime = now();
         $corrupted = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Korupsi',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Praktikum',
-            'day'           => 'Senin',
-            'status'        => 'Out',
+            'user_name' => 'Korupsi',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Praktikum',
+            'day' => 'Senin',
+            'status' => 'Out',
             'checked_in_at' => $checkoutTime,
-            'validated_at'  => $checkoutTime,
+            'validated_at' => $checkoutTime,
         ]);
         $corrupted->created_at = $createdAt;
         $corrupted->save();
@@ -312,13 +315,13 @@ class LabUsageTest extends TestCase
         $healthyCheckIn = now()->subHour();
         $healthy = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Sehat',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Praktikum',
-            'day'           => 'Senin',
-            'status'        => 'Out',
+            'user_name' => 'Sehat',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Praktikum',
+            'day' => 'Senin',
+            'status' => 'Out',
             'checked_in_at' => $healthyCheckIn,
-            'validated_at'  => now(),
+            'validated_at' => now(),
         ]);
 
         $migration = include database_path('migrations/2026_09_28_000002_fix_implicit_timestamp_auto_update.php');

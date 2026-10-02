@@ -23,15 +23,15 @@ class CreateSaveAndAnotherTest extends TestCase
     public static function createForms(): array
     {
         return [
-            'academic-years' => ['academic-years.store', 'academic-years.create', 'academic-years.index', ['manage-academic-years']],
-            'components' => ['components.store', 'components.create', 'components.index', ['manage-components']],
-            'computers' => ['computers.store', 'computers.create', 'computers.index', ['manage-computers']],
-            'hardware' => ['hardware.store', 'hardware.create', 'hardware.index', ['manage-hardware']],
-            'laboratories' => ['laboratories.store', 'laboratories.create', 'laboratories.index', ['manage-laboratories']],
-            'roles' => ['roles.store', 'roles.create', 'roles.index', ['manage-roles']],
-            'software' => ['software.store', 'software.create', 'software.index', ['manage-software']],
-            'tickets' => ['tickets.store', 'tickets.create', 'tickets.index', ['manage-tickets']],
-            'users' => ['users.store', 'users.create', 'users.index', ['manage-users']],
+            'academic-years' => ['academic-years.store', 'academic-years.create', 'academic-years.index', ['view-academic-years', 'create-academic-years']],
+            'components' => ['components.store', 'components.create', 'components.index', ['view-components', 'create-components']],
+            'computers' => ['computers.store', 'computers.create', 'computers.index', ['view-computers', 'create-computers']],
+            'hardware' => ['hardware.store', 'hardware.create', 'hardware.index', ['view-hardware', 'create-hardware']],
+            'laboratories' => ['laboratories.store', 'laboratories.create', 'laboratories.index', ['view-laboratories', 'create-laboratories']],
+            'roles' => ['roles.store', 'roles.create', 'roles.index', ['view-roles', 'create-roles']],
+            'software' => ['software.store', 'software.create', 'software.index', ['view-software', 'create-software']],
+            'tickets' => ['tickets.store', 'tickets.create', 'tickets.index', ['view-tickets', 'create-tickets']],
+            'users' => ['users.store', 'users.create', 'users.index', ['view-users', 'create-users']],
         ];
     }
 
@@ -181,7 +181,7 @@ class CreateSaveAndAnotherTest extends TestCase
 
     public function test_form_is_cleared_and_success_message_shown_after_save_another(): void
     {
-        $user = $this->userWith(['manage-hardware']);
+        $user = $this->userWith(['view-hardware', 'create-hardware']);
 
         $this->actingAs($user)
             ->post(route('hardware.store'), [
@@ -201,7 +201,7 @@ class CreateSaveAndAnotherTest extends TestCase
 
     public function test_validation_error_still_returns_with_old_input(): void
     {
-        $user = $this->userWith(['manage-hardware']);
+        $user = $this->userWith(['view-hardware', 'create-hardware']);
 
         $this->actingAs($user)
             ->from(route('hardware.create'))

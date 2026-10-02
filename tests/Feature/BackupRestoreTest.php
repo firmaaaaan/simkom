@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Laboratory;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\DatabaseBackupService;
@@ -40,6 +41,9 @@ class BackupRestoreTest extends TestCase
     private function admin(): User
     {
         $role = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
+        $role->syncPermissions(
+            Permission::whereIn('name', ['view-backups', 'edit-backups', 'delete-backups'])->get()
+        );
         $user = User::firstOrCreate(['email' => 'admin@backup.test'], ['name' => 'Admin', 'password' => 'rahasia123']);
         $user->roles()->syncWithoutDetaching([$role->id]);
 
@@ -84,25 +88,26 @@ class BackupRestoreTest extends TestCase
         }
     }
 
-    public function test_backup_routes_require_login_only(): void
+    public function test_backup_routes_require_permission(): void
     {
         $this->get(route('backups.index'))->assertRedirect(route('login'));
         $this->get(route('backups.download'))->assertRedirect(route('login'));
 
-        // User tanpa role/permission pun boleh mengakses backup & restore.
+        // User tanpa role/permission TIDAK boleh mengakses backup & restore.
         $user = $this->plainUser();
 
-        $this->actingAs($user)->get(route('backups.index'))
-            ->assertOk()
-            ->assertSee('Backup & Restore', false)
-            ->assertSee(route('backups.index'), false);
+        $this->actingAs($user)->get(route('backups.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('backups.download'))->assertForbidden();
 
-        $this->actingAs($user)->get(route('backups.download'))->assertOk();
-
-        // Menu sidebar selalu tampil untuk semua user login.
+        // Menu sidebar backup juga tidak tampil untuk user tanpa permission.
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee(route('backups.index'), false);
+            ->assertDontSee(route('backups.index'), false);
+
+        // User dengan permission view-backups tetap bisa akses.
+        $this->actingAs($this->admin())->get(route('backups.index'))
+            ->assertOk()
+            ->assertSee('Backup & Restore', false);
     }
 
     public function test_restore_round_trip_replaces_all_data(): void

@@ -29,7 +29,7 @@
             <h2 class="text-base font-semibold text-gray-800">Riwayat Penggunaan Box</h2>
             <p class="text-sm text-gray-500 mt-1">Pantau penggunaan box oleh mahasiswa</p>
         </div>
-        @if(auth()->user()->hasRole('admin'))
+        @if(auth()->user()->hasAnyRole(['admin', 'superadmin']))
             <button type="button" onclick="openBoxUsageForm()"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors self-start">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -137,7 +137,7 @@
         @else
             @php
                 $hasUsing = $usages->contains('status', 'Using');
-                $isAdmin = auth()->check() && auth()->user()->hasRole('admin');
+                $isAdmin = auth()->check() && auth()->user()->hasAnyRole(['admin', 'superadmin']);
             @endphp
 
             @if($hasUsing && $isAdmin)

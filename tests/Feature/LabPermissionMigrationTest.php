@@ -21,8 +21,14 @@ class LabPermissionMigrationTest extends TestCase
     public function test_permissions_exist_after_migrate_without_seeder(): void
     {
         // RefreshDatabase hanya menjalankan migration — tidak ada seeder sama sekali.
-        $this->assertDatabaseHas('permissions', ['name' => 'manage-lab-usages']);
-        $this->assertDatabaseHas('permissions', ['name' => 'manage-lab-schedules']);
+        // Migrasi 000003 memecah permission manage-* lama menjadi per-aksi (view/create/edit/delete).
+        foreach (['view', 'create', 'edit', 'delete'] as $action) {
+            $this->assertDatabaseHas('permissions', ['name' => "{$action}-lab-usages"]);
+            $this->assertDatabaseHas('permissions', ['name' => "{$action}-lab-schedules"]);
+        }
+
+        $this->assertDatabaseMissing('permissions', ['name' => 'manage-lab-usages']);
+        $this->assertDatabaseMissing('permissions', ['name' => 'manage-lab-schedules']);
     }
 
     public function test_migration_attaches_permissions_to_existing_roles(): void

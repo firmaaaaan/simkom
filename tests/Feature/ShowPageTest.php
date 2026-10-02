@@ -17,8 +17,8 @@ class ShowPageTest extends TestCase
     private function admin(): User
     {
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        $role->permissions()->attach(Permission::firstOrCreate(['name' => 'manage-laboratories'], ['label' => 'Kelola Lab']));
-        $role->permissions()->attach(Permission::firstOrCreate(['name' => 'manage-academic-years'], ['label' => 'Kelola Tahun Ajaran']));
+        $role->permissions()->attach(Permission::firstOrCreate(['name' => 'view-laboratories'], ['label' => 'Lihat Lab']));
+        $role->permissions()->attach(Permission::firstOrCreate(['name' => 'view-academic-years'], ['label' => 'Lihat Tahun Ajaran']));
 
         $user = User::create(['name' => 'Admin', 'email' => 'admin@show.test', 'password' => 'rahasia123']);
         $user->roles()->attach($role);

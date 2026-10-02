@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 return new class extends Migration
@@ -42,19 +43,23 @@ return new class extends Migration
                 ]);
             }
 
+            // Nama tabel pivot berubah setelah migrasi spatie/laravel-permission
+            // (2026_10_02_000001); dukung keduanya agar aman dijalankan ulang.
+            $pivot = Schema::hasTable('role_permission') ? 'role_permission' : 'role_has_permissions';
+
             foreach ($config['roles'] as $roleName) {
                 $role = DB::table('roles')->where('name', $roleName)->first();
                 if (! $role) {
                     continue;
                 }
 
-                $attached = DB::table('role_permission')
+                $attached = DB::table($pivot)
                     ->where('role_id', $role->id)
                     ->where('permission_id', $permissionId)
                     ->exists();
 
                 if (! $attached) {
-                    DB::table('role_permission')->insert([
+                    DB::table($pivot)->insert([
                         'role_id' => $role->id,
                         'permission_id' => $permissionId,
                     ]);

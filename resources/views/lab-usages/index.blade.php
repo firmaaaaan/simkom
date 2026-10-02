@@ -84,7 +84,7 @@
             <p class="text-xs text-gray-500 mt-0.5">Check-in via QR oleh mahasiswa, input manual oleh admin, validasi keluar oleh admin/laboran</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            @if(auth()->user()->hasRole('admin'))
+            @if(auth()->user()->hasAnyRole(['admin', 'superadmin']))
                 <button type="button" onclick="openUsageForm()"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -239,7 +239,7 @@
                                         Validasi Keluar
                                     </button>
                                 @endif
-                                @if(auth()->user()->hasRole('admin'))
+                                @if(auth()->user()->hasAnyRole(['admin', 'superadmin']))
                                     <button type="button"
                                         data-usage="{{ $previewJson }}"
                                         onclick="openUsageForm(this)"

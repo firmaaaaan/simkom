@@ -24,11 +24,11 @@ class DashboardController extends Controller
     {
         // Bagian dashboard disembunyikan bila user tidak punya izin modulnya.
         $can = [
-            'computers' => auth()->user()->hasAnyPermission(['manage-computers', 'view-reports']),
-            'tickets' => auth()->user()->hasPermission('manage-tickets'),
-            'borrowings' => auth()->user()->hasPermission('manage-borrowings'),
-            'maintenance' => auth()->user()->hasPermission('manage-maintenance'),
-            'academic_years' => auth()->user()->hasPermission('manage-academic-years'),
+            'computers' => auth()->user()->hasAnyPermission(['view-computers', 'view-reports']),
+            'tickets' => auth()->user()->hasPermission('view-tickets'),
+            'borrowings' => auth()->user()->hasPermission('view-borrowings'),
+            'maintenance' => auth()->user()->hasPermission('view-maintenance'),
+            'academic_years' => auth()->user()->hasPermission('view-academic-years'),
         ];
 
         return view('dashboard', [

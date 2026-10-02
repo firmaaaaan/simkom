@@ -61,7 +61,7 @@
 
                 @include('roles.partials.permission-checkboxes', [
                     'permissions' => $permissions,
-                    'selectedIds' => array_map('intval', old('permissions', [])),
+                    'selectedIds' => array_map('strval', old('permissions', [])),
                 ])
             </div>
 

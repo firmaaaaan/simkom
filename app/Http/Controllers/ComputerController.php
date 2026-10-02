@@ -270,7 +270,7 @@ class ComputerController extends Controller
         // Route ini sengaja tidak lagi di dalam middleware auth/permission supaya QR lama
         // pada stiker tidak mendarat di halaman login. Tamu dan user tanpa izin
         // dialihkan ke halaman kartu kendali publik (riwayat pengecekan saja).
-        if (! auth()->check() || ! auth()->user()->hasAnyPermission(['manage-computers'])) {
+        if (! auth()->check() || ! auth()->user()->hasAnyPermission(['view-computers', 'create-computers', 'edit-computers', 'delete-computers'])) {
             return redirect()->route('kartu.show', array_filter([
                 'computer' => $computer,
                 'month' => $request->month,

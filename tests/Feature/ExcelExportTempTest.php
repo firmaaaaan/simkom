@@ -10,8 +10,8 @@ use App\Models\Computer;
 use App\Models\ComputerBorrowing;
 use App\Models\DeviceCheck;
 use App\Models\DeviceCheckItem;
-use App\Models\LabUsage;
 use App\Models\Laboratory;
+use App\Models\LabUsage;
 use App\Models\MaintenanceChecklist;
 use App\Models\MaintenanceChecklistItem;
 use App\Models\Permission;
@@ -46,9 +46,9 @@ class ExcelExportTempTest extends TestCase
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
 
         foreach ([
-            'manage-users', 'manage-roles', 'manage-laboratories', 'manage-academic-years',
-            'manage-computers', 'manage-maintenance', 'manage-tickets', 'manage-borrowings',
-            'manage-components', 'manage-lab-usages',
+            'view-users', 'view-roles', 'view-laboratories', 'view-academic-years',
+            'view-computers', 'view-maintenance', 'view-tickets', 'view-borrowings',
+            'view-components', 'view-lab-usages',
         ] as $name) {
             $role->permissions()->attach(Permission::firstOrCreate(['name' => $name], ['label' => $name]));
         }
@@ -289,7 +289,7 @@ class ExcelExportTempTest extends TestCase
         // Role & tahun ajaran.
         $roles = $this->rows($this->actingAs($admin)->get(route('roles.export')));
         $this->assertSame('admin', $roles[1][0]);
-        $this->assertStringContainsString('manage-tickets', implode(',', $roles[1]));
+        $this->assertStringContainsString('Lihat Kendala Praktikum', implode(',', $roles[1]));
 
         $years = $this->rows($this->actingAs($admin)->get(route('academic-years.export')));
         $this->assertSame('TA 2026/2027', $years[1][0]);

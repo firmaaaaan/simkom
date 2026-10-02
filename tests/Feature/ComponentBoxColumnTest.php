@@ -19,7 +19,7 @@ class ComponentBoxColumnTest extends TestCase
     {
         $role = Role::create(['name' => 'role-manage-components-2', 'label' => 'Role Manage Components']);
         $role->permissions()->attach(
-            Permission::firstOrCreate(['name' => 'manage-components'], ['label' => 'Kelola Komponen'])
+            Permission::firstOrCreate(['name' => 'view-components'], ['label' => 'Lihat Komponen'])
         );
 
         $user = User::create([
@@ -93,7 +93,7 @@ class ComponentBoxColumnTest extends TestCase
         $response->assertOk()
             ->assertSee('Box A Unik')
             ->assertSee('+2 lainnya');
-        $response->assertSee(route('components.show', $component) . '#box', false);
+        $response->assertSee(route('components.show', $component).'#box', false);
     }
 
     public function test_component_detail_page_lists_all_boxes(): void

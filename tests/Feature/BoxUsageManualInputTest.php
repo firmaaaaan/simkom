@@ -30,8 +30,8 @@ class BoxUsageManualInputTest extends TestCase
         }
 
         $user = User::create([
-            'name'     => ucfirst($roleName),
-            'email'    => $email,
+            'name' => ucfirst($roleName),
+            'email' => $email,
             'password' => 'rahasia123',
         ]);
         $user->roles()->attach($role);
@@ -41,18 +41,18 @@ class BoxUsageManualInputTest extends TestCase
 
     private function admin(): User
     {
-        return $this->userWith('admin', ['manage-components'], 'admin-box@lab.test');
+        return $this->userWith('admin', ['view-components', 'create-components', 'edit-components', 'delete-components'], 'admin-box@lab.test');
     }
 
     private function payload(Box $box, array $overrides = []): array
     {
         return array_merge([
-            'box_id'     => $box->id,
-            'user_name'  => 'Budi Santoso',
-            'user_nim'   => '2210512001',
+            'box_id' => $box->id,
+            'user_name' => 'Budi Santoso',
+            'user_nim' => '2210512001',
             'user_kelas' => 'TI-4A',
-            'status'     => 'Using',
-            'used_at'    => '2026-09-29 08:00',
+            'status' => 'Using',
+            'used_at' => '2026-09-29 08:00',
         ], $overrides);
     }
 
@@ -85,9 +85,9 @@ class BoxUsageManualInputTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('box-usages.store'), $this->payload($box, [
-                'status'      => 'Returned',
+                'status' => 'Returned',
                 'returned_at' => '2026-09-29 15:00',
-                'note'        => 'Kondisi baik',
+                'note' => 'Kondisi baik',
             ]))
             ->assertSessionHas('success');
 
@@ -130,7 +130,7 @@ class BoxUsageManualInputTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('box-usages.store'), $this->payload($box, [
-                'status'      => 'Returned',
+                'status' => 'Returned',
                 'returned_at' => '2026-09-29 07:00',
             ]))
             ->assertSessionHasErrors(['returned_at']);
@@ -144,12 +144,12 @@ class BoxUsageManualInputTest extends TestCase
         $admin = $this->admin();
 
         BoxUsage::create([
-            'box_id'     => $box->id,
-            'user_name'  => 'Sari',
-            'user_nim'   => '2210512002',
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
             'user_kelas' => 'TI-4A',
-            'status'     => 'Using',
-            'used_at'    => now(),
+            'status' => 'Using',
+            'used_at' => now(),
         ]);
 
         $this->actingAs($admin)
@@ -166,19 +166,19 @@ class BoxUsageManualInputTest extends TestCase
 
         // Box sedang dipinjam orang lain lewat scan QR.
         BoxUsage::create([
-            'box_id'     => $box->id,
-            'user_name'  => 'Sari',
-            'user_nim'   => '2210512002',
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
             'user_kelas' => 'TI-4A',
-            'status'     => 'Using',
-            'used_at'    => now(),
+            'status' => 'Using',
+            'used_at' => now(),
         ]);
 
         $this->actingAs($admin)
             ->post(route('box-usages.store'), $this->payload($box, [
-                'status'      => 'Returned',
+                'status' => 'Returned',
                 'returned_at' => '2026-09-28 16:00',
-                'used_at'     => '2026-09-28 08:00',
+                'used_at' => '2026-09-28 08:00',
             ]))
             ->assertSessionHas('success');
 
@@ -188,16 +188,16 @@ class BoxUsageManualInputTest extends TestCase
     public function test_laboran_with_permission_cannot_store_update_or_delete(): void
     {
         $box = $this->box();
-        $laboran = $this->userWith('laboran', ['manage-components'], 'laboran-box@lab.test');
+        $laboran = $this->userWith('laboran', ['view-components', 'create-components', 'edit-components', 'delete-components'], 'laboran-box@lab.test');
 
         $usage = BoxUsage::create([
-            'box_id'     => $box->id,
-            'user_name'  => 'Sari',
-            'user_nim'   => '2210512002',
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
             'user_kelas' => 'TI-4A',
-            'status'     => 'Using',
-            'used_at'    => now(),
-            'source'     => 'manual',
+            'status' => 'Using',
+            'used_at' => now(),
+            'source' => 'manual',
         ]);
 
         $this->actingAs($laboran)->post(route('box-usages.store'), $this->payload($box))->assertForbidden();
@@ -227,26 +227,26 @@ class BoxUsageManualInputTest extends TestCase
         $admin = $this->admin();
 
         $usage = BoxUsage::create([
-            'box_id'     => $box->id,
-            'user_name'  => 'Sari',
-            'user_nim'   => '2210512002',
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
             'user_kelas' => 'TI-4A',
-            'status'     => 'Using',
-            'used_at'    => now()->subHour(),
-            'source'     => 'manual',
+            'status' => 'Using',
+            'used_at' => now()->subHour(),
+            'source' => 'manual',
             'created_by' => $admin->id,
         ]);
 
         $this->actingAs($admin)
             ->put(route('box-usages.update', $usage), [
-                'box_id'      => $otherBox->id,
-                'user_name'   => 'Sari Wijaya',
-                'user_nim'    => '2210512003',
-                'user_kelas'  => 'TI-4B',
-                'status'      => 'Returned',
-                'used_at'     => '2026-09-29 08:00',
+                'box_id' => $otherBox->id,
+                'user_name' => 'Sari Wijaya',
+                'user_nim' => '2210512003',
+                'user_kelas' => 'TI-4B',
+                'status' => 'Returned',
+                'used_at' => '2026-09-29 08:00',
                 'returned_at' => '2026-09-29 12:00',
-                'note'        => 'Lengkap',
+                'note' => 'Lengkap',
             ])
             ->assertSessionHas('success');
 
@@ -271,15 +271,15 @@ class BoxUsageManualInputTest extends TestCase
         $admin = $this->admin();
 
         $usage = BoxUsage::create([
-            'box_id'      => $box->id,
-            'user_name'   => 'Sari',
-            'user_nim'    => '2210512002',
-            'user_kelas'  => 'TI-4A',
-            'status'      => 'Returned',
-            'used_at'     => now()->subHours(3),
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
+            'user_kelas' => 'TI-4A',
+            'status' => 'Returned',
+            'used_at' => now()->subHours(3),
             'returned_at' => now()->subHour(),
-            'source'      => 'manual',
-            'created_by'  => $admin->id,
+            'source' => 'manual',
+            'created_by' => $admin->id,
         ]);
         BoxReturnNote::create(['box_usage_id' => $usage->id, 'note' => 'Lengkap']);
 
@@ -300,15 +300,15 @@ class BoxUsageManualInputTest extends TestCase
         $admin = $this->admin();
 
         $usage = BoxUsage::create([
-            'box_id'      => $box->id,
-            'user_name'   => 'Sari',
-            'user_nim'    => '2210512002',
-            'user_kelas'  => 'TI-4A',
-            'status'      => 'Returned',
-            'used_at'     => now()->subHours(3),
+            'box_id' => $box->id,
+            'user_name' => 'Sari',
+            'user_nim' => '2210512002',
+            'user_kelas' => 'TI-4A',
+            'status' => 'Returned',
+            'used_at' => now()->subHours(3),
             'returned_at' => now()->subHour(),
-            'source'      => 'manual',
-            'created_by'  => $admin->id,
+            'source' => 'manual',
+            'created_by' => $admin->id,
         ]);
         BoxReturnNote::create(['box_usage_id' => $usage->id, 'note' => 'Lengkap']);
 

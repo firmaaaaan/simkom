@@ -18,8 +18,10 @@ class BorrowingMarkReturnedTest extends TestCase
     private function admin(): User
     {
         $role = Role::firstOrCreate(['name' => 'admin-uji'], ['label' => 'Admin Uji']);
-        $permission = Permission::firstOrCreate(['name' => 'manage-borrowings'], ['label' => 'Kelola Peminjaman']);
-        $role->permissions()->syncWithoutDetaching([$permission->id]);
+        foreach (['view-borrowings', 'edit-borrowings'] as $name) {
+            $permission = Permission::firstOrCreate(['name' => $name], ['label' => $name]);
+            $role->permissions()->syncWithoutDetaching([$permission->id]);
+        }
 
         $user = User::firstOrCreate(
             ['email' => 'admin-peminjaman@uji.test'],

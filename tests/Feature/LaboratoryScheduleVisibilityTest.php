@@ -23,12 +23,21 @@ class LaboratoryScheduleVisibilityTest extends TestCase
         ], $attributes));
     }
 
+    /** Nama permission lama (manage-*) dipetakan ke sekumpulan permission per-aksi baru. */
+    private const PERMISSION_MAP = [
+        'manage-lab-schedules' => ['view-lab-schedules', 'create-lab-schedules', 'edit-lab-schedules', 'delete-lab-schedules'],
+        'manage-laboratories' => ['view-laboratories', 'create-laboratories', 'edit-laboratories', 'delete-laboratories'],
+    ];
+
     private function userWith(string $permission): User
     {
+        $names = self::PERMISSION_MAP[$permission] ?? [$permission];
         $role = Role::create(['name' => "role-{$permission}", 'label' => 'Role '.ucfirst($permission)]);
-        $role->permissions()->attach(
-            Permission::firstOrCreate(['name' => $permission], ['label' => ucfirst($permission)])
-        );
+        foreach ($names as $name) {
+            $role->permissions()->attach(
+                Permission::firstOrCreate(['name' => $name], ['label' => ucfirst($name)])
+            );
+        }
 
         $user = User::create([
             'name' => 'Admin '.ucfirst($permission),
@@ -188,7 +197,7 @@ class LaboratoryScheduleVisibilityTest extends TestCase
             'show_in_schedule' => false,
         ]);
 
-        $this->get('/?laboratory_id=' . $hidden->id)
+        $this->get('/?laboratory_id='.$hidden->id)
             ->assertOk()
             ->assertSee($visible->name)
             ->assertDontSee($hidden->name)

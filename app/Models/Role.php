@@ -3,26 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+class Role extends SpatieRole
 {
     use HasUuids;
-    protected $fillable = ['name', 'label'];
 
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class, 'role_permission');
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_role');
-    }
-
-    public function hasPermission(string $permission): bool
-    {
-        return $this->permissions->contains('name', $permission);
-    }
+    protected $fillable = ['name', 'label', 'guard_name'];
 }

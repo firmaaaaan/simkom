@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\LabUsage;
 use App\Models\Laboratory;
+use App\Models\LabUsage;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -31,8 +31,8 @@ class LabUsageManualInputTest extends TestCase
         }
 
         $user = User::create([
-            'name'     => ucfirst($roleName),
-            'email'    => "{$roleName}@lab.test",
+            'name' => ucfirst($roleName),
+            'email' => "{$roleName}@lab.test",
             'password' => 'rahasia123',
         ]);
         $user->roles()->attach($role);
@@ -42,17 +42,17 @@ class LabUsageManualInputTest extends TestCase
 
     private function admin(): User
     {
-        return $this->userWith('admin', ['manage-lab-usages']);
+        return $this->userWith('admin', ['view-lab-usages', 'create-lab-usages', 'edit-lab-usages', 'delete-lab-usages']);
     }
 
     private function payload(Laboratory $lab, array $overrides = []): array
     {
         return array_merge([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Budi Santoso',
-            'user_prodi'    => 'Teknik Informatika',
-            'purpose'       => 'Praktikum Jaringan',
-            'status'        => 'In',
+            'user_name' => 'Budi Santoso',
+            'user_prodi' => 'Teknik Informatika',
+            'purpose' => 'Praktikum Jaringan',
+            'status' => 'In',
             'checked_in_at' => '2026-09-30 08:00',
         ], $overrides);
     }
@@ -85,9 +85,9 @@ class LabUsageManualInputTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('lab-usages.store'), $this->payload($lab, [
-                'status'       => 'Out',
+                'status' => 'Out',
                 'validated_at' => '2026-09-30 11:00',
-                'exit_note'    => 'Selesai praktikum',
+                'exit_note' => 'Selesai praktikum',
             ]))
             ->assertSessionHas('success');
 
@@ -114,9 +114,9 @@ class LabUsageManualInputTest extends TestCase
         $lab = $this->lab();
 
         $this->post(route('lab-scan.check-in', $lab->code), [
-            'user_name'  => 'Budi Santoso',
+            'user_name' => 'Budi Santoso',
             'user_prodi' => 'Teknik Informatika',
-            'purpose'    => 'Praktikum Jaringan',
+            'purpose' => 'Praktikum Jaringan',
         ]);
 
         $this->assertDatabaseCount('notifications', 1);
@@ -158,7 +158,7 @@ class LabUsageManualInputTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('lab-usages.store'), $this->payload($lab, [
-                'status'       => 'Out',
+                'status' => 'Out',
                 'validated_at' => '2026-09-30 07:00',
             ]))
             ->assertSessionHasErrors(['validated_at']);
@@ -185,7 +185,7 @@ class LabUsageManualInputTest extends TestCase
         $admin = $this->admin();
 
         $this->actingAs($admin)->post(route('lab-usages.store'), $this->payload($lab, [
-            'status'       => 'Out',
+            'status' => 'Out',
             'validated_at' => '2026-09-30 10:00',
         ]));
         $this->actingAs($admin)
@@ -198,17 +198,17 @@ class LabUsageManualInputTest extends TestCase
     public function test_laboran_with_permission_cannot_store_update_or_delete(): void
     {
         $lab = $this->lab();
-        $laboran = $this->userWith('laboran', ['manage-lab-usages']);
+        $laboran = $this->userWith('laboran', ['view-lab-usages', 'create-lab-usages', 'edit-lab-usages', 'delete-lab-usages']);
 
         $usage = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Sari',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Tugas',
-            'day'           => 'Senin',
-            'status'        => 'In',
+            'user_name' => 'Sari',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Tugas',
+            'day' => 'Senin',
+            'status' => 'In',
             'checked_in_at' => now(),
-            'source'        => 'manual',
+            'source' => 'manual',
         ]);
 
         $this->actingAs($laboran)->post(route('lab-usages.store'), $this->payload($lab))->assertForbidden();
@@ -239,26 +239,26 @@ class LabUsageManualInputTest extends TestCase
 
         $usage = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Sari',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Tugas',
-            'day'           => 'Senin',
-            'status'        => 'In',
+            'user_name' => 'Sari',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Tugas',
+            'day' => 'Senin',
+            'status' => 'In',
             'checked_in_at' => now()->subHour(),
-            'source'        => 'manual',
-            'created_by'    => $admin->id,
+            'source' => 'manual',
+            'created_by' => $admin->id,
         ]);
 
         $this->actingAs($admin)
             ->put(route('lab-usages.update', $usage), [
                 'laboratory_id' => $otherLab->id,
-                'user_name'     => 'Sari Wijaya',
-                'user_prodi'    => 'Sistem Informasi',
-                'purpose'       => 'Praktikum Basis Data',
-                'status'        => 'Out',
+                'user_name' => 'Sari Wijaya',
+                'user_prodi' => 'Sistem Informasi',
+                'purpose' => 'Praktikum Basis Data',
+                'status' => 'Out',
                 'checked_in_at' => '2026-09-30 08:00',
-                'validated_at'  => '2026-09-30 10:30',
-                'exit_note'     => 'Selesai',
+                'validated_at' => '2026-09-30 10:30',
+                'exit_note' => 'Selesai',
             ])
             ->assertSessionHas('success');
 
@@ -288,13 +288,13 @@ class LabUsageManualInputTest extends TestCase
 
         $other = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Budi Santoso',
-            'user_prodi'    => 'Teknik Informatika',
-            'purpose'       => 'Tugas',
-            'day'           => 'Senin',
-            'status'        => 'In',
+            'user_name' => 'Budi Santoso',
+            'user_prodi' => 'Teknik Informatika',
+            'purpose' => 'Tugas',
+            'day' => 'Senin',
+            'status' => 'In',
             'checked_in_at' => now()->subMinutes(30),
-            'source'        => 'manual',
+            'source' => 'manual',
         ]);
 
         $this->actingAs($admin)
@@ -311,14 +311,14 @@ class LabUsageManualInputTest extends TestCase
 
         $usage = LabUsage::create([
             'laboratory_id' => $lab->id,
-            'user_name'     => 'Sari',
-            'user_prodi'    => 'Informatika',
-            'purpose'       => 'Tugas',
-            'day'           => 'Senin',
-            'status'        => 'In',
+            'user_name' => 'Sari',
+            'user_prodi' => 'Informatika',
+            'purpose' => 'Tugas',
+            'day' => 'Senin',
+            'status' => 'In',
             'checked_in_at' => now(),
-            'source'        => 'manual',
-            'created_by'    => $admin->id,
+            'source' => 'manual',
+            'created_by' => $admin->id,
         ]);
 
         $this->actingAs($admin)

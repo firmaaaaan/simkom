@@ -8,49 +8,66 @@ use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
+    /** modul => [label, aksi yang tersedia]. */
+    private const MODULES = [
+        'users' => ['User', ['view', 'create', 'edit', 'delete']],
+        'roles' => ['Role', ['view', 'create', 'edit', 'delete']],
+        'laboratories' => ['Laboratorium', ['view', 'create', 'edit', 'delete']],
+        'academic-years' => ['Tahun Ajaran', ['view', 'create', 'edit', 'delete']],
+        'hardware' => ['Hardware', ['view', 'create', 'edit', 'delete']],
+        'software' => ['Software', ['view', 'create', 'edit', 'delete']],
+        'components' => ['Komponen', ['view', 'create', 'edit', 'delete']],
+        'computers' => ['Komputer', ['view', 'create', 'edit', 'delete']],
+        'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete']],
+        'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete']],
+        'borrowings' => ['Peminjaman', ['view', 'edit']],
+        'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete']],
+        'lab-schedules' => ['Jadwal Lab', ['view', 'create', 'edit', 'delete']],
+        'backups' => ['Backup', ['view', 'edit', 'delete']],
+        'reports' => ['Laporan', ['view']],
+    ];
+
+    private const ACTION_LABELS = [
+        'view' => 'Lihat',
+        'create' => 'Tambah',
+        'edit' => 'Ubah',
+        'delete' => 'Hapus',
+    ];
+
+    /** Modul yang diberikan ke laboran (sinkron dengan daftar lama). */
+    private const LABORAN_MODULES = [
+        'hardware', 'software', 'components', 'computers',
+        'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
+    ];
+
     public function run(): void
     {
-        // Create Permissions
-        $permissions = [
-            ['name' => 'manage-users',          'label' => 'Kelola User'],
-            ['name' => 'manage-roles',          'label' => 'Kelola Role'],
-            ['name' => 'manage-laboratories',   'label' => 'Kelola Laboratorium'],
-            ['name' => 'manage-academic-years', 'label' => 'Kelola Tahun Ajaran'],
-            ['name' => 'manage-hardware',       'label' => 'Kelola Hardware'],
-            ['name' => 'manage-software',       'label' => 'Kelola Software'],
-            ['name' => 'manage-components',     'label' => 'Kelola Komponen'],
-            ['name' => 'manage-computers',      'label' => 'Kelola Komputer'],
-            ['name' => 'manage-maintenance',    'label' => 'Kelola Pemeliharaan'],
-            ['name' => 'manage-tickets',        'label' => 'Kelola Kendala Praktikum'],
-            ['name' => 'manage-borrowings',     'label' => 'Kelola Peminjaman'],
-            ['name' => 'manage-lab-schedules',  'label' => 'Kelola Jadwal Lab'],
-            ['name' => 'view-reports',          'label' => 'Lihat Laporan'],
-        ];
-
-        foreach ($permissions as $perm) {
-            Permission::create($perm);
+        // Create Permissions (firstOrCreate: aman bila sudah dibuat migration)
+        foreach (self::MODULES as $module => [$label, $actions]) {
+            foreach ($actions as $action) {
+                Permission::firstOrCreate(
+                    ['name' => "{$action}-{$module}"],
+                    ['label' => self::ACTION_LABELS[$action].' '.$label]
+                );
+            }
         }
 
         // Create Roles
-        $adminRole = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        $laboranRole = Role::create(['name' => 'laboran', 'label' => 'Laboran']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
+        $laboranRole = Role::firstOrCreate(['name' => 'laboran'], ['label' => 'Laboran']);
 
         // Admin gets ALL permissions
-        $adminRole->permissions()->attach(Permission::all());
+        $adminRole->syncPermissions(Permission::all());
 
         // Laboran permissions
-        $laboranPermissions = [
-            'manage-hardware',
-            'manage-software',
-            'manage-components',
-            'manage-computers',
-            'manage-maintenance',
-            'manage-tickets',
-            'manage-borrowings',
-            'view-reports',
-        ];
-        $laboranRole->permissions()->attach(
-            Permission::whereIn('name', $laboranPermissions)->get()
+        $laboranNames = [];
+        foreach (self::LABORAN_MODULES as $module) {
+            foreach (self::MODULES[$module][1] as $action) {
+                $laboranNames[] = "{$action}-{$module}";
+            }
+        }
+        $laboranRole->syncPermissions(
+            Permission::whereIn('name', $laboranNames)->get()
         );
     }
 }

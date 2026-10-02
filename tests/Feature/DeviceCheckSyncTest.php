@@ -19,9 +19,11 @@ class DeviceCheckSyncTest extends TestCase
     private function admin(): User
     {
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        $role->permissions()->attach(
-            Permission::firstOrCreate(['name' => 'manage-maintenance'], ['label' => 'Kelola Maintenance'])
-        );
+        foreach (['view-maintenance', 'create-maintenance', 'edit-maintenance', 'delete-maintenance'] as $name) {
+            $role->permissions()->attach(
+                Permission::firstOrCreate(['name' => $name], ['label' => $name])
+            );
+        }
 
         $user = User::create(['name' => 'Admin', 'email' => 'admin@device.test', 'password' => 'rahasia123']);
         $user->roles()->attach($role);

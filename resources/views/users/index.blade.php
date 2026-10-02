@@ -95,7 +95,7 @@
                         <td data-label="Nama" class="px-6 py-4 text-gray-600">{{ $user->email }}</td>
                         <td data-label="Nama" class="px-6 py-4">
                             @foreach($user->roles as $role)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ in_array($role->name, ['admin', 'superadmin'], true) ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
                                     {{ $role->label }}
                                 </span>
                             @endforeach
