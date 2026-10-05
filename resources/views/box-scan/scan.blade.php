@@ -56,7 +56,7 @@
                         @php
                             $otherActiveUsages = \App\Models\BoxUsage::with('box')
                                 ->where('user_nim', $activeUsage->user_nim)
-                                ->whereIn('status', ['Using', 'Stopped'])
+                                ->where('status', 'Using')
                                 ->get();
                         @endphp
                         <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">

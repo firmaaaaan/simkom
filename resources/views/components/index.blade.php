@@ -401,7 +401,6 @@
                         <select name="status" id="bufStatus" onchange="toggleBoxReturnFields()" required
                             class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="Using" {{ old('status', 'Using') === 'Using' ? 'selected' : '' }}>Sedang Dipakai</option>
-                            <option value="Stopped" {{ old('status') === 'Stopped' ? 'selected' : '' }}>Durasi Dihentikan</option>
                             <option value="Returned" {{ old('status') === 'Returned' ? 'selected' : '' }}>Sudah Dikembalikan</option>
                         </select>
                     </div>

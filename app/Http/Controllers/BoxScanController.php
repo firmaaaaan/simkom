@@ -108,7 +108,7 @@ class BoxScanController extends Controller
 
     public function returnBox(Request $request, $boxUsageId)
     {
-        $boxUsage = BoxUsage::whereIn('status', ['Using', 'Stopped'])->findOrFail($boxUsageId);
+        $boxUsage = BoxUsage::where('status', 'Using')->findOrFail($boxUsageId);
 
         $boxUsage->update([
             'status'      => 'Returned',
@@ -151,7 +151,7 @@ class BoxScanController extends Controller
         $boxes = Box::where('code', 'like', "BOX-{$prefix}-%")
             ->where('code', '!=', $box->code)
             ->whereDoesntHave('boxUsages', function ($q) {
-                $q->whereIn('status', ['Using', 'Stopped']);
+                $q->where('status', 'Using');
             })
             ->orderBy('code')
             ->get(['id', 'code', 'name', 'location']);
@@ -309,7 +309,7 @@ class BoxScanController extends Controller
             $usageIds = array_column($validated['items'], 'usage_id');
 
             $usages = BoxUsage::whereIn('id', $usageIds)
-                ->whereIn('status', ['Using', 'Stopped'])
+                ->where('status', 'Using')
                 ->get();
 
             if ($usages->isEmpty()) {
@@ -370,7 +370,7 @@ class BoxScanController extends Controller
 
         $usages = BoxUsage::with('box')
             ->where('user_nim', $activeUsage->user_nim)
-            ->whereIn('status', ['Using', 'Stopped'])
+            ->where('status', 'Using')
             ->orderBy('used_at')
             ->get();
 

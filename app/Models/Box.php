@@ -36,9 +36,7 @@ class Box extends Model
 
     public function getActiveUsage()
     {
-        // Baris Stopped (durasi dihentikan, fisik box belum dicek/dikembalikan)
-        // tetap mengunci box agar tidak bisa dipinjamkan lagi lewat scan QR.
-        return $this->boxUsages()->whereIn('status', ['Using', 'Stopped'])->first();
+        return $this->boxUsages()->where('status', 'Using')->first();
     }
 
     public function getTotalComponentsAttribute(): int

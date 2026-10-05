@@ -47,7 +47,7 @@ class BoxController extends Controller
     {
         $box->load(['boxComponents.component']);
 
-        $activeUsage = $box->boxUsages()->whereIn('status', ['Using', 'Stopped'])->first();
+        $activeUsage = $box->boxUsages()->where('status', 'Using')->first();
 
         $components = Component::orderBy('name')->get();
 

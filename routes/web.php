@@ -241,10 +241,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/box-usages/{usage}', [AdminBoxUsageController::class, 'update'])
             ->middleware('role:admin|superadmin')
             ->name('box-usages.update');
-        // Hentikan durasi semua peminjaman box yang masih berjalan - HANYA ADMIN/SUPERADMIN
-        Route::post('/box-usages/stop-durations', [AdminBoxUsageController::class, 'stopDurations'])
-            ->middleware('role:admin|superadmin')
-            ->name('box-usages.stop-durations');
     });
     Route::middleware('permission:delete-components')->group(function () {
         Route::delete('components/bulk-destroy', [ComponentController::class, 'bulkDestroy'])->name('components.bulk-destroy');

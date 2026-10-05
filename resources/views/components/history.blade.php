@@ -30,29 +30,18 @@
             <p class="text-sm text-gray-500 mt-1">Pantau penggunaan box oleh mahasiswa</p>
         </div>
         @if(auth()->user()->hasAnyRole(['admin', 'superadmin']))
-            <div class="flex flex-wrap items-center gap-2 self-start">
-                @if(($usageStats['using'] ?? 0) > 0)
-                    <button type="button" onclick="confirmStopDurations()"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                        </svg>
-                        Hentikan Semua Durasi
-                    </button>
-                @endif
-                <button type="button" onclick="openBoxUsageForm()"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Input Manual
-                </button>
-            </div>
+            <button type="button" onclick="openBoxUsageForm()"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors self-start">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Input Manual
+            </button>
         @endif
     </div>
 
     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <a href="{{ route('components.index', ['tab' => 'history']) }}"
                class="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow {{ !$statusFilter ? 'ring-2 ring-green-400 border-green-400' : '' }}">
                 <div class="flex items-center gap-3">
@@ -78,20 +67,6 @@
                     <div>
                         <p class="text-xl font-bold text-yellow-600">{{ $usageStats['using'] }}</p>
                         <p class="text-xs text-gray-500">Dipakai</p>
-                    </div>
-                </div>
-            </a>
-            <a href="{{ route('components.index', ['tab' => 'history', 'usage_status' => 'Stopped']) }}"
-               class="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow {{ $statusFilter === 'Stopped' ? 'ring-2 ring-slate-400 border-slate-400' : '' }}">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold text-slate-700">{{ $usageStats['stopped'] ?? 0 }}</p>
-                        <p class="text-xs text-gray-500">Durasi Dihentikan</p>
                     </div>
                 </div>
             </a>
@@ -137,7 +112,6 @@
                 <select name="usage_status" class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     <option value="">Semua Status</option>
                     <option value="Using" {{ ($statusFilter ?? '') === 'Using' ? 'selected' : '' }}>Sedang Dipakai</option>
-                    <option value="Stopped" {{ ($statusFilter ?? '') === 'Stopped' ? 'selected' : '' }}>Durasi Dihentikan</option>
                     <option value="Returned" {{ ($statusFilter ?? '') === 'Returned' ? 'selected' : '' }}>Sudah Dikembalikan</option>
                 </select>
             </div>
@@ -162,7 +136,7 @@
             </div>
         @else
             @php
-                $hasUsing = $usages->contains(fn ($u) => in_array($u->status, ['Using', 'Stopped'], true));
+                $hasUsing = $usages->contains('status', 'Using');
                 $isAdmin = auth()->check() && auth()->user()->hasAnyRole(['admin', 'superadmin']);
             @endphp
 
@@ -171,7 +145,7 @@
                     <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
                         <input type="checkbox" id="selectAllUsing" onchange="toggleSelectAllUsing(this)"
                             class="rounded border-gray-300 text-red-600 focus:ring-red-500">
-                        Pilih Semua (yang sedang dipakai / durasi dihentikan)
+                        Pilih Semua (yang sedang dipakai)
                     </label>
                     <div class="flex items-center gap-3">
                         <div id="bulkReturnError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg"></div>
@@ -221,7 +195,7 @@
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                 @if($hasUsing && $isAdmin)
                                     <td class="px-4 py-3">
-                                        @if(in_array($usage->status, ['Using', 'Stopped'], true))
+                                        @if($usage->status === 'Using')
                                             <input type="checkbox" class="usage-return-cb rounded border-gray-300 text-red-600 focus:ring-red-500"
                                                 data-usage-id="{{ $usage->id }}" onchange="updateBulkReturnBtn()">
                                         @endif
@@ -250,10 +224,6 @@
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
                                             Sedang Dipakai
                                         </span>
-                                    @elseif($usage->status === 'Stopped')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-200 text-slate-700" title="Durasi berhenti, pengecekan/pengembalian dilakukan esok hari">
-                                            Durasi Dihentikan
-                                        </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                             Dikembalikan
@@ -264,7 +234,7 @@
                                     {{ $usage->duration }}
                                 </td>
                                 <td data-label="Catatan" class="px-4 py-3 text-gray-600 text-xs">
-                                    @if(in_array($usage->status, ['Using', 'Stopped'], true) && $isAdmin)
+                                    @if($usage->status === 'Using' && $isAdmin)
                                         <input type="text" class="usage-return-note w-full min-w-[140px] text-xs px-2 py-1.5 border border-gray-200 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500"
                                             data-usage-id="{{ $usage->id }}" placeholder="Catatan (opsional)...">
                                     @else
@@ -274,7 +244,7 @@
                                 @if($isAdmin)
                                     <td data-label="Aksi" class="px-4 py-3 text-center">
                                         <div class="flex items-center justify-center gap-1">
-                                            @if(in_array($usage->status, ['Using', 'Stopped'], true))
+                                            @if($usage->status === 'Using')
                                                 <button onclick="returnSingleUsage('{{ $usage->id }}', this)"
                                                     class="px-3 py-1.5 bg-yellow-600 text-white text-xs font-semibold rounded-lg hover:bg-yellow-700 transition-colors">
                                                     Kembalikan
@@ -318,39 +288,6 @@
     </div>
 </div>
 
-{{-- Modal konfirmasi: hentikan semua durasi --}}
-@if(($usageStats['using'] ?? 0) > 0)
-<div id="stopDurModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-        <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-base font-bold text-gray-800">Hentikan Semua Durasi?</h3>
-                <p class="text-sm text-gray-600 mt-2">
-                    Durasi semua peminjaman box yang masih berjalan akan dikunci pada waktu sekarang
-                    (status berubah menjadi <span class="font-semibold">Durasi Dihentikan</span>).
-                    Pengecekan/pengembalian fisik dapat dilakukan esok hari lewat tombol Kembalikan.
-                </p>
-            </div>
-        </div>
-        <div class="mt-5 flex items-center justify-end gap-3">
-            <button type="button" onclick="hideStopDurationsModal()"
-                class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                Batal
-            </button>
-            <button type="button" id="stopDurConfirmBtn" onclick="stopAllDurations()"
-                class="px-4 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors">
-                Ya, Hentikan
-            </button>
-        </div>
-    </div>
-</div>
-@endif
-
 @push('scripts')
 <script>
     function toggleSelectAllUsing(master) {
@@ -358,44 +295,6 @@
             cb.checked = master.checked;
         });
         updateBulkReturnBtn();
-    }
-
-    function confirmStopDurations() {
-        document.getElementById('stopDurModal').classList.remove('hidden');
-    }
-
-    function hideStopDurationsModal() {
-        document.getElementById('stopDurModal').classList.add('hidden');
-    }
-
-    async function stopAllDurations() {
-        const btn = document.getElementById('stopDurConfirmBtn');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-        try {
-            const response = await fetch('{{ route('box-usages.stop-durations') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-            });
-            const data = await response.json();
-            if (data.success) {
-                hideStopDurationsModal();
-                showHistoryToast('success', 'Berhasil', data.message);
-                setTimeout(() => location.reload(), 600);
-            } else {
-                showHistoryToast('error', 'Gagal', data.message || 'Gagal menghentikan durasi');
-                btn.disabled = false;
-                btn.textContent = originalText;
-            }
-        } catch (err) {
-            showHistoryToast('error', 'Kesalahan', 'Terjadi kesalahan jaringan');
-            btn.disabled = false;
-            btn.textContent = originalText;
-        }
     }
 
     function updateBulkReturnBtn() {

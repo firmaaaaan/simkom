@@ -47,7 +47,7 @@ class ComponentController extends Controller
         $usageSearch = $request->input('usage_search');
         $usageBox = $request->input('usage_box');
 
-        if ($usageStatus && in_array($usageStatus, ['Using', 'Stopped', 'Returned'])) {
+        if ($usageStatus && in_array($usageStatus, ['Using', 'Returned'])) {
             $usageQuery->where('status', $usageStatus);
         }
 
@@ -67,7 +67,6 @@ class ComponentController extends Controller
         $usageStats = [
             'total'    => BoxUsage::count(),
             'using'    => BoxUsage::where('status', 'Using')->count(),
-            'stopped'  => BoxUsage::where('status', 'Stopped')->count(),
             'returned' => BoxUsage::where('status', 'Returned')->count(),
         ];
 
