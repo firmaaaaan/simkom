@@ -15,7 +15,7 @@ class PublicComputerCardController extends Controller
      */
     public function show(Request $request, Computer $computer)
     {
-        $computer->load('laboratory');
+        $computer->load(['laboratory', 'hardware', 'software']);
 
         $month = $request->integer('month') ?: null;
         $year = $request->integer('year') ?: null;

@@ -19,8 +19,9 @@
             }
         }
     </script>
+    <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-gray-50 font-sans antialiased" x-data="{ specOpen: false }">
 
     {{-- Navbar --}}
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -81,14 +82,23 @@
                 </div>
             </div>
 
-            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded-lg p-3">
-                    <p class="text-xs text-gray-400 mb-1">Kode Komputer</p>
-                    <p class="text-lg font-bold text-green-700">{{ $computer->code }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-3">
-                    <p class="text-xs text-gray-400 mb-1">Lokasi</p>
-                    <p class="text-sm font-semibold text-gray-800">{{ $computer->laboratory?->name ?? '-' }}</p>
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400 mb-1">Kode Komputer</p>
+                        <p class="text-lg font-bold text-green-700">{{ $computer->code }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-400 mb-1">Lokasi</p>
+                        <p class="text-sm font-semibold text-gray-800">{{ $computer->laboratory?->name ?? '-' }}</p>
+                    </div>
+                    <button type="button" @click="specOpen = true"
+                        class="w-full min-h-[60px] inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+                        </svg>
+                        Lihat Spesifikasi
+                    </button>
                 </div>
             </div>
         </div>
@@ -114,5 +124,8 @@
         </div>
     </footer>
 
+    @include('computers.partials.spec-modal')
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
