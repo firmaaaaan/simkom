@@ -88,8 +88,15 @@ class LabUsage extends Model
 
     public function getDurationAttribute(): ?string
     {
-        $end = $this->validated_at ?? now();
+        if ($this->checked_in_at === null) {
+            return null;
+        }
 
-        return $this->checked_in_at->diff($end)->format('%h jam %i menit');
+        // Total jam + menit (bukan sisa jam setelah hari), dihitung sampai
+        // waktu validasi atau waktu sekarang bila belum divalidasi.
+        $end = $this->validated_at ?? now();
+        $totalMinutes = max(0, (int) $this->checked_in_at->diffInMinutes($end));
+
+        return sprintf('%d jam %d menit', intdiv($totalMinutes, 60), $totalMinutes % 60);
     }
 }

@@ -62,10 +62,15 @@ class BoxUsage extends Model
 
     public function getDurationAttribute(): ?string
     {
-        if (!$this->returned_at) {
-            return $this->used_at->diffForHumans(null, true);
+        if ($this->used_at === null) {
+            return null;
         }
 
-        return $this->used_at->diff($this->returned_at)->format('%h jam %i menit');
+        // Total jam + menit (bukan sisa jam setelah hari), dihitung sampai
+        // waktu pengembalian atau waktu sekarang bila belum dikembalikan.
+        $end = $this->returned_at ?? now();
+        $totalMinutes = max(0, (int) $this->used_at->diffInMinutes($end));
+
+        return sprintf('%d jam %d menit', intdiv($totalMinutes, 60), $totalMinutes % 60);
     }
 }
