@@ -58,7 +58,7 @@
             </thead>
             <tbody>
                 @php
-                    $typeLabels = ['ticket' => 'Tiket', 'lab_usage' => 'Penggunaan Lab', 'borrowing' => 'Peminjaman'];
+                    $typeLabels = ['ticket' => 'Tiket', 'lab_usage' => 'Penggunaan Lab', 'borrowing' => 'Peminjaman', 'box_usage' => 'Peminjaman Box'];
                 @endphp
                 @forelse($notifications as $index => $notification)
                     <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors {{ $notification->is_unread ? 'bg-green-50/40' : '' }}">

@@ -27,6 +27,24 @@ class BoxUsage extends Model
         'returned_at' => 'datetime',
     ];
 
+    // Notifikasi realtime ke lonceng admin/laboran saat box dipinjam lewat scan QR.
+    // Input manual oleh admin tidak perlu memberi notifikasi (admin sendiri pelakunya).
+    protected static function booted(): void
+    {
+        static::created(function (BoxUsage $usage) {
+            if ($usage->source === 'manual') {
+                return;
+            }
+
+            Notification::create([
+                'title'   => 'Peminjaman Box Baru',
+                'message' => "{$usage->user_name} ({$usage->user_nim}) meminjam box {$usage->box?->code}",
+                'type'    => 'box_usage',
+                'url'     => route('boxes.index'),
+            ]);
+        });
+    }
+
     public function box(): BelongsTo
     {
         return $this->belongsTo(Box::class);
