@@ -366,11 +366,11 @@ class ComputerController extends Controller
 
         if ($labId = $request->laboratory_id) {
             if ($labId === 'all') {
-                $computers = Computer::with(['laboratory', 'hardware', 'software'])->orderBy('code')->get();
+                $computers = Computer::with(['laboratory', 'hardware'])->orderBy('code')->get();
                 $selectedLab = (object) ['id' => 'all', 'name' => 'Semua Laboratorium'];
             } else {
                 $selectedLab = Laboratory::find($labId);
-                $computers = Computer::with(['laboratory', 'hardware', 'software'])
+                $computers = Computer::with(['laboratory', 'hardware'])
                     ->where('laboratory_id', $labId)
                     ->orderBy('code')
                     ->get();

@@ -49,7 +49,7 @@ class KartuKendaliSpecModalTest extends TestCase
             ->assertSee('Lihat Spesifikasi')
             ->assertSee('Spesifikasi Komputer')
             ->assertSee('Intel Core i5')
-            ->assertSee('Windows 11');
+            ->assertDontSee('Windows 11');
     }
 
     public function test_admin_kartu_page_shows_spec_button_and_modal(): void
@@ -66,7 +66,6 @@ class KartuKendaliSpecModalTest extends TestCase
             ->assertOk()
             ->assertSee('Lihat Spesifikasi')
             ->assertSee('Spesifikasi Komputer')
-            ->assertSee('Intel Core i5')
-            ->assertSee('Windows 11');
+            ->assertSee('Intel Core i5');
     }
 }

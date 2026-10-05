@@ -40,24 +40,12 @@
     $specMap = $computers->mapWithKeys(fn ($c) => [
         $c->id => [
             'code' => $c->code,
-            'status' => $c->status,
-            'description' => $c->description,
-            'laboratory' => $c->laboratory?->name,
             'hardware' => $c->hardware->map(fn ($hw) => [
                 'code' => $hw->code,
                 'name' => $hw->name,
                 'brand' => $hw->brand,
                 'model' => $hw->model,
                 'category' => $hw->category,
-                'description' => $hw->description,
-            ])->values(),
-            'software' => $c->software->map(fn ($sw) => [
-                'code' => $sw->code,
-                'name' => $sw->name,
-                'version' => $sw->version,
-                'license_type' => $sw->license_type,
-                'category' => $sw->category,
-                'status' => $sw->status,
             ])->values(),
         ],
     ]);
@@ -65,11 +53,7 @@
 <body class="bg-gray-100 min-h-screen" x-data="{
     previewUrl: null,
     spec: null,
-    specs: @js($specMap),
-    statusClass(s) {
-        return s === 'Aktif' ? 'bg-green-100 text-green-800'
-            : (s === 'Maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600');
-    }
+    specs: @js($specMap)
 }">
     <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="mb-6 no-print">
@@ -186,23 +170,6 @@
             </div>
 
             <div class="flex-1 overflow-auto p-6 space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-xs text-gray-500 mb-1">Laboratorium</p>
-                        <p class="text-sm font-medium text-gray-800" x-text="spec?.laboratory ?? '-'"></p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 mb-1">Status</p>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                            :class="statusClass(spec?.status)" x-text="spec?.status"></span>
-                    </div>
-                </div>
-
-                <div>
-                    <p class="text-xs text-gray-500 mb-1">Keterangan</p>
-                    <p class="text-sm text-gray-800" x-text="spec?.description || '-'"></p>
-                </div>
-
                 <div>
                     <p class="text-sm font-semibold text-gray-800 mb-2">
                         Hardware <span class="font-normal text-gray-400" x-text="'(' + (spec?.hardware ?? []).length + ')'"></span>
@@ -235,30 +202,6 @@
                     </template>
                     <template x-if="(spec?.hardware ?? []).length === 0">
                         <p class="text-sm text-gray-400 italic">Belum ada hardware</p>
-                    </template>
-                </div>
-
-                <div>
-                    <p class="text-sm font-semibold text-gray-800 mb-2">
-                        Software <span class="font-normal text-gray-400" x-text="'(' + (spec?.software ?? []).length + ')'"></span>
-                    </p>
-                    <template x-if="(spec?.software ?? []).length > 0">
-                        <ul class="space-y-2">
-                            <template x-for="sw in (spec?.software ?? [])" :key="sw.code">
-                                <li class="flex items-center justify-between gap-3 px-3 py-2 border border-gray-200 rounded-lg">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800" x-text="sw.name"></p>
-                                        <p class="text-xs text-gray-500" x-text="[sw.version, sw.category].filter(Boolean).join(' • ')"></p>
-                                    </div>
-                                    <span class="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
-                                        :class="sw.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'"
-                                        x-text="sw.status ?? sw.license_type ?? '-'"></span>
-                                </li>
-                            </template>
-                        </ul>
-                    </template>
-                    <template x-if="(spec?.software ?? []).length === 0">
-                        <p class="text-sm text-gray-400 italic">Belum ada software</p>
                     </template>
                 </div>
             </div>

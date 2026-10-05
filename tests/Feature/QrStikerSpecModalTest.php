@@ -55,6 +55,6 @@ class QrStikerSpecModalTest extends TestCase
             ->assertSee('🧾 Spesifikasi')
             ->assertSee('PC-SPEC-01')
             ->assertSee('Intel Core i5')
-            ->assertSee('Windows 11');
+            ->assertDontSee('Windows 11');
     }
 }
