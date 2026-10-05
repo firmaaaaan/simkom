@@ -18,6 +18,7 @@ class BoxUsage extends Model
         'status',
         'used_at',
         'returned_at',
+        'stopped_at',
         'source',
         'created_by',
     ];
@@ -25,6 +26,7 @@ class BoxUsage extends Model
     protected $casts = [
         'used_at'     => 'datetime',
         'returned_at' => 'datetime',
+        'stopped_at'  => 'datetime',
     ];
 
     // Notifikasi realtime ke lonceng admin/laboran saat box dipinjam lewat scan QR.
@@ -62,10 +64,14 @@ class BoxUsage extends Model
 
     public function getDurationAttribute(): ?string
     {
-        if (!$this->returned_at) {
+        // Durasi berhenti di stopped_at (aksi "Hentikan Durasi"), bukan di
+        // waktu pengembalian fisik yang dilakukan keesokan hari.
+        $end = $this->stopped_at ?? $this->returned_at;
+
+        if (!$end) {
             return $this->used_at->diffForHumans(null, true);
         }
 
-        return $this->used_at->diff($this->returned_at)->format('%h jam %i menit');
+        return $this->used_at->diff($end)->format('%h jam %i menit');
     }
 }

@@ -21,7 +21,7 @@ class BoxUsageController extends Controller
             'user_name'   => 'required|string|max:255',
             'user_nim'    => 'required|string|max:50',
             'user_kelas'  => 'nullable|string|max:100',
-            'status'      => 'required|in:Using,Returned',
+            'status'      => 'required|in:Using,Stopped,Returned',
             'used_at'     => 'required|date',
             'returned_at' => 'required_if:status,Returned|nullable|date|after_or_equal:used_at',
             'note'        => 'nullable|string|max:500',
@@ -48,23 +48,44 @@ class BoxUsageController extends Controller
 
     /**
      * Kotak yang sedang dipinjam orang lain tidak boleh dipinjamkan lagi
-     * (aturan yang sama dengan scan QR). Hanya berlaku untuk status Using —
-     * riwayat yang sudah Returned boleh dicatat meski box kini dipinjam lain.
+     * (aturan yang sama dengan scan QR). Hanya berlaku untuk status Using/
+     * Stopped — riwayat yang sudah Returned boleh dicatat meski box kini
+     * dipinjam lain. Baris Stopped tetap dianggap mengunci box karena fisiknya
+     * baru dicek/dikembalikan keesokan hari.
      * $usage dipakai saat update agar record yang sedang diedit tidak dianggap
      * bentrok dengan dirinya sendiri.
      */
     private function activeConflict(array $data, ?BoxUsage $usage = null): ?BoxUsage
     {
-        if (($data['status'] ?? null) !== 'Using') {
+        if (!in_array($data['status'] ?? null, ['Using', 'Stopped'], true)) {
             return null;
         }
 
         return BoxUsage::with('box')
             ->where('box_id', $data['box_id'])
-            ->where('status', 'Using')
+            ->whereIn('status', ['Using', 'Stopped'])
             ->when($usage, fn ($q) => $q->whereKeyNot($usage->id))
             ->get()
             ->first();
+    }
+
+    /**
+     * Hentikan durasi semua peminjaman box yang masih berjalan sekaligus.
+     * Dipakai menjelang tutup hari: durasi dikunci di stopped_at, pengembalian
+     * fisik dilakukan keesokan hari lewat aksi Kembalikan.
+     */
+    public function stopDurations()
+    {
+        $count = BoxUsage::where('status', 'Using')
+            ->update(['status' => 'Stopped', 'stopped_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'count'   => $count,
+            'message' => $count > 0
+                ? "Durasi {$count} peminjaman box berhasil dihentikan."
+                : 'Tidak ada peminjaman box yang sedang berjalan.',
+        ]);
     }
 
     public function store(Request $request)
@@ -87,6 +108,7 @@ class BoxUsageController extends Controller
             'status'      => $validated['status'],
             'used_at'     => Carbon::parse($validated['used_at']),
             'returned_at' => $isReturned ? Carbon::parse($validated['returned_at']) : null,
+            'stopped_at'  => $validated['status'] === 'Stopped' ? now() : null,
             'source'      => 'manual',
             'created_by'  => $request->user()->id,
         ]);
@@ -118,6 +140,14 @@ class BoxUsageController extends Controller
 
         $isReturned = $validated['status'] === 'Returned';
 
+        // Durasi dikunci di stopped_at; status Returning kembali ke Using
+        // melepas kunciannya, sedangkan Returned mempertahankannya.
+        $stoppedAt = match ($validated['status']) {
+            'Stopped' => $usage->stopped_at ?? now(),
+            'Using'   => null,
+            default   => $usage->stopped_at,
+        };
+
         $usage->update([
             'box_id'      => $validated['box_id'],
             'user_name'   => $validated['user_name'],
@@ -126,6 +156,7 @@ class BoxUsageController extends Controller
             'status'      => $validated['status'],
             'used_at'     => Carbon::parse($validated['used_at']),
             'returned_at' => $isReturned ? Carbon::parse($validated['returned_at']) : null,
+            'stopped_at'  => $stoppedAt,
         ]);
 
         // Catatan pengembalian hanya berlaku untuk status Returned.
