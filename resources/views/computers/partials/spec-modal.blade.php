@@ -26,20 +26,14 @@
                     <table class="w-full text-sm text-left">
                         <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                             <tr>
-                                <th class="px-3 py-2 font-medium">Kode</th>
                                 <th class="px-3 py-2 font-medium">Nama</th>
-                                <th class="px-3 py-2 font-medium">Brand</th>
-                                <th class="px-3 py-2 font-medium">Model</th>
                                 <th class="px-3 py-2 font-medium">Kategori</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @foreach($computer->hardware as $hw)
                                 <tr>
-                                    <td class="px-3 py-2 font-mono text-xs text-gray-600">{{ $hw->code }}</td>
                                     <td class="px-3 py-2 text-gray-800">{{ $hw->name }}</td>
-                                    <td class="px-3 py-2 text-gray-600">{{ $hw->brand ?? '-' }}</td>
-                                    <td class="px-3 py-2 text-gray-600">{{ $hw->model ?? '-' }}</td>
                                     <td class="px-3 py-2 text-gray-600">{{ $hw->category }}</td>
                                 </tr>
                             @endforeach

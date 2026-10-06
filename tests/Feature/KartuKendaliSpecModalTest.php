@@ -49,6 +49,10 @@ class KartuKendaliSpecModalTest extends TestCase
             ->assertSee('Lihat Spesifikasi')
             ->assertSee('Spesifikasi Komputer')
             ->assertSee('Intel Core i5')
+            // Modal hanya menampilkan nama + kategori.
+            ->assertSee('Processor')
+            ->assertDontSee('HW-SPEC-101')
+            ->assertDontSee('i5-12400')
             ->assertDontSee('Windows 11');
     }
 
@@ -66,6 +70,10 @@ class KartuKendaliSpecModalTest extends TestCase
             ->assertOk()
             ->assertSee('Lihat Spesifikasi')
             ->assertSee('Spesifikasi Komputer')
-            ->assertSee('Intel Core i5');
+            ->assertSee('Intel Core i5')
+            // Modal hanya menampilkan nama + kategori.
+            ->assertSee('Processor')
+            ->assertDontSee('HW-SPEC-101')
+            ->assertDontSee('i5-12400');
     }
 }
