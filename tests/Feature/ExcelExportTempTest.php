@@ -241,11 +241,14 @@ class ExcelExportTempTest extends TestCase
         $admin = $this->admin();
         $data = $this->seedData();
 
-        // Pengguna: tanpa password.
+        // Pengguna: tanpa password. Cari via email karena urutan latest()
+        // tidak menentu saat created_at dua user sama persis (tie detik).
         $users = $this->rows($this->actingAs($admin)->get(route('users.export')));
         $this->assertSame(['Nama', 'Email', 'Role', 'Jumlah Role', 'Terdaftar'], $users[0]);
-        $this->assertSame('Admin Uji', $users[1][0]);
-        $this->assertSame('Admin', $users[1][2]);
+        $adminRow = collect($users)->slice(1)->firstWhere(1, 'admin@e.test');
+        $this->assertNotNull($adminRow);
+        $this->assertSame('Admin Uji', $adminRow[0]);
+        $this->assertSame('Admin', $adminRow[2]);
         $this->assertStringNotContainsString('rahasia123', json_encode($users));
         $this->assertStringNotContainsString('$2y$', json_encode($users));
 
