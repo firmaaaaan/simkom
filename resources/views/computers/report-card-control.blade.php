@@ -26,7 +26,7 @@
                     <option value="">Pilih Tahun Ajaran</option>
                     @foreach($academicYears as $year)
                         <option value="{{ $year->id }}" {{ ($selectedYear && $selectedYear->id == $year->id) || (!$selectedYear && $year->status == 'Aktif') ? 'selected' : '' }}>
-                            {{ $year->name }} ({{ $year->periodLabel() }}){{ $year->status === 'Aktif' ? ' - Aktif' : '' }}
+                            {{ $year->name }}{{ $year->status === 'Aktif' ? ' - Aktif' : '' }}
                         </option>
                     @endforeach
                 </select>
