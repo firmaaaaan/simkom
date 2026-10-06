@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ComputerExport;
+use App\Exports\ComputerSpecExport;
+use App\Exports\ComputerSpecTemplate;
+use App\Imports\ComputerSpecImport;
 use App\Models\Computer;
 use App\Models\Hardware;
 use App\Models\Software;
@@ -52,6 +55,63 @@ class ComputerController extends Controller
             new ComputerExport($this->filteredQuery($request)->latest()),
             'komputer-' . now()->format('Y-m-d') . '.xlsx'
         );
+    }
+
+    /**
+     * Export spesifikasi komputer (format lebar, satu baris per komputer)
+     * mengikuti filter yang sedang aktif di halaman daftar.
+     */
+    public function specExport(Request $request)
+    {
+        return Excel::download(
+            new ComputerSpecExport($this->filteredQuery($request)->latest()),
+            'spesifikasi-komputer-' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function specTemplate()
+    {
+        return Excel::download(new ComputerSpecTemplate, 'template-spesifikasi-komputer.xlsx');
+    }
+
+    public function specImport()
+    {
+        return view('computers.spec-import');
+    }
+
+    public function storeSpecImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $import = new ComputerSpecImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('computers.spec-import')
+                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+
+        $message = "Berhasil menyinkronkan spesifikasi {$import->getSyncedCount()} komputer";
+        if ($import->getCreatedComputersCount() > 0) {
+            $message .= ', ' . $import->getCreatedComputersCount() . ' komputer baru dibuat';
+        }
+        if ($import->getCreatedHardwareCount() > 0) {
+            $message .= ', ' . $import->getCreatedHardwareCount() . ' hardware baru ditambahkan';
+        }
+        $message .= '.';
+
+        if ($errors = $import->getErrors()) {
+            $message .= ' ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+            }
+        }
+
+        return redirect()->route('computers.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     public function create()
