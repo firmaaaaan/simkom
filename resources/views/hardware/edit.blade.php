@@ -67,20 +67,9 @@
                     <select name="category" id="category" required
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         <option value="">-- Pilih --</option>
-                        <option value="Processor" {{ old('category', $hardware->category) === 'Processor' ? 'selected' : '' }}>Processor (CPU)</option>
-                        <option value="RAM" {{ old('category', $hardware->category) === 'RAM' ? 'selected' : '' }}>Memory (RAM)</option>
-                        <option value="Storage" {{ old('category', $hardware->category) === 'Storage' ? 'selected' : '' }}>Storage (HDD/SSD)</option>
-                        <option value="Motherboard" {{ old('category', $hardware->category) === 'Motherboard' ? 'selected' : '' }}>Motherboard</option>
-                        <option value="Power Supply" {{ old('category', $hardware->category) === 'Power Supply' ? 'selected' : '' }}>Power Supply (PSU)</option>
-                        <option value="VGA" {{ old('category', $hardware->category) === 'VGA' ? 'selected' : '' }}>VGA (GPU)</option>
-                        <option value="Monitor" {{ old('category', $hardware->category) === 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                        <option value="Keyboard" {{ old('category', $hardware->category) === 'Keyboard' ? 'selected' : '' }}>Keyboard</option>
-                        <option value="Mouse" {{ old('category', $hardware->category) === 'Mouse' ? 'selected' : '' }}>Mouse</option>
-                        <option value="Printer" {{ old('category', $hardware->category) === 'Printer' ? 'selected' : '' }}>Printer</option>
-                        <option value="Scanner" {{ old('category', $hardware->category) === 'Scanner' ? 'selected' : '' }}>Scanner</option>
-                        <option value="Headset" {{ old('category', $hardware->category) === 'Headset' ? 'selected' : '' }}>Headset/Microphone</option>
-                        <option value="Kabel" {{ old('category', $hardware->category) === 'Kabel' ? 'selected' : '' }}>Kabel/Adapter</option>
-                        <option value="Lainnya" {{ old('category', $hardware->category) === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        @foreach(\App\Models\Hardware::CATEGORY_LABELS as $value => $label)
+                            <option value="{{ $value }}" @selected(old('category', $hardware->category) === $value)>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 

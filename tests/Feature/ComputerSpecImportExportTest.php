@@ -90,6 +90,20 @@ class ComputerSpecImportExportTest extends TestCase
         return IOFactory::load($path)->getActiveSheet()->toArray(null, true, false, false);
     }
 
+    /**
+     * Struktur judul kolom export/template spesifikasi: identitas komputer,
+     * seluruh kategori form hardware, kategori ekstra dari data, Keterangan.
+     */
+    private function expectedHeadings(array $extraCategories = []): array
+    {
+        return array_merge(
+            ['Kode Komputer', 'Laboratorium'],
+            Hardware::CATEGORIES,
+            $extraCategories,
+            ['Keterangan'],
+        );
+    }
+
     public function test_spec_export_shows_one_row_per_computer_with_category_columns(): void
     {
         $admin = $this->admin();
@@ -97,7 +111,9 @@ class ComputerSpecImportExportTest extends TestCase
 
         $rows = $this->rows($this->actingAs($admin)->get(route('computers.spec-export')));
 
-        $this->assertSame(['Kode Komputer', 'Laboratorium', 'Processor', 'RAM', 'Keterangan'], $rows[0]);
+        // Seluruh 14 kategori form ikut tampil, walaupun belum ada datanya.
+        $this->assertSame($this->expectedHeadings(), $rows[0]);
+        $this->assertCount(2 + count(Hardware::CATEGORIES) + 1, $rows[0]);
 
         $byCode = collect($rows)->slice(1)->keyBy(0);
         $this->assertCount(2, $byCode);
@@ -109,6 +125,35 @@ class ComputerSpecImportExportTest extends TestCase
         $this->assertEmpty($byCode['K1-003'][2]);
     }
 
+    public function test_spec_export_appends_categories_outside_the_form_list(): void
+    {
+        $admin = $this->admin();
+        $data = $this->seedData();
+        $speaker = Hardware::create(['code' => 'HW-009', 'name' => 'Logitech Z120', 'category' => 'Speaker']);
+        $data['computer']->hardware()->attach($speaker->id);
+
+        $rows = $this->rows($this->actingAs($admin)->get(route('computers.spec-export')));
+
+        // Kategori data yang tidak ada di form tetap diekspor (setelah daftar
+        // form, sebelum Keterangan) agar round-trip tidak kehilangan data.
+        $this->assertSame($this->expectedHeadings(['Speaker']), $rows[0]);
+
+        $speakerColumn = array_search('Speaker', $rows[0], true);
+        $byCode = collect($rows)->slice(1)->keyBy(0);
+        $this->assertSame('Logitech Z120', $byCode['K1-001'][$speakerColumn]);
+    }
+
+    public function test_spec_template_lists_every_form_category(): void
+    {
+        $admin = $this->admin();
+
+        $rows = $this->rows($this->actingAs($admin)->get(route('computers.spec-template')));
+
+        $this->assertSame($this->expectedHeadings(), $rows[0]);
+        $this->assertSame('Contoh', $rows[1][0]);
+        $this->assertNotEmpty($rows[1][array_search('Processor', $rows[0], true)]);
+    }
+
     public function test_spec_export_joins_multiple_parts_and_follows_filters(): void
     {
         $admin = $this->admin();
@@ -118,13 +163,12 @@ class ComputerSpecImportExportTest extends TestCase
         $data['computer']->hardware()->attach([$monitor->id, $monitor2->id]);
 
         $rows = $this->rows($this->actingAs($admin)->get(route('computers.spec-export')));
-        $this->assertSame(
-            ['Kode Komputer', 'Laboratorium', 'Processor', 'RAM', 'Monitor', 'Keterangan'],
-            $rows[0]
-        );
+        $this->assertSame($this->expectedHeadings(), $rows[0]);
+
+        $monitorColumn = array_search('Monitor', $rows[0], true);
         $this->assertSame(
             'LG 24 Inch; Samsung 22 Inch',
-            collect($rows)->slice(1)->keyBy(0)['K1-001'][4]
+            collect($rows)->slice(1)->keyBy(0)['K1-001'][$monitorColumn]
         );
 
         $filtered = $this->rows($this->actingAs($admin)->get(route('computers.spec-export', ['search' => 'K1-001'])));

@@ -9,6 +9,48 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Hardware extends Model
 {
     use HasUuids;
+
+    /**
+     * Daftar kategori hardware (nilai yang tersimpan di database).
+     * Sumber tunggal: dipakai form create/edit dan export spesifikasi.
+     */
+    public const CATEGORIES = [
+        'Processor',
+        'RAM',
+        'Storage',
+        'Motherboard',
+        'Power Supply',
+        'VGA',
+        'Monitor',
+        'Keyboard',
+        'Mouse',
+        'Printer',
+        'Scanner',
+        'Headset',
+        'Kabel',
+        'Lainnya',
+    ];
+
+    /**
+     * Label tampilan tiap kategori untuk dropdown form.
+     */
+    public const CATEGORY_LABELS = [
+        'Processor' => 'Processor (CPU)',
+        'RAM' => 'Memory (RAM)',
+        'Storage' => 'Storage (HDD/SSD)',
+        'Motherboard' => 'Motherboard',
+        'Power Supply' => 'Power Supply (PSU)',
+        'VGA' => 'VGA (GPU)',
+        'Monitor' => 'Monitor',
+        'Keyboard' => 'Keyboard',
+        'Mouse' => 'Mouse',
+        'Printer' => 'Printer',
+        'Scanner' => 'Scanner',
+        'Headset' => 'Headset/Microphone',
+        'Kabel' => 'Kabel/Adapter',
+        'Lainnya' => 'Lainnya',
+    ];
+
     protected $fillable = [
         'name',
         'code',

@@ -75,20 +75,9 @@
                     <select name="category" id="category" required
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         <option value="">-- Pilih --</option>
-                        <option value="Processor" {{ old('category') === 'Processor' ? 'selected' : '' }}>Processor (CPU)</option>
-                        <option value="RAM" {{ old('category') === 'RAM' ? 'selected' : '' }}>Memory (RAM)</option>
-                        <option value="Storage" {{ old('category') === 'Storage' ? 'selected' : '' }}>Storage (HDD/SSD)</option>
-                        <option value="Motherboard" {{ old('category') === 'Motherboard' ? 'selected' : '' }}>Motherboard</option>
-                        <option value="Power Supply" {{ old('category') === 'Power Supply' ? 'selected' : '' }}>Power Supply (PSU)</option>
-                        <option value="VGA" {{ old('category') === 'VGA' ? 'selected' : '' }}>VGA (GPU)</option>
-                        <option value="Monitor" {{ old('category') === 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                        <option value="Keyboard" {{ old('category') === 'Keyboard' ? 'selected' : '' }}>Keyboard</option>
-                        <option value="Mouse" {{ old('category') === 'Mouse' ? 'selected' : '' }}>Mouse</option>
-                        <option value="Printer" {{ old('category') === 'Printer' ? 'selected' : '' }}>Printer</option>
-                        <option value="Scanner" {{ old('category') === 'Scanner' ? 'selected' : '' }}>Scanner</option>
-                        <option value="Headset" {{ old('category') === 'Headset' ? 'selected' : '' }}>Headset/Microphone</option>
-                        <option value="Kabel" {{ old('category') === 'Kabel' ? 'selected' : '' }}>Kabel/Adapter</option>
-                        <option value="Lainnya" {{ old('category') === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        @foreach(\App\Models\Hardware::CATEGORY_LABELS as $value => $label)
+                            <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 

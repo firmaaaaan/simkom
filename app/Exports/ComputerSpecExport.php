@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Hardware;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -16,27 +17,6 @@ use Maatwebsite\Excel\Concerns\WithMapping;
  */
 class ComputerSpecExport extends BaseExport implements WithHeadings, WithMapping
 {
-    /**
-     * Urutan kolom kategori yang lazim agar hasil lebih mudah dibaca.
-     * Kategori lain di luar daftar ini menyusul secara alfabetis.
-     */
-    private const CATEGORY_ORDER = [
-        'Processor',
-        'Motherboard',
-        'RAM',
-        'Storage',
-        'VGA',
-        'Monitor',
-        'Keyboard',
-        'Mouse',
-        'Printer',
-        'Scanner',
-        'Power Supply',
-        'Headset',
-        'Kabel',
-        'Lainnya',
-    ];
-
     private ?array $categories = null;
 
     public function headings(): array
@@ -68,9 +48,12 @@ class ComputerSpecExport extends BaseExport implements WithHeadings, WithMapping
     }
 
     /**
-     * Kategori hardware yang benar-benar dipakai oleh komputer pada hasil
-     * query. Dihitung sendiri (bukan dari collection baris) karena headings()
-     * dipanggil library sebelum map().
+     * Seluruh kategori dari form hardware (Hardware::CATEGORIES) selalu tampil
+     * sebagai kolom agar pengguna bisa mengisi kategori yang belum ada data.
+     * Kategori di luar daftar yang terpakai di data (mis. hasil import lama)
+     * tetap ditambahkan setelahnya secara alfabetis agar round-trip tidak
+     * kehilangan data. Dihitung sendiri karena headings() dipanggil library
+     * sebelum map().
      */
     private function categories(): array
     {
@@ -78,22 +61,18 @@ class ComputerSpecExport extends BaseExport implements WithHeadings, WithMapping
             return $this->categories;
         }
 
-        $this->categories = $this->query->get()
+        $used = $this->query->get()
             ->flatMap(fn ($computer) => $computer->hardware)
             ->pluck('category')
             ->filter()
-            ->unique()
-            ->sortBy(function ($category) {
-                $position = array_search($category, self::CATEGORY_ORDER, true);
+            ->unique();
 
-                return sprintf(
-                    '%02d|%s',
-                    $position === false ? count(self::CATEGORY_ORDER) : $position,
-                    Str::lower($category)
-                );
-            })
-            ->values()
-            ->all();
+        $extras = $used
+            ->reject(fn ($category) => in_array($category, Hardware::CATEGORIES, true))
+            ->sortBy(fn ($category) => Str::lower($category))
+            ->values();
+
+        $this->categories = array_merge(Hardware::CATEGORIES, $extras->all());
 
         return $this->categories;
     }
