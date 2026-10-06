@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ComputerCheckTemplate;
 use App\Exports\ComputerExport;
 use App\Exports\ComputerSpecExport;
 use App\Exports\ComputerSpecTemplate;
+use App\Imports\ComputerCheckImport;
 use App\Imports\ComputerSpecImport;
 use App\Models\Computer;
 use App\Models\Hardware;
@@ -110,6 +112,69 @@ class ComputerController extends Controller
         }
 
         return redirect()->route('computers.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
+    }
+
+    public function checkTemplate()
+    {
+        return Excel::download(new ComputerCheckTemplate, 'template-kartu-kendali.xlsx');
+    }
+
+    public function checkImport()
+    {
+        return view('computers.check-import');
+    }
+
+    /**
+     * Import kartu kendali historis. Tanggal pengecekan diisi di form karena
+     * file Excel tidak memuat tanggal; tahun ajaran ditentukan otomatis.
+     */
+    public function storeCheckImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'tanggal' => 'required|date',
+        ]);
+
+        $import = new ComputerCheckImport($request->input('tanggal'));
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('computers.check-import')
+                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+
+        $summary = [];
+        if ($import->getImportedCount() > 0) {
+            $summary[] = $import->getImportedCount() . ' pengecekan baru';
+        }
+        if ($import->getUpdatedCount() > 0) {
+            $summary[] = $import->getUpdatedCount() . ' diperbarui';
+        }
+        $message = $summary
+            ? 'Berhasil mengimpor ' . implode(' dan ', $summary)
+            : 'Tidak ada pengecekan yang diimpor';
+        if ($year = $import->getAcademicYear()) {
+            $message .= " pada {$year->name}";
+            if ($import->wasAcademicYearCreated()) {
+                $message .= ' (tahun ajaran dibuat otomatis)';
+            }
+        }
+        $message .= '.';
+
+        if ($errors = $import->getErrors()) {
+            $message .= ' ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+            }
+        }
+
+        if ($unmatched = $import->getUnmatchedPjNames()) {
+            $message .= ' PJ tidak ditemukan sebagai user: ' . implode(', ', $unmatched) . ' (ditampilkan sebagai System).';
+        }
+
+        return redirect()->route('computers.check-import')
             ->with('success', $message)
             ->with('import_errors', $import->getErrors());
     }

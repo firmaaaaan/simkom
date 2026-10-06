@@ -273,6 +273,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/computers/export', [ComputerController::class, 'export'])->name('computers.export');
         Route::get('/computers/spec-export', [ComputerController::class, 'specExport'])->name('computers.spec-export');
         Route::get('/computers/spec-template', [ComputerController::class, 'specTemplate'])->name('computers.spec-template');
+        Route::get('/computers/check-template', [ComputerController::class, 'checkTemplate'])->name('computers.check-template');
 
         Route::get('/computers/list', function (\Illuminate\Http\Request $request) {
             $query = \App\Models\Computer::select('id', 'code');
@@ -297,6 +298,9 @@ Route::middleware('auth')->group(function () {
         // Import spesifikasi mengubah data komputer, sehingga memakai izin edit
         Route::get('/computers/spec-import', [ComputerController::class, 'specImport'])->name('computers.spec-import');
         Route::post('/computers/spec-import', [ComputerController::class, 'storeSpecImport'])->name('computers.store-spec-import');
+        // Import kartu kendali historis menambah/memperbarui data pengecekan
+        Route::get('/computers/check-import', [ComputerController::class, 'checkImport'])->name('computers.check-import');
+        Route::post('/computers/check-import', [ComputerController::class, 'storeCheckImport'])->name('computers.store-check-import');
         // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
         Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
         // URL jadwal real-time yang ditautkan dari halaman jadwal publik
