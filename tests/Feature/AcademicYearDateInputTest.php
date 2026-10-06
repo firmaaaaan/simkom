@@ -7,12 +7,14 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 /**
- * Form tahun ajaran tidak lagi meminta tanggal mulai/selesai — periode selalu
- * diturunkan otomatis dari tahun (1 Agustus sampai 30 Juni).
+ * Form tahun ajaran tidak lagi meminta tanggal mulai/selesai — kolom tanggal
+ * sudah dihapus dari tabel, periode selalu diturunkan dari tahun
+ * (1 Agustus sampai 30 Juni).
  */
 class AcademicYearDateInputTest extends TestCase
 {
@@ -72,8 +74,8 @@ class AcademicYearDateInputTest extends TestCase
         ])->assertRedirect(route('academic-years.index'));
 
         $year = AcademicYear::first();
-        $this->assertNull($year->start_date);
-        $this->assertNull($year->end_date);
+        $this->assertFalse(Schema::hasColumn('academic_years', 'start_date'));
+        $this->assertFalse(Schema::hasColumn('academic_years', 'end_date'));
         $this->assertSame('01 Aug 2030 - 30 Jun 2031', $year->periodLabel());
     }
 
@@ -91,17 +93,16 @@ class AcademicYearDateInputTest extends TestCase
         ])->assertRedirect(route('academic-years.index'));
 
         $year = AcademicYear::first();
-        $this->assertNull($year->start_date);
-        $this->assertNull($year->end_date);
+        $this->assertArrayNotHasKey('start_date', $year->getAttributes());
+        $this->assertArrayNotHasKey('end_date', $year->getAttributes());
         $this->assertSame('01 Aug 2031 - 30 Jun 2032', $year->periodLabel());
     }
 
-    public function test_update_keeps_existing_dates_untouched(): void
+    public function test_update_ignores_posted_dates(): void
     {
         $user = $this->userWith('edit-academic-years');
         $year = AcademicYear::create([
             'name' => 'TA 2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'status' => 'Aktif',
-            'start_date' => '2026-08-15', 'end_date' => '2027-06-30',
         ]);
 
         $this->actingAs($user)->put(route('academic-years.update', $year), [
@@ -109,12 +110,14 @@ class AcademicYearDateInputTest extends TestCase
             'start_year' => 2026,
             'end_year' => 2027,
             'status' => 'Non Aktif',
+            'start_date' => '2026-08-15',
+            'end_date' => '2027-06-30',
         ])->assertRedirect(route('academic-years.index'));
 
         $year->refresh();
         $this->assertSame('TA 2026/2027 Baru', $year->name);
-        $this->assertSame('2026-08-15', $year->start_date->format('Y-m-d'));
-        $this->assertSame('2027-06-30', $year->end_date->format('Y-m-d'));
+        $this->assertArrayNotHasKey('start_date', $year->getAttributes());
+        $this->assertArrayNotHasKey('end_date', $year->getAttributes());
     }
 
     public function test_show_page_hides_date_fields(): void

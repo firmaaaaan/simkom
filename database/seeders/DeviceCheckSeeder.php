@@ -33,13 +33,8 @@ class DeviceCheckSeeder extends Seeder
             }
 
             // Dua pengecekan per lab: awal & akhir semester tahun ajaran terpilih.
-            $startDate = $year->start_date
-                ? Carbon::parse($year->start_date)->addWeeks(2)
-                : Carbon::create((int) $year->start_year, 9, 15);
-
-            $endDate = $year->end_date
-                ? Carbon::parse($year->end_date)->subMonths(2)
-                : Carbon::create((int) $year->end_year, 2, 15);
+            $startDate = Carbon::create((int) $year->start_year, 9, 15);
+            $endDate = Carbon::create((int) $year->end_year, 2, 15);
 
             foreach ([$startDate, $endDate] as $i => $date) {
                 $check = DeviceCheck::create([

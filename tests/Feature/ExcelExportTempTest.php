@@ -66,7 +66,6 @@ class ExcelExportTempTest extends TestCase
 
         $year = AcademicYear::create([
             'name' => 'TA 2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'status' => 'Aktif',
-            'start_date' => '2026-08-01', 'end_date' => '2027-06-30',
         ]);
 
         $reporter = User::firstOrCreate(

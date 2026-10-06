@@ -37,7 +37,6 @@ class DeviceCheckSyncTest extends TestCase
         $computer = Computer::create(['code' => 'LU1-001', 'laboratory_id' => $lab->id, 'status' => 'Aktif']);
         $year = AcademicYear::create([
             'name' => 'TA 2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'status' => 'Aktif',
-            'start_date' => '2026-08-01', 'end_date' => '2027-06-30',
         ]);
 
         return [$lab, $computer, $year];

@@ -14,15 +14,11 @@ class AcademicYear extends Model
         'start_year',
         'end_year',
         'status',
-        'start_date',
-        'end_date',
     ];
 
     protected $casts = [
         'start_year' => 'integer',
         'end_year' => 'integer',
-        'start_date' => 'date',
-        'end_date' => 'date',
     ];
 
     public function scopeActive($query)
@@ -31,25 +27,19 @@ class AcademicYear extends Model
     }
 
     /**
-     * Awal periode tahun ajaran (inklusif, jam 00:00:00).
-     * Bila start_date kosong, dipakai 1 Agustus dari start_year.
+     * Awal periode tahun ajaran (inklusif, jam 00:00:00): 1 Agustus start_year.
      */
     public function periodStart(): Carbon
     {
-        return $this->start_date
-            ? $this->start_date->copy()->startOfDay()
-            : Carbon::create($this->start_year, 8, 1)->startOfDay();
+        return Carbon::create($this->start_year, 8, 1)->startOfDay();
     }
 
     /**
-     * Akhir periode tahun ajaran (inklusif, sampai 23:59:59).
-     * Bila end_date kosong, dipakai 30 Juni dari end_year.
+     * Akhir periode tahun ajaran (inklusif, sampai 23:59:59): 30 Juni end_year.
      */
     public function periodEnd(): Carbon
     {
-        return $this->end_date
-            ? $this->end_date->copy()->endOfDay()
-            : Carbon::create($this->end_year, 6, 30)->endOfDay();
+        return Carbon::create($this->end_year, 6, 30)->endOfDay();
     }
 
     public function periodLabel(): string

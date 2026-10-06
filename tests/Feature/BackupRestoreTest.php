@@ -186,6 +186,38 @@ class BackupRestoreTest extends TestCase
         $this->assertDatabaseHas('laboratories', ['code' => 'BK1']);
     }
 
+    public function test_restore_rejects_backup_with_dropped_academic_year_date_columns(): void
+    {
+        $admin = $this->admin();
+        $this->lab('BK1');
+        $before = Laboratory::count();
+
+        // Backup yang dibuat sebelum kolom start_date/end_date dihapus dari
+        // academic_years: sengaja ditolak agar data tidak rusak.
+        $this->actingAs($admin)
+            ->from(route('backups.index'))
+            ->post(route('backups.restore'), [
+                'file' => UploadedFile::fake()->createWithContent('backup.json', json_encode([
+                    'format_version' => DatabaseBackupService::FORMAT_VERSION,
+                    'tables' => ['academic_years' => [[
+                        'id' => 'x',
+                        'name' => 'Tahun Ajaran 2026/2027',
+                        'start_year' => 2026,
+                        'end_year' => 2027,
+                        'status' => 'Aktif',
+                        'start_date' => '2026-08-01',
+                        'end_date' => '2027-06-30',
+                    ]]],
+                ])),
+                'confirmation' => 'RESTORE',
+            ])
+            ->assertRedirect(route('backups.index'))
+            ->assertSessionHas('error');
+
+        $this->assertSame($before, Laboratory::count());
+        $this->assertDatabaseHas('laboratories', ['code' => 'BK1']);
+    }
+
     public function test_restore_requires_exact_confirmation(): void
     {
         $admin = $this->admin();
