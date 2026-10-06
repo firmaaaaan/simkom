@@ -53,8 +53,6 @@ class AcademicYearController extends Controller
             'start_year' => 'required|integer|min:2000|max:2100',
             'end_year' => 'required|integer|min:2000|max:2100|gt:start_year',
             'status' => 'required|in:Aktif,Non Aktif',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         AcademicYear::create($validated);
@@ -84,8 +82,6 @@ class AcademicYearController extends Controller
             'start_year' => 'required|integer|min:2000|max:2100',
             'end_year' => 'required|integer|min:2000|max:2100|gt:start_year',
             'status' => 'required|in:Aktif,Non Aktif',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
         $academicYear->update($validated);

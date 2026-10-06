@@ -45,13 +45,13 @@ class ShowPageTest extends TestCase
     {
         $year = AcademicYear::create([
             'name' => 'TA 2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'status' => 'Aktif',
-            'start_date' => '2026-08-01', 'end_date' => '2027-06-30',
         ]);
 
         $this->actingAs($this->admin())
             ->get(route('academic-years.show', $year))
             ->assertOk()
             ->assertSee('TA 2026/2027')
-            ->assertSee('01-08-2026');
+            ->assertDontSee('Tanggal Mulai')
+            ->assertDontSee('Tanggal Selesai');
     }
 }

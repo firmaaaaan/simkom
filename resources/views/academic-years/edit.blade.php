@@ -53,19 +53,6 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
-                        <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $academicYear->start_date?->format('Y-m-d')) }}"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
-                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $academicYear->end_date?->format('Y-m-d')) }}"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                    </div>
-                </div>
-
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
                     <select name="status" id="status" required

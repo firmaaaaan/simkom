@@ -54,14 +54,6 @@
                     <p class="text-xs text-gray-400 mb-1">Tahun</p>
                     <p class="text-sm text-gray-800">{{ $academicYear->start_year }} - {{ $academicYear->end_year }}</p>
                 </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">Tanggal Mulai</p>
-                    <p class="text-sm text-gray-800">{{ $academicYear->start_date?->format('d-m-Y') ?? '-' }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">Tanggal Selesai</p>
-                    <p class="text-sm text-gray-800">{{ $academicYear->end_date?->format('d-m-Y') ?? '-' }}</p>
-                </div>
             </div>
         </div>
     </div>
