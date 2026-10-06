@@ -74,11 +74,13 @@ class ComputerCheckImportTest extends TestCase
         );
     }
 
-    private function import(array $grid, string $tanggal): TestResponse
+    private function seedYear(): AcademicYear
     {
-        return $this->post(route('computers.store-check-import'), [
-            'file' => $this->fileFromGrid($grid),
-            'tanggal' => $tanggal,
+        return AcademicYear::create([
+            'name' => 'Tahun Ajaran 2022/2023',
+            'start_year' => 2022,
+            'end_year' => 2023,
+            'status' => 'Non Aktif',
         ]);
     }
 
@@ -96,6 +98,7 @@ class ComputerCheckImportTest extends TestCase
     {
         $admin = $this->admin();
         $this->seedComputers();
+        $year = $this->seedYear();
 
         // Meniru file asli: blok judul (Nama Lab, Periode), header "Fungsi"
         // yang di-merge di atas sub-judul "Baik"/"Tidak".
@@ -112,10 +115,11 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2022-09-15',
+                'academic_year_id' => $year->id,
             ])
             ->assertRedirect(route('computers.check-import'))
             ->assertSessionHas('success', fn ($message) => str_contains($message, 'Tahun Ajaran 2022/2023')
-                && str_contains($message, 'dibuat otomatis'));
+                && ! str_contains($message, 'dibuat otomatis'));
 
         $this->assertSame(2, ComputerCheck::count());
 
@@ -130,19 +134,37 @@ class ComputerCheckImportTest extends TestCase
         $this->assertSame('Perlu Perbaikan', $second->overall_status);
         $this->assertSame('Layar retak', $second->notes);
 
-        // Tahun ajaran dibuat otomatis dari tanggal dan ditautkan ke semua baris.
+        // Tahun ajaran dipilih di form dipakai untuk semua baris (tanpa auto-create).
         $this->assertSame(1, AcademicYear::count());
-        $year = AcademicYear::first();
-        $this->assertSame('Tahun Ajaran 2022/2023', $year->name);
-        $this->assertSame('Non Aktif', $year->status);
         $this->assertSame($year->id, $first->academic_year_id);
         $this->assertSame($year->id, $second->academic_year_id);
+    }
+
+    public function test_import_requires_academic_year(): void
+    {
+        $admin = $this->admin();
+        $this->seedComputers();
+
+        $grid = [
+            ['Kode Komputer', 'Baik', 'Tidak'],
+            ['K1-001', '✓', ''],
+        ];
+
+        $this->actingAs($admin)
+            ->post(route('computers.store-check-import'), [
+                'file' => $this->fileFromGrid($grid),
+                'tanggal' => '2022-09-15',
+            ])
+            ->assertSessionHasErrors('academic_year_id');
+
+        $this->assertSame(0, ComputerCheck::count());
     }
 
     public function test_import_matches_pj_to_user_and_reports_unmatched(): void
     {
         $admin = $this->admin();
         $this->seedComputers();
+        $year = $this->seedYear();
         $firmansyah = User::create(['name' => 'Firmansyah', 'email' => 'firman@uji.test', 'password' => 'x']);
 
         $grid = [
@@ -155,6 +177,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2023-02-10',
+                'academic_year_id' => $year->id,
             ])
             ->assertRedirect(route('computers.check-import'));
 
@@ -172,6 +195,7 @@ class ComputerCheckImportTest extends TestCase
     {
         $admin = $this->admin();
         $this->seedComputers();
+        $year = $this->seedYear();
 
         $grid = [
             ['Kode Komputer', 'Baik', 'Tidak'],
@@ -185,6 +209,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2022-09-15',
+                'academic_year_id' => $year->id,
             ])
             ->assertRedirect(route('computers.check-import'));
 
@@ -206,6 +231,7 @@ class ComputerCheckImportTest extends TestCase
     {
         $admin = $this->admin();
         $this->seedComputers();
+        $year = $this->seedYear();
 
         $grid = [
             ['Kode Komputer', 'Baik', 'Tidak', 'Keterangan'],
@@ -215,6 +241,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2022-10-01',
+                'academic_year_id' => $year->id,
             ])
             ->assertSessionHas('success', fn ($message) => str_contains($message, '1 pengecekan baru'));
 
@@ -225,6 +252,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2022-10-01',
+                'academic_year_id' => $year->id,
             ])
             ->assertSessionHas('success', fn ($message) => str_contains($message, '1 diperbarui'));
 
@@ -243,6 +271,7 @@ class ComputerCheckImportTest extends TestCase
             ->get(route('computers.check-import'))
             ->assertOk()
             ->assertSee('Import Kartu Kendali dari Excel')
+            ->assertSee('Pilih Tahun Ajaran')
             ->assertSee(route('computers.check-template'));
 
         // Menu import kartu kendali tampil di halaman daftar komputer.
@@ -268,6 +297,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $upload,
                 'tanggal' => '2022-09-15',
+                'academic_year_id' => $this->seedYear()->id,
             ])
             ->assertRedirect(route('computers.check-import'));
         $this->assertSame(0, ComputerCheck::count());
@@ -291,6 +321,7 @@ class ComputerCheckImportTest extends TestCase
     {
         $admin = $this->admin();
         $this->seedComputers();
+        $year = $this->seedYear();
 
         $grid = [
             ['Kode Komputer', 'Baik', 'Tidak', 'Keterangan'],
@@ -300,6 +331,7 @@ class ComputerCheckImportTest extends TestCase
             ->post(route('computers.store-check-import'), [
                 'file' => $this->fileFromGrid($grid),
                 'tanggal' => '2022-09-15',
+                'academic_year_id' => $year->id,
             ])
             ->assertSessionHas('success');
 

@@ -123,21 +123,24 @@ class ComputerController extends Controller
 
     public function checkImport()
     {
-        return view('computers.check-import');
+        return view('computers.check-import', [
+            'academicYears' => AcademicYear::orderByDesc('start_year')->get(),
+        ]);
     }
 
     /**
      * Import kartu kendali historis. Tanggal pengecekan diisi di form karena
-     * file Excel tidak memuat tanggal; tahun ajaran ditentukan otomatis.
+     * file Excel tidak memuat tanggal; tahun ajaran dipilih dari dropdown.
      */
     public function storeCheckImport(Request $request)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
             'tanggal' => 'required|date',
+            'academic_year_id' => 'required|exists:academic_years,id',
         ]);
 
-        $import = new ComputerCheckImport($request->input('tanggal'));
+        $import = new ComputerCheckImport($request->input('tanggal'), $request->input('academic_year_id'));
         try {
             Excel::import($import, $request->file('file'));
         } catch (\Exception $e) {
@@ -157,9 +160,6 @@ class ComputerController extends Controller
             : 'Tidak ada pengecekan yang diimpor';
         if ($year = $import->getAcademicYear()) {
             $message .= " pada {$year->name}";
-            if ($import->wasAcademicYearCreated()) {
-                $message .= ' (tahun ajaran dibuat otomatis)';
-            }
         }
         $message .= '.';
 

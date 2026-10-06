@@ -25,8 +25,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
  * Perilaku:
  * - Tanggal pengecekan diisi di form (semua baris memakai tanggal yang sama,
  *   disimpan sebagai created_at jam 08:00).
- * - Tahun ajaran ditentukan otomatis dari tanggal; bila belum ada, dibuat
- *   otomatis berstatus Non Aktif.
+ * - Tahun ajaran dipilih di form (dropdown wajib) dan dipakai untuk semua baris.
  * - "Baik" → status Baik; "Tidak" → status Perlu Perbaikan.
  * - Kode komputer yang tidak ada di sistem = error baris (tidak dibuat baru).
  * - Pengecekan komputer + tanggal yang sama sudah ada → diperbarui (idempoten).
@@ -51,13 +50,13 @@ class ComputerCheckImport implements ToCollection
     protected array $errors = [];
     protected array $unmatchedPjNames = [];
     protected ?AcademicYear $academicYear = null;
-    protected bool $academicYearCreated = false;
     protected Carbon $checkedAt;
     protected array $userCache = [];
 
-    public function __construct(string $date)
+    public function __construct(string $date, string $academicYearId)
     {
         $this->checkedAt = Carbon::parse($date)->setTime(8, 0);
+        $this->academicYear = AcademicYear::find($academicYearId);
     }
 
     public function collection(Collection $rows): void
@@ -117,8 +116,6 @@ class ComputerCheckImport implements ToCollection
             ?? ($subHeaderRow ? $this->findLabel($subHeaderRow, ['keterangan']) : null);
         $columns['pj'] = $this->findLabel($headerRow, ['pj', 'penanggung jawab'])
             ?? ($subHeaderRow ? $this->findLabel($subHeaderRow, ['pj', 'penanggung jawab']) : null);
-
-        $this->academicYear = $this->resolveAcademicYear();
 
         foreach ($rows->slice($dataStart)->values() as $offset => $row) {
             if ($this->rowIsEmpty($row)) {
@@ -203,38 +200,6 @@ class ComputerCheckImport implements ToCollection
             'created_at' => $this->checkedAt,
         ]));
         $this->importedCount++;
-    }
-
-    /**
-     * Tentukan tahun ajaran dari tanggal pengecekan. Bila belum ada tahun yang
-     * mencakup tanggal itu, buat otomatis (Non Aktif; periode default 1 Agustus
-     * sampai 30 Juni).
-     */
-    private function resolveAcademicYear(): ?AcademicYear
-    {
-        $existing = AcademicYear::orderByDesc('start_year')
-            ->get()
-            ->first(fn (AcademicYear $year) => $year->coversDate($this->checkedAt));
-
-        if ($existing) {
-            return $existing;
-        }
-
-        if ($this->checkedAt->month >= 8) {
-            $start = $this->checkedAt->year;
-            $end = $this->checkedAt->year + 1;
-        } else {
-            $start = $this->checkedAt->year - 1;
-            $end = $this->checkedAt->year;
-        }
-
-        $year = AcademicYear::firstOrCreate(
-            ['start_year' => $start, 'end_year' => $end],
-            ['name' => "Tahun Ajaran {$start}/{$end}", 'status' => 'Non Aktif']
-        );
-        $this->academicYearCreated = $year->wasRecentlyCreated;
-
-        return $year;
     }
 
     /**
@@ -351,10 +316,5 @@ class ComputerCheckImport implements ToCollection
     public function getAcademicYear(): ?AcademicYear
     {
         return $this->academicYear;
-    }
-
-    public function wasAcademicYearCreated(): bool
-    {
-        return $this->academicYearCreated;
     }
 }

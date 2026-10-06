@@ -88,10 +88,27 @@
         <form action="{{ route('computers.store-check-import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-6">
+                <label for="academic_year_id" class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran <span class="text-red-500">*</span></label>
+                <select id="academic_year_id" name="academic_year_id" required
+                    class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <option value="">Pilih Tahun Ajaran</option>
+                    @foreach($academicYears as $year)
+                        <option value="{{ $year->id }}" {{ (string) old('academic_year_id') === (string) $year->id ? 'selected' : '' }}>
+                            {{ $year->name }} ({{ $year->periodLabel() }}){{ $year->status === 'Aktif' ? ' - Aktif' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Tahun ajaran tempat seluruh baris pada file ini dicatat.</p>
+                @error('academic_year_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-6">
                 <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">Tanggal Pengecekan</label>
                 <input id="tanggal" name="tanggal" type="date" value="{{ old('tanggal') }}" required
                     class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <p class="mt-1 text-xs text-gray-500">Tanggal pelaksanaan pengecekan pada file ini — seluruh baris memakai tanggal yang sama, dan tahun ajaran ditentukan otomatis dari tanggal ini.</p>
+                <p class="mt-1 text-xs text-gray-500">Tanggal pelaksanaan pengecekan pada file ini — seluruh baris memakai tanggal yang sama, dan disimpan sebagai waktu pengecekan.</p>
                 @error('tanggal')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
