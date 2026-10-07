@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\MaintenanceExport;
+use App\Exports\MaintenanceTemplate;
+use App\Imports\MaintenanceImport;
 use App\Models\AcademicYear;
 use App\Models\Computer;
 use App\Models\Laboratory;
@@ -34,8 +36,88 @@ class MaintenanceController extends Controller
     {
         return Excel::download(
             new MaintenanceExport($this->listQuery()),
-            'pemeliharaan-' . now()->format('Y-m-d') . '.xlsx'
+            'pemeliharaan-'.now()->format('Y-m-d').'.xlsx'
         );
+    }
+
+    public function template()
+    {
+        return Excel::download(new MaintenanceTemplate, 'template-pemeliharaan.xlsx');
+    }
+
+    public function import()
+    {
+        return view('maintenance.import', [
+            'laboratories' => Laboratory::orderBy('name')->get(),
+            'academicYears' => AcademicYear::orderByDesc('start_year')->get(),
+            'inspectorName' => auth()->user()?->name,
+        ]);
+    }
+
+    /**
+     * Import pemeliharaan dari Excel. Konteks pemeliharaan (lab, tahun
+     * ajaran, tanggal, pemeriksa, catatan) diisi di form karena file hanya
+     * berisi matriks centang komputer × pertanyaan.
+     */
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'laboratory_id' => 'required|exists:laboratories,id',
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'maintenance_date' => 'required|date',
+            'inspector_name' => 'nullable|string|max:255',
+            'notes_computer' => 'nullable|string',
+            'notes_mouse_keyboard' => 'nullable|string',
+            'notes_ups' => 'nullable|string',
+            'notes_monitor' => 'nullable|string',
+        ]);
+
+        $import = new MaintenanceImport(
+            $request->input('laboratory_id'),
+            $request->input('academic_year_id'),
+            $request->input('maintenance_date'),
+            $request->input('inspector_name'),
+            [
+                'notes_computer' => $request->input('notes_computer'),
+                'notes_mouse_keyboard' => $request->input('notes_mouse_keyboard'),
+                'notes_ups' => $request->input('notes_ups'),
+                'notes_monitor' => $request->input('notes_monitor'),
+            ],
+        );
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('maintenance.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $summary = [];
+        if ($import->getCreatedCount() > 0) {
+            $summary[] = $import->getCreatedCount().' pemeliharaan baru';
+        }
+        if ($import->getUpdatedCount() > 0) {
+            $summary[] = $import->getUpdatedCount().' diperbarui';
+        }
+        $message = $summary
+            ? 'Berhasil mengimpor '.implode(' dan ', $summary)
+            : 'Tidak ada pemeliharaan yang diimpor';
+        if ($year = $import->getAcademicYear()) {
+            $message .= " pada {$year->name}";
+        }
+        $message .= '.';
+
+        if ($errors = $import->getErrors()) {
+            $message .= ' '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('maintenance.import')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     public function create(Request $request)
@@ -115,7 +197,7 @@ class MaintenanceController extends Controller
 
         $items = MaintenanceChecklistItem::where('maintenance_checklist_id', $maintenance->id)
             ->get()
-            ->keyBy(fn($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
+            ->keyBy(fn ($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
 
@@ -134,7 +216,7 @@ class MaintenanceController extends Controller
 
         $items = MaintenanceChecklistItem::where('maintenance_checklist_id', $maintenance->id)
             ->get()
-            ->keyBy(fn($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
+            ->keyBy(fn ($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
 
@@ -253,7 +335,7 @@ class MaintenanceController extends Controller
 
         $items = MaintenanceChecklistItem::where('maintenance_checklist_id', $maintenance->id)
             ->get()
-            ->keyBy(fn($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
+            ->keyBy(fn ($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
 
