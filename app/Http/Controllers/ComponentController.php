@@ -6,6 +6,7 @@ use App\Exports\ComponentExport;
 use App\Imports\ComponentImport;
 use App\Models\Box;
 use App\Models\BoxUsage;
+use App\Models\BoxUsageDamage;
 use App\Models\Component;
 use App\Models\ComponentBorrowing;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class ComponentController extends Controller
             ->orderBy('code')
             ->get();
 
-        $usageQuery = BoxUsage::with(['box', 'returnNote']);
+        $usageQuery = BoxUsage::with(['box.boxComponents.component', 'returnNote', 'damages.component']);
 
         $usageStatus = $request->input('usage_status');
         $usageSearch = $request->input('usage_search');
@@ -67,6 +68,14 @@ class ComponentController extends Controller
         }
 
         $usages = $usageQuery->latest('used_at')->paginate(15)->withQueryString();
+
+        // Kunci "NIM|component_id" yang sudah pernah dilaporkan rusak —
+        // dipakai view untuk menonaktifkan komponen pada form laporan kerusakan.
+        $damageBlocked = BoxUsageDamage::query()
+            ->join('box_usages', 'box_usages.id', '=', 'box_usage_damages.box_usage_id')
+            ->get(['box_usage_damages.component_id as component_id', 'box_usages.user_nim as user_nim'])
+            ->mapWithKeys(fn ($row) => ["{$row->user_nim}|{$row->component_id}" => true])
+            ->all();
 
         $usageStats = [
             'total' => BoxUsage::count(),
@@ -98,7 +107,7 @@ class ComponentController extends Controller
             'returned' => ComponentBorrowing::where('status', 'Returned')->count(),
         ];
 
-        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats', 'borrowings', 'borrowingStats'));
+        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats', 'borrowings', 'borrowingStats', 'damageBlocked'));
     }
 
     public function create()

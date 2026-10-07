@@ -461,6 +461,43 @@
     </div>
 </div>
 
+{{-- Modal Laporan Kerusakan Komponen dalam Pemakaian Box (admin/laboran) --}}
+<div id="boxDamageModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-start justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900">Lapor Kerusakan Komponen</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Maksimal satu kali laporan untuk komponen yang sama oleh satu pengguna.</p>
+            </div>
+            <button type="button" onclick="closeBoxDamageModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Tutup">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form id="boxDamageForm" method="POST">
+            @csrf
+            <div class="px-6 py-4 space-y-4">
+                <div id="boxDamageError" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg"></div>
+                <div id="boxDamageList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Catatan kerusakan (opsional)</label>
+                    <textarea name="note" rows="2" maxlength="500" placeholder="mis. resistor terbakar..."
+                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"></textarea>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="closeBoxDamageModal()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
+                    Laporkan Kerusakan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     (function() {
@@ -678,6 +715,73 @@
             openBoxUsageForm();
         }
     });
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    {{-- Laporan kerusakan komponen dalam pemakaian box --}}
+    (function () {
+        const modal = document.getElementById('boxDamageModal');
+        const form = document.getElementById('boxDamageForm');
+        const list = document.getElementById('boxDamageList');
+        const errorEl = document.getElementById('boxDamageError');
+
+        function esc(value) {
+            return String(value).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+            }[c]));
+        }
+
+        window.openBoxDamageModal = function (btn) {
+            let components = [];
+            try {
+                components = JSON.parse(btn.dataset.components || '[]');
+            } catch (e) {
+                components = [];
+            }
+
+            form.action = `/box-usages/${btn.dataset.usageId}/damages`;
+            form.reset();
+            errorEl.classList.add('hidden');
+
+            if (components.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-500">Box ini tidak memiliki komponen.</p>';
+            } else {
+                list.innerHTML = components.map((c) => `
+                    <label class="flex items-start gap-2 text-sm ${c.blocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}">
+                        <input type="checkbox" name="component_ids[]" value="${esc(c.id)}"
+                            class="mt-0.5 rounded border-gray-300 text-red-600 focus:ring-red-500" ${c.blocked ? 'disabled' : ''}>
+                        <span>
+                            <span class="font-medium text-gray-800">${esc(c.label)}</span>
+                            ${c.blocked ? '<span class="block text-[11px] text-gray-400">Sudah pernah dilaporkan oleh pengguna ini</span>' : ''}
+                        </span>
+                    </label>`).join('');
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeBoxDamageModal = function () {
+            modal.classList.add('hidden');
+        };
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === this) closeBoxDamageModal();
+        });
+
+        form.addEventListener('submit', function (e) {
+            if (form.querySelectorAll('input[name="component_ids[]"]:checked').length === 0) {
+                e.preventDefault();
+                errorEl.textContent = 'Pilih minimal satu komponen yang rusak.';
+                errorEl.classList.remove('hidden');
+            }
+        });
+    })();
 </script>
 @endpush
 @endsection

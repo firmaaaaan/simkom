@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BoxUsage extends Model
 {
     use HasUuids;
+
     protected $fillable = [
         'box_id',
         'user_name',
@@ -23,7 +25,7 @@ class BoxUsage extends Model
     ];
 
     protected $casts = [
-        'used_at'     => 'datetime',
+        'used_at' => 'datetime',
         'returned_at' => 'datetime',
     ];
 
@@ -37,10 +39,10 @@ class BoxUsage extends Model
             }
 
             Notification::create([
-                'title'   => 'Peminjaman Box Baru',
+                'title' => 'Peminjaman Box Baru',
                 'message' => "{$usage->user_name} ({$usage->user_nim}) meminjam box {$usage->box?->code}",
-                'type'    => 'box_usage',
-                'url'     => route('boxes.index'),
+                'type' => 'box_usage',
+                'url' => route('boxes.index'),
             ]);
         });
     }
@@ -53,6 +55,11 @@ class BoxUsage extends Model
     public function returnNote(): HasOne
     {
         return $this->hasOne(BoxReturnNote::class);
+    }
+
+    public function damages(): HasMany
+    {
+        return $this->hasMany(BoxUsageDamage::class);
     }
 
     public function createdBy(): BelongsTo

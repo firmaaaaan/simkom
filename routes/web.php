@@ -256,6 +256,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:create-components')
         ->middleware('role:admin|superadmin')
         ->name('box-usages.store');
+    // Laporan kerusakan komponen dalam pemakaian box - ADMIN/LABORAN
+    Route::post('/box-usages/{usage}/damages', [AdminBoxUsageController::class, 'storeDamage'])
+        ->middleware('permission:edit-components')
+        ->name('box-usages.store-damage');
     Route::resource('components', ComponentController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-components')
         ->middlewareFor(['create', 'store'], 'permission:create-components')
