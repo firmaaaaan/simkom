@@ -319,6 +319,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:view-maintenance')->group(function () {
         Route::get('maintenance/export', [MaintenanceController::class, 'export'])->name('maintenance.export');
         Route::get('device-checks/export', [DeviceCheckController::class, 'export'])->name('device-checks.export');
+        Route::get('device-checks/template', [DeviceCheckController::class, 'template'])->name('device-checks.template');
         Route::get('maintenance/{maintenance}/print', [MaintenanceController::class, 'print'])->name('maintenance.print');
         Route::get('device-checks/report', [DeviceCheckController::class, 'report'])->name('device-checks.report');
         Route::get('device-checks/report/print', [DeviceCheckController::class, 'reportPrint'])->name('device-checks.report-print');
@@ -326,6 +327,9 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('permission:edit-maintenance')->group(function () {
         Route::post('maintenance/{maintenance}/computer/{computer}', [MaintenanceController::class, 'saveComputer'])->name('maintenance.save-computer');
+        // Import pengecekan perangkat mengubah data pengecekan (meniru pola import kartu kendali)
+        Route::get('device-checks/import', [DeviceCheckController::class, 'import'])->name('device-checks.import');
+        Route::post('device-checks/import', [DeviceCheckController::class, 'storeImport'])->name('device-checks.store-import');
     });
     Route::resource('maintenance', MaintenanceController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-maintenance')

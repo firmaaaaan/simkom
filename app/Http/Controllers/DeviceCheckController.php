@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\DeviceCheckExport;
+use App\Exports\DeviceCheckTemplate;
+use App\Imports\DeviceCheckImport;
 use App\Models\AcademicYear;
 use App\Models\Computer;
 use App\Models\DeviceCheck;
@@ -39,8 +41,80 @@ class DeviceCheckController extends Controller
     {
         return Excel::download(
             new DeviceCheckExport($this->listQuery()),
-            'pengecekan-perangkat-' . now()->format('Y-m-d') . '.xlsx'
+            'pengecekan-perangkat-'.now()->format('Y-m-d').'.xlsx'
         );
+    }
+
+    public function template()
+    {
+        return Excel::download(new DeviceCheckTemplate, 'template-pengecekan-perangkat.xlsx');
+    }
+
+    public function import()
+    {
+        return view('device-checks.import', [
+            'laboratories' => Laboratory::orderBy('name')->get(),
+            'academicYears' => AcademicYear::orderByDesc('start_year')->get(),
+            'officerName' => auth()->user()?->name,
+        ]);
+    }
+
+    /**
+     * Import pengecekan perangkat dari Excel. Konteks pengecekan (lab, tahun
+     * ajaran, tanggal, petugas) diisi di form karena file hanya berisi matriks
+     * centang komputer × item.
+     */
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'laboratory_id' => 'required|exists:laboratories,id',
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'check_date' => 'required|date',
+            'officer_name' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        $import = new DeviceCheckImport(
+            $request->input('laboratory_id'),
+            $request->input('academic_year_id'),
+            $request->input('check_date'),
+            $request->input('officer_name'),
+            $request->input('notes'),
+        );
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('device-checks.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $summary = [];
+        if ($import->getCreatedCount() > 0) {
+            $summary[] = $import->getCreatedCount().' pengecekan baru';
+        }
+        if ($import->getUpdatedCount() > 0) {
+            $summary[] = $import->getUpdatedCount().' diperbarui';
+        }
+        $message = $summary
+            ? 'Berhasil mengimpor '.implode(' dan ', $summary)
+            : 'Tidak ada pengecekan yang diimpor';
+        if ($year = $import->getAcademicYear()) {
+            $message .= " pada {$year->name}";
+        }
+        $message .= '.';
+
+        if ($errors = $import->getErrors()) {
+            $message .= ' '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('device-checks.import')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     public function create(Request $request)
@@ -145,7 +219,7 @@ class DeviceCheckController extends Controller
 
         $checked = $check->exists
             ? $check->items()->get()
-                ->mapWithKeys(fn (DeviceCheckItem $item) => [$item->computer_id . '.' . $item->item_key => $item->is_checked])
+                ->mapWithKeys(fn (DeviceCheckItem $item) => [$item->computer_id.'.'.$item->item_key => $item->is_checked])
                 ->all()
             : [];
 
@@ -239,7 +313,7 @@ class DeviceCheckController extends Controller
                 foreach ($checks as $check) {
                     $checked = $check->items
                         ->mapWithKeys(fn (DeviceCheckItem $item) => [
-                            $item->computer_id . '.' . $item->item_key => $item->is_checked,
+                            $item->computer_id.'.'.$item->item_key => $item->is_checked,
                         ])->all();
 
                     $cells = $computers->count() * $itemCount;
