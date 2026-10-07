@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeviceCheck extends Model
 {
     use HasUuids;
+
     protected $fillable = [
         'laboratory_id',
         'academic_year_id',
@@ -50,6 +51,7 @@ class DeviceCheck extends Model
             ['key' => 'power_cpu', 'label' => 'CPU', 'group' => 'Kabel Power'],
             ['key' => 'power_ups', 'label' => 'UPS', 'group' => 'Kabel Power'],
             ['key' => 'ups', 'label' => 'UPS'],
+            ['key' => 'jaringan', 'label' => 'Jaringan'],
         ];
     }
 

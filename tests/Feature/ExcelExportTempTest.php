@@ -267,13 +267,13 @@ class ExcelExportTempTest extends TestCase
         $this->assertSame(2, $maintenance[1][5]);
         $this->assertSame('Debu dibersihkan', $maintenance[1][6]);
 
-        // Pengecekan perangkat: 5 dari 7 sel berfungsi.
+        // Pengecekan perangkat: 5 dari 8 sel berfungsi.
         $checks = $this->rows($this->actingAs($admin)->get(route('device-checks.export')));
         $this->assertSame(1, $checks[1][4]);   // jumlah komputer
         $this->assertSame(5, $checks[1][5]);   // berfungsi
-        $this->assertSame(2, $checks[1][6]);   // perlu perhatian
-        $this->assertSame(7, $checks[1][7]);   // total sel
-        $this->assertSame('71.4%', $checks[1][8]);
+        $this->assertSame(3, $checks[1][6]);   // perlu perhatian
+        $this->assertSame(8, $checks[1][7]);   // total sel
+        $this->assertSame('62.5%', $checks[1][8]);
 
         // Peminjaman: catatan admin ikut terekspor.
         $borrowings = $this->rows($this->actingAs($admin)->get(route('borrowings.export')));
