@@ -4,7 +4,7 @@
 @section('header', 'Kartu Kendali Komputer')
 
 @section('content')
-<div class="max-w-4xl" x-data="{ specOpen: false }">
+<div class="max-w-4xl" x-data="{ specOpen: false, activeTab: '{{ in_array(request('tab'), ['riwayat', 'perangkat', 'pemeliharaan']) ? request('tab') : 'riwayat' }}' }">
     <div class="mb-6 flex items-center justify-between">
         <a href="{{ route('computers.show', $computer) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -191,12 +191,49 @@
         </form>
     </div>
 
-    {{-- Riwayat Pengecekan --}}
-    <div class="bg-white rounded-xl border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-100">
-            <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan</h2>
+    {{-- Riwayat (tab: kartu kendali / pengecekan perangkat / pemeliharaan) --}}
+    <div class="flex items-center gap-1 mb-4 border-b border-gray-200 no-print">
+        <button @click="activeTab = 'riwayat'" :class="activeTab === 'riwayat' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+            class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
+            Kartu Kendali
+        </button>
+        <button @click="activeTab = 'perangkat'" :class="activeTab === 'perangkat' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+            class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
+            Pengecekan Perangkat
+        </button>
+        <button @click="activeTab = 'pemeliharaan'" :class="activeTab === 'pemeliharaan' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+            class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
+            Pemeliharaan
+        </button>
+    </div>
+
+    <div x-show="activeTab === 'riwayat'" x-cloak>
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan</h2>
+            </div>
+            @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => true, 'years' => $years])
         </div>
-        @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => true, 'years' => $years])
+    </div>
+
+    <div x-show="activeTab === 'perangkat'" x-cloak>
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan Perangkat</h2>
+                <p class="text-xs text-gray-500 mt-1">Hasil matriks pengecekan perangkat yang mencakup komputer ini (20 terbaru).</p>
+            </div>
+            @include('computers.partials.riwayat-device-check', ['deviceChecks' => $deviceChecks])
+        </div>
+    </div>
+
+    <div x-show="activeTab === 'pemeliharaan'" x-cloak>
+        <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-base font-semibold text-gray-800">Riwayat Pemeliharaan</h2>
+                <p class="text-xs text-gray-500 mt-1">Checklist pemeliharaan yang mencakup komputer ini (20 terbaru).</p>
+            </div>
+            @include('computers.partials.riwayat-pemeliharaan', ['maintenances' => $maintenances])
+        </div>
     </div>
 
     @include('computers.partials.spec-modal')

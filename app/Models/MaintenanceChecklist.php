@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MaintenanceChecklist extends Model
 {
     use HasUuids;
+
     protected $fillable = [
         'laboratory_id',
         'academic_year_id',
@@ -32,6 +33,24 @@ class MaintenanceChecklist extends Model
     public function items()
     {
         return $this->hasMany(MaintenanceChecklistItem::class);
+    }
+
+    /**
+     * Riwayat pemeliharaan yang mencakup satu komputer (baris item milik
+     * komputer ikut dimuat, hanya untuk komputer itu) — terbaru lebih dulu.
+     */
+    public function scopeForComputer($query, string $computerId)
+    {
+        return $query
+            ->whereHas('items', fn ($q) => $q->where('computer_id', $computerId))
+            ->with([
+                'laboratory',
+                'academicYear',
+                'items' => fn ($q) => $q->where('computer_id', $computerId),
+            ])
+            ->orderByDesc('maintenance_date')
+            ->orderByDesc('id')
+            ->limit(20);
     }
 
     public static function getChecklistItems(): array

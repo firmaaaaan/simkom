@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Computer;
 use App\Models\ComputerCheck;
+use App\Models\DeviceCheck;
+use App\Models\MaintenanceChecklist;
 use Illuminate\Http\Request;
 
 class PublicComputerCardController extends Controller
@@ -28,6 +30,17 @@ class PublicComputerCardController extends Controller
 
         $years = ComputerCheck::availableYears($computer);
 
-        return view('computers.public-card', compact('computer', 'checks', 'years', 'month', 'year'));
+        $deviceChecks = DeviceCheck::forComputer($computer->id)->get();
+        $maintenances = MaintenanceChecklist::forComputer($computer->id)->get();
+
+        return view('computers.public-card', compact(
+            'computer',
+            'checks',
+            'years',
+            'month',
+            'year',
+            'deviceChecks',
+            'maintenances',
+        ));
     }
 }

@@ -36,6 +36,8 @@
 @if(count($years) > 0)
     {{-- Filter Bulanan --}}
     <form method="GET" class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-end gap-3">
+        {{-- Pertahankan tab riwayat aktif setelah filter diterapkan. --}}
+        <input type="hidden" name="tab" value="riwayat">
         <div>
             <label for="filter-month" class="block text-xs text-gray-400 mb-1">Bulan</label>
             <select id="filter-month" name="month" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">

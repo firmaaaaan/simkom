@@ -38,6 +38,24 @@ class DeviceCheck extends Model
     }
 
     /**
+     * Riwayat pengecekan yang mencakup satu komputer (baris item milik
+     * komputer ikut dimuat, hanya untuk komputer itu) — terbaru lebih dulu.
+     */
+    public function scopeForComputer($query, string $computerId)
+    {
+        return $query
+            ->whereHas('items', fn ($q) => $q->where('computer_id', $computerId))
+            ->with([
+                'laboratory',
+                'academicYear',
+                'items' => fn ($q) => $q->where('computer_id', $computerId),
+            ])
+            ->orderByDesc('check_date')
+            ->orderByDesc('id')
+            ->limit(20);
+    }
+
+    /**
      * Kolom item perangkat yang diperiksa — urutannya sama dengan urutan
      * kolom pada matriks. Tambah/kurangi entri di sini bila item berubah.
      */

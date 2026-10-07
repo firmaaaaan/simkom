@@ -21,7 +21,7 @@
     </script>
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-gray-50 font-sans antialiased" x-data="{ specOpen: false }">
+<body class="bg-gray-50 font-sans antialiased" x-data="{ specOpen: false, activeTab: '{{ in_array(request('tab'), ['riwayat', 'perangkat', 'pemeliharaan']) ? request('tab') : 'riwayat' }}' }">
 
     {{-- Navbar --}}
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -103,14 +103,52 @@
             </div>
         </div>
 
-        {{-- Riwayat Pengecekan (tanpa nama item & catatan per item) --}}
-        <div class="bg-white rounded-xl border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-100">
-                <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan</h2>
-                <p class="text-xs text-gray-500 mt-1">Riwayat pengecekan komputer ini, bisa disaring per bulan.</p>
-            </div>
+        {{-- Riwayat (tab: kartu kendali / pengecekan perangkat / pemeliharaan) --}}
+        <div class="flex items-center gap-1 mb-4 border-b border-gray-200 overflow-x-auto">
+            <button @click="activeTab = 'riwayat'" :class="activeTab === 'riwayat' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap">
+                Kartu Kendali
+            </button>
+            <button @click="activeTab = 'perangkat'" :class="activeTab === 'perangkat' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap">
+                Pengecekan Perangkat
+            </button>
+            <button @click="activeTab = 'pemeliharaan'" :class="activeTab === 'pemeliharaan' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap">
+                Pemeliharaan
+            </button>
+        </div>
 
-            @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => false, 'years' => $years])
+        <div x-show="activeTab === 'riwayat'" x-cloak>
+            {{-- Riwayat Pengecekan (tanpa nama item & catatan per item) --}}
+            <div class="bg-white rounded-xl border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan</h2>
+                    <p class="text-xs text-gray-500 mt-1">Riwayat pengecekan komputer ini, bisa disaring per bulan.</p>
+                </div>
+
+                @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => false, 'years' => $years])
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'perangkat'" x-cloak>
+            <div class="bg-white rounded-xl border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-base font-semibold text-gray-800">Riwayat Pengecekan Perangkat</h2>
+                    <p class="text-xs text-gray-500 mt-1">Hasil matriks pengecekan perangkat yang mencakup komputer ini (20 terbaru).</p>
+                </div>
+                @include('computers.partials.riwayat-device-check', ['deviceChecks' => $deviceChecks])
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'pemeliharaan'" x-cloak>
+            <div class="bg-white rounded-xl border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h2 class="text-base font-semibold text-gray-800">Riwayat Pemeliharaan</h2>
+                    <p class="text-xs text-gray-500 mt-1">Checklist pemeliharaan yang mencakup komputer ini (20 terbaru).</p>
+                </div>
+                @include('computers.partials.riwayat-pemeliharaan', ['maintenances' => $maintenances])
+            </div>
         </div>
     </div>
 

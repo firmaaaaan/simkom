@@ -8,13 +8,15 @@ use App\Exports\ComputerSpecExport;
 use App\Exports\ComputerSpecTemplate;
 use App\Imports\ComputerCheckImport;
 use App\Imports\ComputerSpecImport;
-use App\Models\Computer;
-use App\Models\Hardware;
-use App\Models\Software;
-use App\Models\Laboratory;
-use App\Models\ComputerCheck;
-use App\Models\Setting;
 use App\Models\AcademicYear;
+use App\Models\Computer;
+use App\Models\ComputerCheck;
+use App\Models\DeviceCheck;
+use App\Models\Hardware;
+use App\Models\Laboratory;
+use App\Models\MaintenanceChecklist;
+use App\Models\Setting;
+use App\Models\Software;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -45,7 +47,7 @@ class ComputerController extends Controller
 
         if ($search = $request->search) {
             $query->where('code', 'like', "%{$search}%")
-                  ->orWhereHas('laboratory', fn($q) => $q->where('name', 'like', "%{$search}%"));
+                ->orWhereHas('laboratory', fn ($q) => $q->where('name', 'like', "%{$search}%"));
         }
 
         return $query;
@@ -55,7 +57,7 @@ class ComputerController extends Controller
     {
         return Excel::download(
             new ComputerExport($this->filteredQuery($request)->latest()),
-            'komputer-' . now()->format('Y-m-d') . '.xlsx'
+            'komputer-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
@@ -67,7 +69,7 @@ class ComputerController extends Controller
     {
         return Excel::download(
             new ComputerSpecExport($this->filteredQuery($request)->latest()),
-            'spesifikasi-komputer-' . now()->format('Y-m-d') . '.xlsx'
+            'spesifikasi-komputer-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
@@ -87,27 +89,27 @@ class ComputerController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $import = new ComputerSpecImport();
+        $import = new ComputerSpecImport;
         try {
             Excel::import($import, $request->file('file'));
         } catch (\Exception $e) {
             return redirect()->route('computers.spec-import')
-                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
         }
 
         $message = "Berhasil menyinkronkan spesifikasi {$import->getSyncedCount()} komputer";
         if ($import->getCreatedComputersCount() > 0) {
-            $message .= ', ' . $import->getCreatedComputersCount() . ' komputer baru dibuat';
+            $message .= ', '.$import->getCreatedComputersCount().' komputer baru dibuat';
         }
         if ($import->getCreatedHardwareCount() > 0) {
-            $message .= ', ' . $import->getCreatedHardwareCount() . ' hardware baru ditambahkan';
+            $message .= ', '.$import->getCreatedHardwareCount().' hardware baru ditambahkan';
         }
         $message .= '.';
 
         if ($errors = $import->getErrors()) {
-            $message .= ' ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            $message .= ' '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
             if (count($errors) > 5) {
-                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
             }
         }
 
@@ -145,18 +147,18 @@ class ComputerController extends Controller
             Excel::import($import, $request->file('file'));
         } catch (\Exception $e) {
             return redirect()->route('computers.check-import')
-                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
         }
 
         $summary = [];
         if ($import->getImportedCount() > 0) {
-            $summary[] = $import->getImportedCount() . ' pengecekan baru';
+            $summary[] = $import->getImportedCount().' pengecekan baru';
         }
         if ($import->getUpdatedCount() > 0) {
-            $summary[] = $import->getUpdatedCount() . ' diperbarui';
+            $summary[] = $import->getUpdatedCount().' diperbarui';
         }
         $message = $summary
-            ? 'Berhasil mengimpor ' . implode(' dan ', $summary)
+            ? 'Berhasil mengimpor '.implode(' dan ', $summary)
             : 'Tidak ada pengecekan yang diimpor';
         if ($year = $import->getAcademicYear()) {
             $message .= " pada {$year->name}";
@@ -164,14 +166,14 @@ class ComputerController extends Controller
         $message .= '.';
 
         if ($errors = $import->getErrors()) {
-            $message .= ' ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            $message .= ' '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
             if (count($errors) > 5) {
-                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
             }
         }
 
         if ($unmatched = $import->getUnmatchedPjNames()) {
-            $message .= ' PJ tidak ditemukan sebagai user: ' . implode(', ', $unmatched) . ' (ditampilkan sebagai System).';
+            $message .= ' PJ tidak ditemukan sebagai user: '.implode(', ', $unmatched).' (ditampilkan sebagai System).';
         }
 
         return redirect()->route('computers.check-import')
@@ -184,6 +186,7 @@ class ComputerController extends Controller
         $laboratories = Laboratory::orderBy('name')->get();
         $hardware = Hardware::orderBy('name')->get();
         $software = Software::orderBy('name')->get();
+
         return view('computers.create', compact('laboratories', 'hardware', 'software'));
     }
 
@@ -219,6 +222,7 @@ class ComputerController extends Controller
     public function show(Computer $computer)
     {
         $computer->load(['laboratory', 'hardware', 'software']);
+
         return view('computers.show', compact('computer'));
     }
 
@@ -230,13 +234,14 @@ class ComputerController extends Controller
         $software = Software::orderBy('name')->get();
         $selectedHardware = $computer->hardware->pluck('id')->toArray();
         $selectedSoftware = $computer->software->pluck('id')->toArray();
+
         return view('computers.edit', compact('computer', 'laboratories', 'hardware', 'software', 'selectedHardware', 'selectedSoftware'));
     }
 
     public function update(Request $request, Computer $computer)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:50|unique:computers,code,' . $computer->id,
+            'code' => 'required|string|max:50|unique:computers,code,'.$computer->id,
             'laboratory_id' => 'nullable|exists:laboratories,id',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
             'description' => 'nullable|string',
@@ -280,7 +285,7 @@ class ComputerController extends Controller
             $computer->delete();
         }
 
-        return redirect()->route('computers.index')->with('success', count($request->ids) . ' komputer berhasil dihapus.');
+        return redirect()->route('computers.index')->with('success', count($request->ids).' komputer berhasil dihapus.');
     }
 
     public function bulkAssign(Request $request)
@@ -304,11 +309,11 @@ class ComputerController extends Controller
     public function storeBulkAssign(Request $request)
     {
         $validated = $request->validate([
-            'hardware_ids'   => 'nullable|array',
+            'hardware_ids' => 'nullable|array',
             'hardware_ids.*' => 'exists:hardware,id',
-            'software_ids'   => 'nullable|array',
+            'software_ids' => 'nullable|array',
             'software_ids.*' => 'exists:software,id',
-            'computer_ids'   => 'required|array|min:1',
+            'computer_ids' => 'required|array|min:1',
             'computer_ids.*' => 'exists:computers,id',
         ]);
 
@@ -323,26 +328,31 @@ class ComputerController extends Controller
         $assigned = 0;
 
         foreach ($computers as $computer) {
-            if (!empty($hardwareIds)) {
+            if (! empty($hardwareIds)) {
                 $computer->hardware()->syncWithoutDetaching($hardwareIds);
             }
-            if (!empty($softwareIds)) {
+            if (! empty($softwareIds)) {
                 $computer->software()->syncWithoutDetaching($softwareIds);
             }
             $assigned++;
         }
 
         $parts = [];
-        if (!empty($hardwareIds)) $parts[] = count($hardwareIds) . ' hardware';
-        if (!empty($softwareIds)) $parts[] = count($softwareIds) . ' software';
+        if (! empty($hardwareIds)) {
+            $parts[] = count($hardwareIds).' hardware';
+        }
+        if (! empty($softwareIds)) {
+            $parts[] = count($softwareIds).' software';
+        }
 
         return redirect()->route('computers.index')
-            ->with('success', implode(' dan ', $parts) . ' berhasil ditugaskan ke ' . $assigned . ' komputer.');
+            ->with('success', implode(' dan ', $parts).' berhasil ditugaskan ke '.$assigned.' komputer.');
     }
 
     public function generate()
     {
         $laboratories = Laboratory::orderBy('name')->get();
+
         return view('computers.generate', compact('laboratories'));
     }
 
@@ -367,10 +377,11 @@ class ComputerController extends Controller
 
         for ($i = 0; $i < $count; $i++) {
             $num = $start + $i;
-            $code = $prefix . '-' . str_pad($num, 3, '0', STR_PAD_LEFT);
+            $code = $prefix.'-'.str_pad($num, 3, '0', STR_PAD_LEFT);
 
             if (Computer::where('code', $code)->exists()) {
                 $skipped++;
+
                 continue;
             }
 
@@ -417,7 +428,19 @@ class ComputerController extends Controller
         $years = ComputerCheck::availableYears($computer);
         $currentYear = AcademicYear::current();
 
-        return view('computers.card', compact('computer', 'checks', 'years', 'month', 'year', 'currentYear'));
+        $deviceChecks = DeviceCheck::forComputer($computer->id)->get();
+        $maintenances = MaintenanceChecklist::forComputer($computer->id)->get();
+
+        return view('computers.card', compact(
+            'computer',
+            'checks',
+            'years',
+            'month',
+            'year',
+            'currentYear',
+            'deviceChecks',
+            'maintenances',
+        ));
     }
 
     public function cardPrint(Computer $computer)
@@ -523,6 +546,7 @@ class ComputerController extends Controller
                 ->flatMap(function ($group) {
                     return $group->values()->map(function ($computer, $index) {
                         $computer->nomor_meja = $index + 1;
+
                         return $computer;
                     });
                 })
@@ -534,6 +558,7 @@ class ComputerController extends Controller
                 ->get()
                 ->map(function ($computer, $index) {
                     $computer->nomor_meja = $index + 1;
+
                     return $computer;
                 });
         } elseif ($laboratories->isNotEmpty()) {
@@ -543,6 +568,7 @@ class ComputerController extends Controller
                 ->get()
                 ->map(function ($computer, $index) {
                     $computer->nomor_meja = $index + 1;
+
                     return $computer;
                 });
         }
@@ -624,12 +650,14 @@ class ComputerController extends Controller
     public function reportCardControl(Request $request)
     {
         $data = $this->getReportData($request);
+
         return view('computers.report-card-control', $data);
     }
 
     public function reportCardControlPrint(Request $request)
     {
         $data = $this->getReportData($request);
+
         return view('computers.report-card-control-print', $data);
     }
 }
