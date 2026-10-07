@@ -21,8 +21,8 @@ class ComponentController extends Controller
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('brand', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
             });
         }
 
@@ -54,7 +54,11 @@ class ComponentController extends Controller
         if ($usageSearch) {
             $usageQuery->where(function ($q) use ($usageSearch) {
                 $q->where('user_name', 'like', "%{$usageSearch}%")
-                  ->orWhere('user_nim', 'like', "%{$usageSearch}%");
+                    ->orWhere('user_nim', 'like', "%{$usageSearch}%")
+                    ->orWhereHas('box', function ($boxQuery) use ($usageSearch) {
+                        $boxQuery->where('name', 'like', "%{$usageSearch}%")
+                            ->orWhere('code', 'like', "%{$usageSearch}%");
+                    });
             });
         }
 
@@ -65,8 +69,8 @@ class ComponentController extends Controller
         $usages = $usageQuery->latest('used_at')->paginate(15)->withQueryString();
 
         $usageStats = [
-            'total'    => BoxUsage::count(),
-            'using'    => BoxUsage::where('status', 'Using')->count(),
+            'total' => BoxUsage::count(),
+            'using' => BoxUsage::where('status', 'Using')->count(),
             'returned' => BoxUsage::where('status', 'Returned')->count(),
         ];
 
@@ -82,15 +86,15 @@ class ComponentController extends Controller
         if ($borrowingSearch) {
             $borrowingQuery->where(function ($q) use ($borrowingSearch) {
                 $q->where('user_name', 'like', "%{$borrowingSearch}%")
-                  ->orWhere('user_nim', 'like', "%{$borrowingSearch}%");
+                    ->orWhere('user_nim', 'like', "%{$borrowingSearch}%");
             });
         }
 
         $borrowings = $borrowingQuery->latest('borrowed_at')->paginate(15)->withQueryString();
 
         $borrowingStats = [
-            'total'    => ComponentBorrowing::count(),
-            'using'    => ComponentBorrowing::where('status', 'Using')->count(),
+            'total' => ComponentBorrowing::count(),
+            'using' => ComponentBorrowing::where('status', 'Using')->count(),
             'returned' => ComponentBorrowing::where('status', 'Returned')->count(),
         ];
 
@@ -150,7 +154,7 @@ class ComponentController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:components,code,' . $component->id,
+            'code' => 'required|string|max:50|unique:components,code,'.$component->id,
             'category' => 'required|in:IoT,Jaringan,Lain-lain',
             'brand' => 'nullable|string|max:255',
             'model' => 'nullable|string|max:255',
@@ -202,7 +206,7 @@ class ComponentController extends Controller
 
         Component::whereIn('id', $request->ids)->delete();
 
-        return redirect()->route('components.index')->with('success', count($request->ids) . ' komponen berhasil dihapus.');
+        return redirect()->route('components.index')->with('success', count($request->ids).' komponen berhasil dihapus.');
     }
 
     public function export()
@@ -226,19 +230,19 @@ class ComponentController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $import = new ComponentImport();
+        $import = new ComponentImport;
         try {
             Excel::import($import, $request->file('file'));
         } catch (\Exception $e) {
             return redirect()->route('components.import')
-                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
         }
 
         $message = "Berhasil mengimpor {$import->getImportedCount()} data komponen";
         if ($errors = $import->getErrors()) {
-            $message .= '. ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
             if (count($errors) > 5) {
-                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
             }
         }
 
