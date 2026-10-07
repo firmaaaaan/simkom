@@ -59,7 +59,6 @@
                         <span class="font-semibold text-gray-700">Periode</span>
                         <span class="text-gray-500 mx-2">:</span>
                         <span class="text-gray-900">{{ $selectedYear->name }}</span>
-                        <span class="text-gray-500">({{ $selectedYear->periodLabel() }})</span>
                     </div>
                 </div>
             </div>

@@ -149,11 +149,13 @@ class AcademicYearDateInputTest extends TestCase
         $rows = IOFactory::load($path)->getActiveSheet()->toArray(null, true, false, false);
 
         $this->assertSame(
-            ['Nama Tahun Ajaran', 'Tahun Mulai', 'Tahun Selesai', 'Periode', 'Status'],
+            ['Nama Tahun Ajaran', 'Tahun Mulai', 'Tahun Selesai', 'Status'],
             $rows[0]
         );
-        // Periode tetap berada di index 3 (tetangga ExcelExportTempTest).
-        $this->assertSame('01 Aug 2026 - 30 Jun 2027', $rows[1][3]);
+        // Tanggal periode tidak diekspor; Status berada di index 3 (tetangga ExcelExportTempTest).
+        $this->assertSame('Non Aktif', $rows[1][3]);
         $this->assertStringNotContainsString('Tanggal Mulai', implode(',', $rows[0]));
+        $this->assertStringNotContainsString('Periode', implode(',', $rows[0]));
+        $this->assertStringNotContainsString('30 Jun', implode(',', $rows[1]));
     }
 }

@@ -89,7 +89,7 @@
                         <h2 class="text-base font-semibold text-gray-800">Rekap Pengecekan</h2>
                         <p class="text-xs text-gray-500 mt-1">
                             Tahun Ajaran <span class="font-semibold">{{ $selectedYear->name }}</span>
-                            ({{ $selectedYear->periodLabel() }}) — semua pengecekan ditampilkan, termasuk beberapa tanggal di lab yang sama.
+                            — semua pengecekan ditampilkan, termasuk beberapa tanggal di lab yang sama.
                         </p>
                         <p class="text-xs mt-1 {{ $checkedCount === 0 ? 'text-red-600' : 'text-gray-500' }}">
                             <span class="font-semibold">{{ $checkedCount }}</span> dari {{ $selectable->count() }} baris dipilih.

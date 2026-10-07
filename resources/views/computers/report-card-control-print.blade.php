@@ -57,7 +57,7 @@
                 </tr>
                 <tr>
                     <td>Periode</td>
-                    <td>: {{ $selectedYear->name ?? '-' }}{{ $selectedYear ? ' (' . $selectedYear->periodLabel() . ')' : '' }}</td>
+                    <td>: {{ $selectedYear->name ?? '-' }}</td>
                 </tr>
             </table>
         </div>

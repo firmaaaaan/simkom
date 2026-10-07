@@ -78,7 +78,7 @@
             </tr>
             <tr>
                 <td>Periode</td>
-                <td>: {{ $check->academicYear->name ?? '-' }}{{ $check->academicYear ? ' (' . $check->academicYear->periodLabel() . ')' : '' }}</td>
+                <td>: {{ $check->academicYear->name ?? '-' }}</td>
             </tr>
             <tr>
                 <td>Tanggal</td>

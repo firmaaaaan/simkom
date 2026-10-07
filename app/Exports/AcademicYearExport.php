@@ -13,7 +13,6 @@ class AcademicYearExport extends BaseExport implements WithHeadings, WithMapping
             'Nama Tahun Ajaran',
             'Tahun Mulai',
             'Tahun Selesai',
-            'Periode',
             'Status',
         ];
     }
@@ -24,7 +23,6 @@ class AcademicYearExport extends BaseExport implements WithHeadings, WithMapping
             $academicYear->name,
             $academicYear->start_year,
             $academicYear->end_year,
-            $academicYear->periodLabel(),
             $academicYear->status,
         ];
     }

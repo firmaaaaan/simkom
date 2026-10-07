@@ -295,7 +295,8 @@ class ExcelExportTempTest extends TestCase
 
         $years = $this->rows($this->actingAs($admin)->get(route('academic-years.export')));
         $this->assertSame('TA 2026/2027', $years[1][0]);
-        $this->assertSame('01 Aug 2026 - 30 Jun 2027', $years[1][3]);
+        $this->assertSame('Aktif', $years[1][3]);
+        $this->assertStringNotContainsString('30 Jun', implode(',', $years[1]));
     }
 
     public function test_every_export_requires_its_permission(): void

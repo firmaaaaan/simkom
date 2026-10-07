@@ -94,7 +94,7 @@
                 </tr>
                 <tr>
                     <td>Periode</td>
-                    <td>: {{ $selectedYear->name }} ({{ $selectedYear->periodLabel() }})</td>
+                    <td>: {{ $selectedYear->name }}</td>
                 </tr>
                 <tr>
                     <td>Dicetak</td>
@@ -183,7 +183,7 @@
                         </tr>
                         <tr>
                             <td>Periode</td>
-                            <td>: {{ $selectedYear->name }} ({{ $selectedYear->periodLabel() }})</td>
+                            <td>: {{ $selectedYear->name }}</td>
                         </tr>
                         <tr>
                             <td>Tanggal</td>
