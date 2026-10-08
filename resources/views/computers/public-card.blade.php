@@ -127,7 +127,7 @@
                     <p class="text-xs text-gray-500 mt-1">Riwayat pengecekan komputer ini, bisa disaring per bulan.</p>
                 </div>
 
-                @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => false, 'years' => $years])
+                @include('computers.partials.riwayat-pengecekan', ['checks' => $checks, 'showItemNames' => false, 'years' => $years, 'showTime' => false])
             </div>
         </div>
 

@@ -5,6 +5,8 @@
     - $checks        : koleksi App\Models\ComputerCheck
     - $showItemNames : true  -> tampilkan nama hardware/software + statusnya (area admin)
                        false -> hanya ringkasan jumlah per status (halaman publik)
+    - $showTime      : true  -> tampilkan jam pada tanggal pengecekan (default, area admin)
+                       false -> hanya tanggal tanpa jam (halaman publik)
     - $years         : daftar tahun untuk dropdown filter (opsional)
 
     Filter bulan/tahun dibaca dari query string (?month=&year=) dan dikirim lewat GET
@@ -12,6 +14,7 @@
 --}}
 @php
     $showItemNames = $showItemNames ?? true;
+    $showTime = $showTime ?? true;
     $years = $years ?? [];
 
     $selectedMonth = request('month');
@@ -85,7 +88,7 @@
                         {{ $check->overall_status === 'Baik' ? 'bg-green-100 text-green-800' : ($check->overall_status === 'Kritis' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
                         {{ $check->overall_status }}
                     </span>
-                    <span class="text-xs text-gray-500">{{ $check->created_at->format('d M Y H:i') }}</span>
+                    <span class="text-xs text-gray-500">{{ $check->created_at->format($showTime ? 'd M Y H:i' : 'd M Y') }}</span>
                     @if($check->academicYear)
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
                             {{ $check->academicYear->name }}

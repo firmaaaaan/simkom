@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AcademicYear;
 use App\Models\Computer;
+use App\Models\ComputerCheck;
 use App\Models\DeviceCheck;
 use App\Models\DeviceCheckItem;
 use App\Models\Laboratory;
@@ -89,6 +90,20 @@ class KartuKendaliHistoryTabTest extends TestCase
         return $maintenance;
     }
 
+    private function seedComputerCheck(Computer $computer, AcademicYear $year): ComputerCheck
+    {
+        $check = new ComputerCheck([
+            'computer_id' => $computer->id,
+            'academic_year_id' => $year->id,
+            'overall_status' => 'Baik',
+            'notes' => 'Semua fungsi normal',
+        ]);
+        $check->created_at = '2025-09-15 10:30:00';
+        $check->save();
+
+        return $check;
+    }
+
     private function viewer(): User
     {
         $role = Role::firstOrCreate(['name' => 'viewer-kartu'], ['label' => 'Viewer Kartu']);
@@ -110,6 +125,7 @@ class KartuKendaliHistoryTabTest extends TestCase
     {
         [$lab, $computer] = $this->seedLab();
         $year = $this->seedYear();
+        $this->seedComputerCheck($computer, $year);
         $this->seedDeviceCheck($lab, $computer, $year);
         $this->seedMaintenance($lab, $computer, $year);
 
@@ -119,6 +135,10 @@ class KartuKendaliHistoryTabTest extends TestCase
             ->assertOk()
             ->assertSee('Pengecekan Perangkat')
             ->assertSee('Pemeliharaan')
+            // Halaman publik hanya menampilkan tanggal pengecekan, tanpa jam.
+            ->assertSee('15 Sep 2025')
+            ->assertDontSee('15 Sep 2025 10:30')
+            ->assertDontSee('10:30')
             // Data tab pengecekan perangkat.
             ->assertSee('15 September 2025')
             ->assertSee('Firmansyah')
@@ -144,12 +164,15 @@ class KartuKendaliHistoryTabTest extends TestCase
     {
         [$lab, $computer] = $this->seedLab();
         $year = $this->seedYear();
+        $this->seedComputerCheck($computer, $year);
         $this->seedDeviceCheck($lab, $computer, $year);
         $this->seedMaintenance($lab, $computer, $year);
 
         $this->actingAs($this->viewer())
             ->get(route('computers.card', $computer))
             ->assertOk()
+            // Kartu kendali area admin tetap menampilkan jam pengecekan.
+            ->assertSee('15 Sep 2025 10:30')
             ->assertSee('Riwayat Pemeliharaan')
             ->assertSee('Hasil matriks pengecekan perangkat')
             ->assertSee('15 September 2025')
