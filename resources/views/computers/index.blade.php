@@ -184,12 +184,9 @@
                 <div class="mb-3">
                     <p class="text-xs text-gray-400 mb-1">Hardware ({{ $item->hardware->count() }})</p>
                     <div class="flex flex-wrap gap-1">
-                        @foreach($item->hardware->take(3) as $hw)
+                        @foreach($item->hardware as $hw)
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-50 text-blue-700">{{ $hw->name }}</span>
                         @endforeach
-                        @if($item->hardware->count() > 3)
-                            <span class="text-xs text-gray-400 self-center">+{{ $item->hardware->count() - 3 }}</span>
-                        @endif
                     </div>
                 </div>
             @endif

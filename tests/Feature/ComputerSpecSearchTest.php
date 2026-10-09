@@ -186,6 +186,25 @@ class ComputerSpecSearchTest extends TestCase
         $this->assertSame('SPEC-001', $rows[1][0]);
     }
 
+    public function test_index_shows_all_hardware_chips_without_overflow_counter(): void
+    {
+        $user = $this->userWith(['view-computers'], 'viewer-hw@test');
+
+        foreach (range(1, 4) as $i) {
+            $hw = Hardware::create(['name' => "Komponen Tambahan {$i}", 'code' => "HW-SP-T{$i}", 'category' => 'Lainnya']);
+            $this->pcNoSpec->hardware()->attach($hw->id);
+        }
+
+        $response = $this->actingAs($user)->get(route('computers.index', ['search' => 'SPEC-003']));
+        $response->assertOk()->assertSee('SPEC-003');
+
+        // Semua hardware tampil — tidak ada lagi chip yang dipotong +N.
+        foreach ($this->pcNoSpec->hardware as $hw) {
+            $response->assertSee($hw->name);
+        }
+        $response->assertDontSee('>+</', false);
+    }
+
     public function test_index_renders_spec_filter_ui_and_reset_link(): void
     {
         $user = $this->userWith(['view-computers'], 'viewer-ui@test');
