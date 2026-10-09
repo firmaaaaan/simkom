@@ -199,4 +199,146 @@ class KartuKendaliHistoryTabTest extends TestCase
             ->assertOk()
             ->assertSee("activeTab: 'pemeliharaan'", false);
     }
+
+    private function seedSecondYear(): AcademicYear
+    {
+        return AcademicYear::create([
+            'name' => 'Tahun Ajaran 2024/2025',
+            'start_year' => 2024,
+            'end_year' => 2025,
+            'status' => 'Non Aktif',
+        ]);
+    }
+
+    private function seedComputerCheckFor(Computer $computer, AcademicYear $year, string $notes): ComputerCheck
+    {
+        $check = new ComputerCheck([
+            'computer_id' => $computer->id,
+            'academic_year_id' => $year->id,
+            'overall_status' => 'Baik',
+            'notes' => $notes,
+        ]);
+        $check->created_at = '2024-10-10 09:00:00';
+        $check->save();
+
+        return $check;
+    }
+
+    private function seedDeviceCheckFor(Laboratory $lab, Computer $computer, AcademicYear $year, string $notes): DeviceCheck
+    {
+        $check = DeviceCheck::create([
+            'laboratory_id' => $lab->id,
+            'academic_year_id' => $year->id,
+            'check_date' => '2024-10-11',
+            'officer_name' => 'Andi',
+            'notes' => $notes,
+        ]);
+
+        foreach (DeviceCheck::itemKeys() as $itemKey) {
+            DeviceCheckItem::create([
+                'device_check_id' => $check->id,
+                'computer_id' => $computer->id,
+                'item_key' => $itemKey,
+                'is_checked' => true,
+            ]);
+        }
+
+        return $check;
+    }
+
+    private function seedMaintenanceFor(Laboratory $lab, Computer $computer, AcademicYear $year, string $notes): MaintenanceChecklist
+    {
+        $maintenance = MaintenanceChecklist::create([
+            'laboratory_id' => $lab->id,
+            'academic_year_id' => $year->id,
+            'maintenance_date' => '2024-10-12',
+            'inspector_name' => 'Budi',
+            'notes_computer' => $notes,
+        ]);
+
+        MaintenanceChecklistItem::create([
+            'maintenance_checklist_id' => $maintenance->id,
+            'computer_id' => $computer->id,
+            'category' => 'A',
+            'item_number' => 1,
+            'is_checked' => true,
+        ]);
+
+        return $maintenance;
+    }
+
+    public function test_academic_year_filter_selects_render_on_public_and_admin_pages(): void
+    {
+        [, $computer] = $this->seedLab();
+        $this->seedYear();
+
+        $this->get(route('kartu.show', $computer))
+            ->assertOk()
+            ->assertSee('name="academic_year_id"', false)
+            ->assertSee('name="device_academic_year_id"', false)
+            ->assertSee('name="maintenance_academic_year_id"', false);
+
+        $this->actingAs($this->viewer())
+            ->get(route('computers.card', $computer))
+            ->assertOk()
+            ->assertSee('name="academic_year_id"', false)
+            ->assertSee('name="device_academic_year_id"', false)
+            ->assertSee('name="maintenance_academic_year_id"', false);
+    }
+
+    public function test_academic_year_filters_narrow_each_tab_independently(): void
+    {
+        [$lab, $computer] = $this->seedLab();
+        $yearA = $this->seedYear();
+        $yearB = $this->seedSecondYear();
+
+        // Data tahun ajaran aktif (via helper lama).
+        $this->seedComputerCheck($computer, $yearA);
+        $this->seedDeviceCheck($lab, $computer, $yearA);
+        $this->seedMaintenance($lab, $computer, $yearA);
+
+        // Data tahun ajaran kedua dengan catatan khas agar bisa dibedakan.
+        $this->seedComputerCheckFor($computer, $yearB, 'Cek kartu kendali tahun B');
+        $this->seedDeviceCheckFor($lab, $computer, $yearB, 'Matriks perangkat tahun B');
+        $this->seedMaintenanceFor($lab, $computer, $yearB, 'Checklist pemeliharaan tahun B');
+
+        // Tab Kartu Kendali: hanya pengecekan tahun B yang tampil.
+        $this->get(route('kartu.show', $computer).'?academic_year_id='.$yearB->id)
+            ->assertOk()
+            ->assertSee('Cek kartu kendali tahun B')
+            ->assertDontSee('Semua fungsi normal');
+
+        // Tab Pengecekan Perangkat: hanya matriks tahun B yang tampil.
+        $this->get(route('kartu.show', $computer).'?device_academic_year_id='.$yearB->id)
+            ->assertOk()
+            ->assertSee('Matriks perangkat tahun B')
+            ->assertDontSee('Pengecekan awal semester');
+
+        // Tab Pemeliharaan: hanya checklist tahun B yang tampil.
+        $this->get(route('kartu.show', $computer).'?maintenance_academic_year_id='.$yearB->id)
+            ->assertOk()
+            ->assertSee('Checklist pemeliharaan tahun B')
+            ->assertDontSee('Debu dibersihkan');
+
+        // Filter asing (id tidak ada) -> empty state, bukan tampilkan semua.
+        $this->get(route('kartu.show', $computer).'?academic_year_id=tidak-ada')
+            ->assertOk()
+            ->assertDontSee('Semua fungsi normal');
+    }
+
+    public function test_admin_card_applies_academic_year_filter(): void
+    {
+        [$lab, $computer] = $this->seedLab();
+        $yearA = $this->seedYear();
+        $yearB = $this->seedSecondYear();
+
+        $this->seedComputerCheck($computer, $yearA);
+        $this->seedComputerCheckFor($computer, $yearB, 'Cek kartu kendali tahun B');
+
+        $this->actingAs($this->viewer())
+            ->get(route('computers.card', $computer).'?academic_year_id='.$yearB->id)
+            ->assertOk()
+            ->assertSee('Cek kartu kendali tahun B')
+            ->assertDontSee('Semua fungsi normal');
+    }
 }

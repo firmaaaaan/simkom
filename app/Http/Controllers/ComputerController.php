@@ -411,6 +411,9 @@ class ComputerController extends Controller
                 'computer' => $computer,
                 'month' => $request->month,
                 'year' => $request->year,
+                'academic_year_id' => $request->academic_year_id,
+                'device_academic_year_id' => $request->device_academic_year_id,
+                'maintenance_academic_year_id' => $request->maintenance_academic_year_id,
             ]));
         }
 
@@ -419,17 +422,29 @@ class ComputerController extends Controller
         $month = $request->integer('month') ?: null;
         $year = $request->integer('year') ?: null;
 
+        // Filter tahun ajaran per tab; nilai asing (bukan id valid) akan
+        // cocok dengan nol baris sehingga tampil empty state, bukan bocor.
+        $academicYearId = $request->filled('academic_year_id') ? $request->string('academic_year_id') : null;
+        $deviceAcademicYearId = $request->filled('device_academic_year_id') ? $request->string('device_academic_year_id') : null;
+        $maintenanceAcademicYearId = $request->filled('maintenance_academic_year_id') ? $request->string('maintenance_academic_year_id') : null;
+
         $checks = ComputerCheck::where('computer_id', $computer->id)
             ->forPeriod($month, $year)
+            ->when($academicYearId, fn ($query, $id) => $query->where('academic_year_id', $id))
             ->with(['checkedBy', 'academicYear', 'hardwareChecks.checkable'])
             ->latest()
             ->get();
 
         $years = ComputerCheck::availableYears($computer);
         $currentYear = AcademicYear::current();
+        $academicYears = AcademicYear::orderByDesc('start_year')->get();
 
-        $deviceChecks = DeviceCheck::forComputer($computer->id)->get();
-        $maintenances = MaintenanceChecklist::forComputer($computer->id)->get();
+        $deviceChecks = DeviceCheck::forComputer($computer->id)
+            ->when($deviceAcademicYearId, fn ($query, $id) => $query->where('academic_year_id', $id))
+            ->get();
+        $maintenances = MaintenanceChecklist::forComputer($computer->id)
+            ->when($maintenanceAcademicYearId, fn ($query, $id) => $query->where('academic_year_id', $id))
+            ->get();
 
         return view('computers.card', compact(
             'computer',
@@ -438,6 +453,7 @@ class ComputerController extends Controller
             'month',
             'year',
             'currentYear',
+            'academicYears',
             'deviceChecks',
             'maintenances',
         ));

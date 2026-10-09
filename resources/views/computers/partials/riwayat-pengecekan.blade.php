@@ -8,18 +8,23 @@
     - $showTime      : true  -> tampilkan jam pada tanggal pengecekan (default, area admin)
                        false -> hanya tanggal tanpa jam (halaman publik)
     - $years         : daftar tahun untuk dropdown filter (opsional)
+    - $academicYears : daftar App\Models\AcademicYear untuk filter tahun ajaran
+                       (opsional, dikirim dari controller)
 
-    Filter bulan/tahun dibaca dari query string (?month=&year=) dan dikirim lewat GET
-    ke halaman yang sedang dibuka, jadi form ini tidak butuh action khusus.
+    Filter bulan/tahun/tahun ajaran dibaca dari query string
+    (?month=&year=&academic_year_id=) dan dikirim lewat GET ke halaman yang
+    sedang dibuka, jadi form ini tidak butuh action khusus.
 --}}
 @php
     $showItemNames = $showItemNames ?? true;
     $showTime = $showTime ?? true;
     $years = $years ?? [];
+    $academicYears = $academicYears ?? [];
 
     $selectedMonth = request('month');
     $selectedYear = request('year');
-    $isFiltered = filled($selectedMonth) || filled($selectedYear);
+    $selectedAcademicYear = request('academic_year_id');
+    $isFiltered = filled($selectedMonth) || filled($selectedYear) || filled($selectedAcademicYear);
 
     $monthNames = [
         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -36,8 +41,8 @@
     ];
 @endphp
 
-@if(count($years) > 0)
-    {{-- Filter Bulanan --}}
+@if(count($years) > 0 || count($academicYears) > 0)
+    {{-- Filter Bulan / Tahun / Tahun Ajaran --}}
     <form method="GET" class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-end gap-3">
         {{-- Pertahankan tab riwayat aktif setelah filter diterapkan. --}}
         <input type="hidden" name="tab" value="riwayat">
@@ -59,6 +64,17 @@
                 @endforeach
             </select>
         </div>
+        <div>
+            <label for="filter-academic-year" class="block text-xs text-gray-400 mb-1">Tahun Ajaran</label>
+            <select id="filter-academic-year" name="academic_year_id" class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <option value="">Semua tahun ajaran</option>
+                @foreach($academicYears as $option)
+                    <option value="{{ $option->id }}" @selected((string) $selectedAcademicYear === (string) $option->id)>
+                        {{ $option->name }}{{ $option->status === 'Aktif' ? ' - Aktif' : '' }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
         <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
@@ -66,7 +82,7 @@
             Terapkan
         </button>
         @if($isFiltered)
-            <a href="{{ url()->current() }}" class="px-4 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <a href="{{ url()->current() }}?tab=riwayat" class="px-4 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                 Reset
             </a>
         @endif
@@ -74,7 +90,8 @@
     </form>
 @endif
 
-<div class="p-6">
+{{-- Daftar dibatasi 65vh agar halaman tidak terlalu panjang; scroll di dalam area ini. --}}
+<div class="p-6 max-h-[65vh] overflow-y-auto overscroll-contain">
     @forelse($checks as $check)
         @php
             $hardwareChecks = $check->hardwareChecks->where('checkable_type', 'App\Models\Hardware');
