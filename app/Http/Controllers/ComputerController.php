@@ -29,8 +29,11 @@ class ComputerController extends Controller
         $computers = $this->filteredQuery($request)->latest()->paginate($perPage);
         $laboratories = Laboratory::orderBy('name')->get();
         $publicSpecEnabled = Setting::publicSpecEnabled();
+        // Kategori dari data aktual supaya kategori ekstra di luar daftar resmi
+        // (mis. hasil seeder) tetap muncul di dropdown pencarian spesifikasi.
+        $specCategories = Hardware::query()->orderBy('category')->distinct()->pluck('category');
 
-        return view('computers.index', compact('computers', 'laboratories', 'publicSpecEnabled'));
+        return view('computers.index', compact('computers', 'laboratories', 'publicSpecEnabled', 'specCategories'));
     }
 
     /**
@@ -46,8 +49,33 @@ class ComputerController extends Controller
         }
 
         if ($search = $request->search) {
-            $query->where('code', 'like', "%{$search}%")
-                ->orWhereHas('laboratory', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+            // Dibungkus closure supaya OR tetap berada dalam satu grup
+            // dan tidak melewati filter laboratory_id di atasnya.
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhereHas('laboratory', fn ($lab) => $lab->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        // Pencarian berdasarkan spesifikasi (hardware): kategori + kata kunci
+        // digabung dalam satu EXISTS agar keduanya menyangkut komponen yang sama.
+        $specCategory = $request->spec_category;
+        $specKeyword = $request->spec;
+
+        if ($specCategory || $specKeyword) {
+            $query->whereHas('hardware', function ($q) use ($specCategory, $specKeyword) {
+                if ($specCategory) {
+                    $q->where('category', $specCategory);
+                }
+
+                if ($specKeyword) {
+                    $like = "%{$specKeyword}%";
+                    $q->where(fn ($w) => $w->where('name', 'like', $like)
+                        ->orWhere('brand', 'like', $like)
+                        ->orWhere('model', 'like', $like)
+                        ->orWhere('category', 'like', $like));
+                }
+            });
         }
 
         return $query;

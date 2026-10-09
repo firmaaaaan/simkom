@@ -125,13 +125,29 @@
             </svg>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari komputer..." class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-52">
         </div>
+        <select name="spec_category" onchange="this.form.submit()"
+            title="Filter kategori spesifikasi (hardware)"
+            class="text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent py-2">
+            <option value="">Semua Spesifikasi</option>
+            @foreach($specCategories as $category)
+                <option value="{{ $category }}" @selected(request('spec_category') === $category)>{{ $category }}</option>
+            @endforeach
+        </select>
+        <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877m2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437" />
+            </svg>
+            <input type="text" name="spec" value="{{ request('spec') }}" placeholder="Cari spesifikasi..."
+                title="Cari nama/brand/model/kategori hardware, mis. i5, 8GB, SSD"
+                class="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-52">
+        </div>
         <select name="per_page" onchange="this.form.submit()"
             class="text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent py-2">
             @foreach([10, 25, 50, 100] as $size)
                 <option value="{{ $size }}" @selected(request('per_page', 10) == $size)>{{ $size }} / halaman</option>
             @endforeach
         </select>
-        @if(request('laboratory_id') || request('search'))
+        @if(request('laboratory_id') || request('search') || request('spec_category') || request('spec'))
             <a href="{{ route('computers.index') }}" class="text-sm text-gray-500 hover:text-red-600 transition-colors whitespace-nowrap">Reset</a>
         @endif
     </form>
