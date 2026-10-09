@@ -10,14 +10,18 @@
 
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
     <div class="flex items-center gap-2">
+        @can('import-lab-schedules')
         <button onclick="openImportModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Import Excel
         </button>
+        @endcan
+        @can('export-lab-schedules')
         <a href="{{ route('lab-schedules.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
             Export Excel
         </a>
+        @endcan
     </div>
     <p class="text-sm text-gray-500">Total: <span id="total-count" class="font-semibold text-gray-800">0</span> jadwal</p>
 </div>

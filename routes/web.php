@@ -137,7 +137,7 @@ Route::middleware('auth')->group(function () {
 
     // User Management — per aksi: view/create/edit/delete-users
     Route::get('users/export', [UserController::class, 'export'])
-        ->middleware('permission:view-users')
+        ->middleware('permission:export-users')
         ->name('users.export');
     Route::resource('users', UserController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-users')
@@ -147,7 +147,7 @@ Route::middleware('auth')->group(function () {
 
     // Role Management — per aksi: view/create/edit/delete-roles
     Route::get('roles/export', [RoleController::class, 'export'])
-        ->middleware('permission:view-roles')
+        ->middleware('permission:export-roles')
         ->name('roles.export');
     Route::resource('roles', RoleController::class)
         ->except(['show'])
@@ -158,7 +158,7 @@ Route::middleware('auth')->group(function () {
 
     // Data Master - Admin only
     Route::get('laboratories/export', [LaboratoryController::class, 'export'])
-        ->middleware('permission:view-laboratories')
+        ->middleware('permission:export-laboratories')
         ->name('laboratories.export');
     Route::delete('laboratories/bulk-destroy', [LaboratoryController::class, 'bulkDestroy'])
         ->middleware('permission:delete-laboratories')
@@ -170,7 +170,7 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-laboratories');
 
     Route::get('academic-years/export', [AcademicYearController::class, 'export'])
-        ->middleware('permission:view-academic-years')
+        ->middleware('permission:export-academic-years')
         ->name('academic-years.export');
     Route::delete('academic-years/bulk-destroy', [AcademicYearController::class, 'bulkDestroy'])
         ->middleware('permission:delete-academic-years')
@@ -182,14 +182,17 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-academic-years');
 
     // Hardware (Admin + Laboran)
-    Route::middleware('permission:create-hardware')->group(function () {
+    Route::middleware('permission:import-hardware')->group(function () {
         Route::get('hardware/import', [HardwareController::class, 'import'])->name('hardware.import');
         Route::post('hardware/import', [HardwareController::class, 'storeImport'])->name('hardware.store-import');
     });
-    Route::middleware('permission:view-hardware')->group(function () {
+    Route::middleware('permission:export-hardware')->group(function () {
         Route::get('hardware/export', [HardwareController::class, 'export'])->name('hardware.export');
-        Route::get('hardware/template', [HardwareController::class, 'template'])->name('hardware.template');
     });
+    // Template dipakai proses import juga, jadi boleh export ATAU import.
+    Route::get('hardware/template', [HardwareController::class, 'template'])
+        ->middleware('permission:export-hardware|import-hardware')
+        ->name('hardware.template');
     Route::delete('hardware/bulk-destroy', [HardwareController::class, 'bulkDestroy'])
         ->middleware('permission:delete-hardware')
         ->name('hardware.bulk-destroy');
@@ -200,14 +203,17 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-hardware');
 
     // Software (Admin + Laboran)
-    Route::middleware('permission:create-software')->group(function () {
+    Route::middleware('permission:import-software')->group(function () {
         Route::get('software/import', [SoftwareController::class, 'import'])->name('software.import');
         Route::post('software/import', [SoftwareController::class, 'storeImport'])->name('software.store-import');
     });
-    Route::middleware('permission:view-software')->group(function () {
+    Route::middleware('permission:export-software')->group(function () {
         Route::get('software/export', [SoftwareController::class, 'export'])->name('software.export');
-        Route::get('software/template', [SoftwareController::class, 'template'])->name('software.template');
     });
+    // Template dipakai proses import juga, jadi boleh export ATAU import.
+    Route::get('software/template', [SoftwareController::class, 'template'])
+        ->middleware('permission:export-software|import-software')
+        ->name('software.template');
     Route::delete('software/bulk-destroy', [SoftwareController::class, 'bulkDestroy'])
         ->middleware('permission:delete-software')
         ->name('software.bulk-destroy');
@@ -218,20 +224,31 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-software');
 
     // Components (Admin + Laboran)
-    Route::middleware('permission:create-components')->group(function () {
+    Route::middleware('permission:import-components')->group(function () {
         Route::get('components/import', [ComponentController::class, 'import'])->name('components.import');
         Route::post('components/import', [ComponentController::class, 'storeImport'])->name('components.store-import');
+    });
+    Route::middleware('permission:create-components')->group(function () {
         Route::post('boxes', [BoxController::class, 'store'])->name('boxes.store');
         Route::post('boxes/bulk-add-component', [BoxController::class, 'bulkAddComponent'])->name('boxes.bulk-add-component');
         Route::post('boxes/{box}/components', [BoxComponentController::class, 'store'])->name('boxes.components.store');
         Route::post('component-borrowings', [ComponentBorrowingController::class, 'store'])->name('component-borrowings.store');
     });
-    Route::middleware('permission:view-components')->group(function () {
+    // Route export/cetak boxes harus didefinisikan SEBELUM boxes/{box}
+    // supaya "boxes/export" tidak tertangkap route show.
+    Route::middleware('permission:export-components')->group(function () {
         Route::get('components/export', [ComponentController::class, 'export'])->name('components.export');
-        Route::get('components/template', [ComponentController::class, 'template'])->name('components.template');
         Route::get('boxes/export', [BoxController::class, 'export'])->name('boxes.export');
+    });
+    // Template dipakai proses import juga, jadi boleh export ATAU import.
+    Route::get('components/template', [ComponentController::class, 'template'])
+        ->middleware('permission:export-components|import-components')
+        ->name('components.template');
+    Route::get('boxes/print-labels', [BoxController::class, 'printLabels'])
+        ->middleware('permission:print-components')
+        ->name('boxes.print-labels');
+    Route::middleware('permission:view-components')->group(function () {
         Route::get('boxes', [BoxController::class, 'index'])->name('boxes.index');
-        Route::get('boxes/print-labels', [BoxController::class, 'printLabels'])->name('boxes.print-labels');
         Route::get('boxes/{box}', [BoxController::class, 'show'])->name('boxes.show');
     });
     Route::middleware('permission:edit-components')->group(function () {
@@ -269,16 +286,13 @@ Route::middleware('auth')->group(function () {
     // Reports (Admin + Laboran)
     Route::middleware('permission:view-reports')->group(function () {
         Route::get('/reports/card-control', [ComputerController::class, 'reportCardControl'])->name('reports.card-control');
-        Route::get('/reports/card-control/print', [ComputerController::class, 'reportCardControlPrint'])->name('reports.card-control-print');
     });
+    Route::get('/reports/card-control/print', [ComputerController::class, 'reportCardControlPrint'])
+        ->middleware('permission:print-reports')
+        ->name('reports.card-control-print');
 
     // Computers (Admin + Laboran)
     Route::middleware('permission:view-computers')->group(function () {
-        Route::get('/computers/export', [ComputerController::class, 'export'])->name('computers.export');
-        Route::get('/computers/spec-export', [ComputerController::class, 'specExport'])->name('computers.spec-export');
-        Route::get('/computers/spec-template', [ComputerController::class, 'specTemplate'])->name('computers.spec-template');
-        Route::get('/computers/check-template', [ComputerController::class, 'checkTemplate'])->name('computers.check-template');
-
         Route::get('/computers/list', function (\Illuminate\Http\Request $request) {
             $query = \App\Models\Computer::select('id', 'code');
             if ($labId = $request->laboratory_id) {
@@ -286,7 +300,20 @@ Route::middleware('auth')->group(function () {
             }
             return response()->json($query->orderBy('code')->get());
         })->name('computers.list');
+    });
+    Route::middleware('permission:export-computers')->group(function () {
+        Route::get('/computers/export', [ComputerController::class, 'export'])->name('computers.export');
+        Route::get('/computers/spec-export', [ComputerController::class, 'specExport'])->name('computers.spec-export');
+    });
+    // Template dipakai proses import juga, jadi boleh export ATAU import.
+    Route::get('/computers/spec-template', [ComputerController::class, 'specTemplate'])
+        ->middleware('permission:export-computers|import-computers')
+        ->name('computers.spec-template');
+    Route::get('/computers/check-template', [ComputerController::class, 'checkTemplate'])
+        ->middleware('permission:export-computers|import-computers')
+        ->name('computers.check-template');
 
+    Route::middleware('permission:print-computers')->group(function () {
         Route::get('/computers/qr-stiker', [ComputerController::class, 'qrStiker'])->name('computers.qr-stiker');
         Route::get('/computers/praktikum-labels', [ComputerController::class, 'praktikumLabels'])->name('computers.praktikum-labels');
         Route::get('/computers/{computer}/card/print', [ComputerController::class, 'cardPrint'])->name('computers.card-print');
@@ -299,16 +326,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/computers/bulk-assign', [ComputerController::class, 'bulkAssign'])->name('computers.bulk-assign');
         Route::post('/computers/bulk-assign', [ComputerController::class, 'storeBulkAssign'])->name('computers.store-bulk-assign');
         Route::post('/computers/{computer}/check', [ComputerController::class, 'storeCheck'])->name('computers.check');
-        // Import spesifikasi mengubah data komputer, sehingga memakai izin edit
+        // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
+        Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
+        // URL jadwal real-time yang ditautkan dari halaman jadwal publik
+        Route::post('/settings/realtime-schedule-url', [SettingController::class, 'updateRealtimeScheduleUrl'])->name('settings.realtime-schedule-url');
+    });
+    Route::middleware('permission:import-computers')->group(function () {
+        // Import spesifikasi mengubah data komputer (izin import terpisah dari edit)
         Route::get('/computers/spec-import', [ComputerController::class, 'specImport'])->name('computers.spec-import');
         Route::post('/computers/spec-import', [ComputerController::class, 'storeSpecImport'])->name('computers.store-spec-import');
         // Import kartu kendali historis menambah/memperbarui data pengecekan
         Route::get('/computers/check-import', [ComputerController::class, 'checkImport'])->name('computers.check-import');
         Route::post('/computers/check-import', [ComputerController::class, 'storeCheckImport'])->name('computers.store-check-import');
-        // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
-        Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
-        // URL jadwal real-time yang ditautkan dari halaman jadwal publik
-        Route::post('/settings/realtime-schedule-url', [SettingController::class, 'updateRealtimeScheduleUrl'])->name('settings.realtime-schedule-url');
     });
     Route::middleware('permission:delete-computers')->group(function () {
         Route::delete('/computers/bulk-destroy', [ComputerController::class, 'bulkDestroy'])->name('computers.bulk-destroy');
@@ -321,17 +350,28 @@ Route::middleware('auth')->group(function () {
 
     // Maintenance (Admin + Laboran)
     Route::middleware('permission:view-maintenance')->group(function () {
+        Route::get('device-checks/report', [DeviceCheckController::class, 'report'])->name('device-checks.report');
+    });
+    Route::middleware('permission:export-maintenance')->group(function () {
         Route::get('maintenance/export', [MaintenanceController::class, 'export'])->name('maintenance.export');
         Route::get('device-checks/export', [DeviceCheckController::class, 'export'])->name('device-checks.export');
-        Route::get('device-checks/template', [DeviceCheckController::class, 'template'])->name('device-checks.template');
-        Route::get('maintenance/template', [MaintenanceController::class, 'template'])->name('maintenance.template');
+    });
+    Route::middleware('permission:print-maintenance')->group(function () {
         Route::get('maintenance/{maintenance}/print', [MaintenanceController::class, 'print'])->name('maintenance.print');
-        Route::get('device-checks/report', [DeviceCheckController::class, 'report'])->name('device-checks.report');
         Route::get('device-checks/report/print', [DeviceCheckController::class, 'reportPrint'])->name('device-checks.report-print');
         Route::get('device-checks/{deviceCheck}/print', [DeviceCheckController::class, 'print'])->name('device-checks.print');
     });
+    // Template dipakai proses import juga, jadi boleh export ATAU import.
+    Route::get('device-checks/template', [DeviceCheckController::class, 'template'])
+        ->middleware('permission:export-maintenance|import-maintenance')
+        ->name('device-checks.template');
+    Route::get('maintenance/template', [MaintenanceController::class, 'template'])
+        ->middleware('permission:export-maintenance|import-maintenance')
+        ->name('maintenance.template');
     Route::middleware('permission:edit-maintenance')->group(function () {
         Route::post('maintenance/{maintenance}/computer/{computer}', [MaintenanceController::class, 'saveComputer'])->name('maintenance.save-computer');
+    });
+    Route::middleware('permission:import-maintenance')->group(function () {
         // Import pengecekan perangkat mengubah data pengecekan (meniru pola import kartu kendali)
         Route::get('device-checks/import', [DeviceCheckController::class, 'import'])->name('device-checks.import');
         Route::post('device-checks/import', [DeviceCheckController::class, 'storeImport'])->name('device-checks.store-import');
@@ -353,9 +393,9 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-maintenance');
 
     // Tickets (Admin + Laboran)
-    Route::middleware('permission:view-tickets')->group(function () {
-        Route::get('tickets/export', [TicketController::class, 'export'])->name('tickets.export');
-    });
+    Route::get('tickets/export', [TicketController::class, 'export'])
+        ->middleware('permission:export-tickets')
+        ->name('tickets.export');
     Route::middleware('permission:edit-tickets')->group(function () {
         Route::patch('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.update-status');
         Route::post('tickets/{ticket}/comments', [TicketController::class, 'addComment'])->name('tickets.add-comment');
@@ -371,8 +411,10 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['destroy'], 'permission:delete-tickets');
 
     // Peminjaman Komputer (Admin + Laboran)
+    Route::get('/borrowings/export', [AdminBorrowingController::class, 'export'])
+        ->middleware('permission:export-borrowings')
+        ->name('borrowings.export');
     Route::middleware('permission:view-borrowings')->group(function () {
-        Route::get('/borrowings/export', [AdminBorrowingController::class, 'export'])->name('borrowings.export');
         Route::get('/borrowings', [AdminBorrowingController::class, 'index'])->name('borrowings.index');
     });
     Route::middleware('permission:edit-borrowings')->group(function () {
@@ -382,10 +424,14 @@ Route::middleware('auth')->group(function () {
 
     // Penggunaan Laboratorium - check-in via QR, validasi keluar oleh admin/laboran
     Route::middleware('permission:view-lab-usages')->group(function () {
-        Route::get('/lab-usages/export', [AdminLabUsageController::class, 'export'])->name('lab-usages.export');
-        Route::get('/lab-usages/qr-stiker', [AdminLabUsageController::class, 'qrStiker'])->name('lab-usages.qr-stiker');
         Route::get('/lab-usages', [AdminLabUsageController::class, 'index'])->name('lab-usages.index');
     });
+    Route::get('/lab-usages/export', [AdminLabUsageController::class, 'export'])
+        ->middleware('permission:export-lab-usages')
+        ->name('lab-usages.export');
+    Route::get('/lab-usages/qr-stiker', [AdminLabUsageController::class, 'qrStiker'])
+        ->middleware('permission:print-lab-usages')
+        ->name('lab-usages.qr-stiker');
     Route::middleware('permission:edit-lab-usages')->group(function () {
         Route::post('/lab-usages/{usage}/validate-out', [AdminLabUsageController::class, 'validateOut'])->name('lab-usages.validate-out');
         // Input manual (edit) - HANYA ADMIN/SUPERADMIN
@@ -405,12 +451,12 @@ Route::middleware('auth')->group(function () {
         ->name('lab-usages.destroy');
 
     // Jadwal Penggunaan Laboratorium (Admin only)
-    Route::middleware('permission:view-lab-schedules')->group(function () {
-        Route::get('lab-schedules/export', [LabScheduleController::class, 'export'])->name('lab-schedules.export');
-    });
-    Route::middleware('permission:create-lab-schedules')->group(function () {
-        Route::post('lab-schedules/import', [LabScheduleController::class, 'import'])->name('lab-schedules.import');
-    });
+    Route::get('lab-schedules/export', [LabScheduleController::class, 'export'])
+        ->middleware('permission:export-lab-schedules')
+        ->name('lab-schedules.export');
+    Route::post('lab-schedules/import', [LabScheduleController::class, 'import'])
+        ->middleware('permission:import-lab-schedules')
+        ->name('lab-schedules.import');
     Route::middleware('permission:edit-lab-schedules')->group(function () {
         // Drag & drop: pindah/tukar slot jadwal.
         Route::post('lab-schedules/{schedule}/move', [LabScheduleController::class, 'move'])->name('lab-schedules.move');

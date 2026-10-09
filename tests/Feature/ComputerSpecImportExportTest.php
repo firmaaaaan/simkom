@@ -25,7 +25,7 @@ class ComputerSpecImportExportTest extends TestCase
     {
         $role = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
 
-        foreach (['view-computers', 'edit-computers'] as $name) {
+        foreach (['view-computers', 'edit-computers', 'export-computers', 'import-computers'] as $name) {
             $role->permissions()->attach(
                 Permission::firstOrCreate(['name' => $name], ['label' => $name])
             );
@@ -178,7 +178,7 @@ class ComputerSpecImportExportTest extends TestCase
         $this->assertCount(1, $none);
     }
 
-    public function test_spec_export_and_template_require_view_computers(): void
+    public function test_spec_export_and_template_require_permissions(): void
     {
         $outsider = User::create(['name' => 'Orang Luar', 'email' => 'luar-spek@e.test', 'password' => 'x']);
         $this->seedData();
@@ -331,7 +331,7 @@ class ComputerSpecImportExportTest extends TestCase
             ->assertSee('Import Spesifikasi');
     }
 
-    public function test_spec_import_requires_edit_computers(): void
+    public function test_spec_import_requires_import_computers(): void
     {
         $outsider = User::create(['name' => 'Orang Luar 2', 'email' => 'luar-spek2@e.test', 'password' => 'x']);
         $this->seedData();

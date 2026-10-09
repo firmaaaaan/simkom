@@ -19,6 +19,7 @@
         Kembali
     </a>
     <div class="flex items-center gap-2">
+        @can('print-maintenance')
         <a href="{{ route('device-checks.print', $check) }}" target="_blank"
             class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -26,6 +27,7 @@
             </svg>
             Cetak
         </a>
+        @endcan
         <a href="{{ route('device-checks.edit', $check) }}"
             class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

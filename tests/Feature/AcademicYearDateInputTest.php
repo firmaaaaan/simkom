@@ -137,7 +137,7 @@ class AcademicYearDateInputTest extends TestCase
 
     public function test_export_drops_date_columns(): void
     {
-        $user = $this->userWith('view-academic-years');
+        $user = $this->userWith('view-academic-years', 'export-academic-years');
         AcademicYear::create([
             'name' => 'TA 2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'status' => 'Non Aktif',
         ]);

@@ -25,7 +25,7 @@ class LabUsageTest extends TestCase
     private function admin(): User
     {
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        foreach (['view-lab-usages', 'create-lab-usages', 'edit-lab-usages', 'delete-lab-usages'] as $name) {
+        foreach (['view-lab-usages', 'create-lab-usages', 'edit-lab-usages', 'delete-lab-usages', 'print-lab-usages'] as $name) {
             $role->permissions()->attach(
                 Permission::firstOrCreate(['name' => $name], ['label' => $name])
             );

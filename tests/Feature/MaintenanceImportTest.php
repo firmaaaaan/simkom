@@ -24,7 +24,7 @@ class MaintenanceImportTest extends TestCase
 
     private function admin(): User
     {
-        return $this->userWith('Admin Import', 'admin-maint-import@uji.test', ['view-maintenance', 'edit-maintenance']);
+        return $this->userWith('Admin Import', 'admin-maint-import@uji.test', ['view-maintenance', 'edit-maintenance', 'import-maintenance']);
     }
 
     private function userWith(string $name, string $email, array $permissions): User
@@ -355,16 +355,16 @@ class MaintenanceImportTest extends TestCase
             ->assertSee(route('maintenance.import'), false);
     }
 
-    public function test_import_requires_edit_maintenance_and_template_requires_view(): void
+    public function test_import_requires_import_maintenance_and_template_requires_export_or_import(): void
     {
         $this->seedLab();
         $year = $this->seedYear();
 
         $viewer = $this->userWith('Viewer', 'viewer-maint-import@uji.test', ['view-maintenance']);
-        $editor = $this->userWith('Editor', 'editor-maint-import@uji.test', ['edit-maintenance']);
+        $editor = $this->userWith('Editor', 'editor-maint-import@uji.test', ['edit-maintenance', 'import-maintenance']);
 
         $this->actingAs($viewer)->get(route('maintenance.import'))->assertForbidden();
-        $this->actingAs($viewer)->get(route('maintenance.template'))->assertOk();
+        $this->actingAs($viewer)->get(route('maintenance.template'))->assertForbidden();
         $this->actingAs($viewer)
             ->post(route('maintenance.store-import'), [
                 'file' => $this->fileFromGrid([['No', 'Kode Komputer']]),

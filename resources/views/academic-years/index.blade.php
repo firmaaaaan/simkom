@@ -15,7 +15,7 @@
             </svg>
             Hapus Terpilih (<span x-text="selected.length"></span>)
         </button>
-        <x-export-button route="academic-years.export" />
+        <x-export-button permission="export-academic-years" route="academic-years.export" />
         <a href="{{ route('academic-years.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

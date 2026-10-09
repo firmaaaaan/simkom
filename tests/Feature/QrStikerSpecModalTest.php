@@ -20,6 +20,7 @@ class QrStikerSpecModalTest extends TestCase
     {
         $role = Role::create(['name' => 'laboran-spec', 'label' => 'Laboran']);
         $role->permissions()->attach(Permission::firstOrCreate(['name' => 'view-computers'], ['label' => 'Lihat Komputer']));
+        $role->permissions()->attach(Permission::firstOrCreate(['name' => 'print-computers'], ['label' => 'Cetak Komputer']));
 
         $user = User::create(['name' => 'Laboran', 'email' => 'lab@spec.test', 'password' => 'rahasia123']);
         $user->roles()->attach($role);

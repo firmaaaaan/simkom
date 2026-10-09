@@ -5,8 +5,11 @@
 @php
     $selectedIds = $selectedIds ?? [];
 
-    $actionWords = ['view' => 'Lihat', 'create' => 'Tambah', 'edit' => 'Ubah', 'delete' => 'Hapus'];
-    $actionOrder = ['view', 'create', 'edit', 'delete'];
+    $actionWords = [
+        'view' => 'Lihat', 'create' => 'Tambah', 'edit' => 'Ubah', 'delete' => 'Hapus',
+        'export' => 'Export', 'import' => 'Import', 'print' => 'Cetak',
+    ];
+    $actionOrder = ['view', 'create', 'edit', 'delete', 'export', 'import', 'print'];
 
     $categories = [
         'Pengaturan' => ['users', 'roles', 'backups'],
@@ -18,7 +21,7 @@
     $byModule = [];
     $unparsed = [];
     foreach ($permissions as $permission) {
-        if (preg_match('/^(view|create|edit|delete)-(.+)$/', $permission->name, $m)) {
+        if (preg_match('/^(view|create|edit|delete|export|import|print)-(.+)$/', $permission->name, $m)) {
             $byModule[$m[2]][$m[1]] = $permission;
         } else {
             $unparsed[] = $permission;
@@ -34,7 +37,7 @@
         }
 
         return [
-            'label' => preg_replace('/^(Lihat|Tambah|Ubah|Hapus)\s+/', '', $items[0]['permission']->label),
+            'label' => preg_replace('/^(Lihat|Tambah|Ubah|Hapus|Export|Import|Cetak)\s+/', '', $items[0]['permission']->label),
             'items' => $items,
         ];
     };

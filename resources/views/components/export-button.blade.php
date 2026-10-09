@@ -1,5 +1,6 @@
-@props(['route', 'params' => [], 'label' => 'Export'])
+@props(['route', 'params' => [], 'label' => 'Export', 'permission' => null])
 
+@if($permission === null || auth()->user()?->can($permission))
 <a href="{{ route($route, $params) }}"
     title="Unduh data sebagai file Excel (.xlsx)"
     {{ $attributes->merge(['class' => 'inline-flex items-center gap-2 px-4 py-2 border border-purple-600 text-purple-600 text-sm font-medium rounded-lg hover:bg-purple-50 transition-colors']) }}>
@@ -8,3 +9,4 @@
     </svg>
     {{ $label }}
 </a>
+@endif

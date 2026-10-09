@@ -24,7 +24,7 @@ class DeviceCheckImportTest extends TestCase
 
     private function admin(): User
     {
-        return $this->userWith('Admin Import', 'admin-import@uji.test', ['view-maintenance', 'edit-maintenance']);
+        return $this->userWith('Admin Import', 'admin-import@uji.test', ['view-maintenance', 'edit-maintenance', 'import-maintenance']);
     }
 
     private function userWith(string $name, string $email, array $permissions): User
@@ -322,16 +322,16 @@ class DeviceCheckImportTest extends TestCase
             ->assertSee(route('device-checks.import'), false);
     }
 
-    public function test_import_requires_edit_maintenance_and_template_requires_view(): void
+    public function test_import_requires_import_maintenance_and_template_requires_export_or_import(): void
     {
         $this->seedLab();
         $year = $this->seedYear();
 
         $viewer = $this->userWith('Viewer', 'viewer-maint@uji.test', ['view-maintenance']);
-        $editor = $this->userWith('Editor', 'editor-maint@uji.test', ['edit-maintenance']);
+        $editor = $this->userWith('Editor', 'editor-maint@uji.test', ['edit-maintenance', 'import-maintenance']);
 
         $this->actingAs($viewer)->get(route('device-checks.import'))->assertForbidden();
-        $this->actingAs($viewer)->get(route('device-checks.template'))->assertOk();
+        $this->actingAs($viewer)->get(route('device-checks.template'))->assertForbidden();
         $this->actingAs($viewer)
             ->post(route('device-checks.store-import'), [
                 'file' => $this->fileFromGrid([['No', 'Kode Komputer']]),

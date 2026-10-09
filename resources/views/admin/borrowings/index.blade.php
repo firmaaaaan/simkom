@@ -82,7 +82,7 @@
     <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 class="text-base font-semibold text-gray-800">Daftar Peminjaman</h2>
         <div class="flex items-center gap-2">
-        <x-export-button route="borrowings.export" :params="request()->query()" />
+        <x-export-button permission="export-borrowings" route="borrowings.export" :params="request()->query()" />
         <form action="{{ route('borrowings.index') }}" method="GET" class="flex items-center gap-2">
             @if(request('status'))
                 <input type="hidden" name="status" value="{{ request('status') }}">

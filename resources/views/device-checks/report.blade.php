@@ -41,6 +41,7 @@
                     Tampilkan
                 </button>
                 @if($selectedYear)
+                    @can('print-maintenance')
                     <a href="{{ route('device-checks.report-print', ['laboratory_id' => $selectedLab->id, 'academic_year_id' => $selectedYear->id]) }}" target="_blank"
                         class="inline-flex items-center gap-2 px-6 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -48,6 +49,7 @@
                         </svg>
                         Cetak Semua
                     </a>
+                    @endcan
                 @endif
             </div>
         </form>
@@ -106,6 +108,7 @@
                             class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
                             Terapkan Pilihan
                         </button>
+                        @can('print-maintenance')
                         <button type="submit" formaction="{{ route('device-checks.report-print') }}" formtarget="_blank"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -113,6 +116,7 @@
                             </svg>
                             Cetak yang Dipilih
                         </button>
+                        @endcan
                     </div>
                 </div>
 
@@ -174,8 +178,10 @@
                                         @if($row['check'])
                                             <div class="flex items-center gap-2 whitespace-nowrap">
                                                 <a href="{{ route('device-checks.show', $row['check']) }}" class="text-sm text-green-600 hover:text-green-700 font-medium">Lihat</a>
+                                                @can('print-maintenance')
                                                 <a href="{{ route('device-checks.report-print', ['laboratory_id' => $selectedLab->id, 'academic_year_id' => $selectedYear->id, 'checks' => [$row['check']->id]]) }}"
                                                     target="_blank" class="text-sm text-gray-500 hover:text-gray-700">Cetak ini</a>
+                                                @endcan
                                             </div>
                                         @else
                                             <span class="text-xs text-gray-400">Belum dicek</span>
@@ -208,7 +214,9 @@
                     <div class="flex gap-4 text-xs">
                         <span class="text-green-600">Berfungsi: <strong>{{ $row['ok'] }}</strong></span>
                         <span class="{{ $row['problems'] > 0 ? 'text-red-600' : 'text-gray-500' }}">Perlu perhatian: <strong>{{ $row['problems'] }}</strong></span>
+                        @can('print-maintenance')
                         <a href="{{ route('device-checks.print', $row['check']) }}" target="_blank" class="text-green-600 hover:text-green-700 font-medium">Cetak lab ini</a>
+                        @endcan
                     </div>
                 </div>
 

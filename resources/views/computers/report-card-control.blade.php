@@ -36,9 +36,11 @@
                     Tampilkan
                 </button>
                 @if($selectedLab && $selectedYear)
+                    @can('print-reports')
                     <a href="{{ route('reports.card-control-print', ['laboratory_id' => $selectedLab->id, 'academic_year_id' => $selectedYear->id]) }}" target="_blank" class="px-6 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
                         Cetak
                     </a>
+                    @endcan
                 @endif
             </div>
         </form>

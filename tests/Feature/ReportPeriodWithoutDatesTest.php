@@ -88,7 +88,7 @@ class ReportPeriodWithoutDatesTest extends TestCase
 
     public function test_kartu_kendali_report_screen_and_print_omit_period_dates(): void
     {
-        $user = $this->userWith('Viewer Laporan', 'viewer-laporan@uji.test', ['view-reports']);
+        $user = $this->userWith('Viewer Laporan', 'viewer-laporan@uji.test', ['view-reports', 'print-reports']);
         $lab = $this->seedLab();
         $year = $this->seedYear();
         $query = ['laboratory_id' => $lab->id, 'academic_year_id' => $year->id];
@@ -109,7 +109,7 @@ class ReportPeriodWithoutDatesTest extends TestCase
 
     public function test_device_check_report_screen_and_print_omit_period_dates(): void
     {
-        $user = $this->userWith('Viewer Pengecekan', 'viewer-pengecekan@uji.test', ['view-maintenance']);
+        $user = $this->userWith('Viewer Pengecekan', 'viewer-pengecekan@uji.test', ['view-maintenance', 'print-maintenance']);
         $lab = $this->seedLab();
         $year = $this->seedYear();
         $query = ['laboratory_id' => $lab->id, 'academic_year_id' => $year->id];
@@ -129,7 +129,7 @@ class ReportPeriodWithoutDatesTest extends TestCase
 
     public function test_device_check_print_omit_period_dates(): void
     {
-        $user = $this->userWith('Viewer Cetak', 'viewer-cetak@uji.test', ['view-maintenance']);
+        $user = $this->userWith('Viewer Cetak', 'viewer-cetak@uji.test', ['view-maintenance', 'print-maintenance']);
         $lab = $this->seedLab();
         $year = $this->seedYear();
         $check = $this->seedCheck($lab, $year);

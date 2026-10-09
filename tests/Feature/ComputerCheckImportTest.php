@@ -25,7 +25,7 @@ class ComputerCheckImportTest extends TestCase
     {
         $role = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
 
-        foreach (['view-computers', 'edit-computers'] as $name) {
+        foreach (['view-computers', 'edit-computers', 'export-computers', 'import-computers'] as $name) {
             $role->permissions()->attach(
                 Permission::firstOrCreate(['name' => $name], ['label' => $name])
             );
@@ -303,7 +303,7 @@ class ComputerCheckImportTest extends TestCase
         $this->assertSame(0, ComputerCheck::count());
     }
 
-    public function test_check_import_requires_edit_computers_and_template_requires_view(): void
+    public function test_check_import_requires_import_computers_and_template_requires_permissions(): void
     {
         $outsider = User::create(['name' => 'Orang Luar', 'email' => 'luar-kartu@e.test', 'password' => 'x']);
 

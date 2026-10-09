@@ -10,21 +10,21 @@ class RoleSeeder extends Seeder
 {
     /** modul => [label, aksi yang tersedia]. */
     private const MODULES = [
-        'users' => ['User', ['view', 'create', 'edit', 'delete']],
-        'roles' => ['Role', ['view', 'create', 'edit', 'delete']],
-        'laboratories' => ['Laboratorium', ['view', 'create', 'edit', 'delete']],
-        'academic-years' => ['Tahun Ajaran', ['view', 'create', 'edit', 'delete']],
-        'hardware' => ['Hardware', ['view', 'create', 'edit', 'delete']],
-        'software' => ['Software', ['view', 'create', 'edit', 'delete']],
-        'components' => ['Komponen', ['view', 'create', 'edit', 'delete']],
-        'computers' => ['Komputer', ['view', 'create', 'edit', 'delete']],
-        'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete']],
-        'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete']],
-        'borrowings' => ['Peminjaman', ['view', 'edit']],
-        'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete']],
-        'lab-schedules' => ['Jadwal Lab', ['view', 'create', 'edit', 'delete']],
+        'users' => ['User', ['view', 'create', 'edit', 'delete', 'export']],
+        'roles' => ['Role', ['view', 'create', 'edit', 'delete', 'export']],
+        'laboratories' => ['Laboratorium', ['view', 'create', 'edit', 'delete', 'export']],
+        'academic-years' => ['Tahun Ajaran', ['view', 'create', 'edit', 'delete', 'export']],
+        'hardware' => ['Hardware', ['view', 'create', 'edit', 'delete', 'export', 'import']],
+        'software' => ['Software', ['view', 'create', 'edit', 'delete', 'export', 'import']],
+        'components' => ['Komponen', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
+        'computers' => ['Komputer', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
+        'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
+        'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete', 'export']],
+        'borrowings' => ['Peminjaman', ['view', 'edit', 'export']],
+        'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
+        'lab-schedules' => ['Jadwal Lab', ['view', 'create', 'edit', 'delete', 'export', 'import']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
-        'reports' => ['Laporan', ['view']],
+        'reports' => ['Laporan', ['view', 'print']],
     ];
 
     private const ACTION_LABELS = [
@@ -32,6 +32,9 @@ class RoleSeeder extends Seeder
         'create' => 'Tambah',
         'edit' => 'Ubah',
         'delete' => 'Hapus',
+        'export' => 'Export',
+        'import' => 'Import',
+        'print' => 'Cetak',
     ];
 
     /** Modul yang diberikan ke laboran (sinkron dengan daftar lama). */

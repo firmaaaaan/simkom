@@ -49,6 +49,9 @@ class ExcelExportTempTest extends TestCase
             'view-users', 'view-roles', 'view-laboratories', 'view-academic-years',
             'view-computers', 'view-maintenance', 'view-tickets', 'view-borrowings',
             'view-components', 'view-lab-usages',
+            'export-users', 'export-roles', 'export-laboratories', 'export-academic-years',
+            'export-computers', 'export-maintenance', 'export-tickets', 'export-borrowings',
+            'export-components', 'export-lab-usages',
         ] as $name) {
             $role->permissions()->attach(Permission::firstOrCreate(['name' => $name], ['label' => $name]));
         }
