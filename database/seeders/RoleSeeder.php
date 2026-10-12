@@ -22,7 +22,6 @@ class RoleSeeder extends Seeder
         'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete', 'export']],
         'borrowings' => ['Peminjaman', ['view', 'edit', 'export']],
         'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
-        'lab-schedules' => ['Jadwal Lab', ['view', 'create', 'edit', 'delete', 'export', 'import']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
         'reports' => ['Laporan', ['view', 'print']],
     ];

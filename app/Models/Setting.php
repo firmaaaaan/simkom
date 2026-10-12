@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 
 class Setting extends Model
 {
@@ -17,16 +18,16 @@ class Setting extends Model
     ];
 
     public $incrementing = false;
+
     protected $keyType = 'int';
 
     public const PUBLIC_SPEC_ID = 1;
-    public const REALTIME_SCHEDULE_URL_ID = 2;
 
     public static function get(int $id, ?string $default = null): ?string
     {
         try {
             $setting = static::find($id);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return $default;
         }
 
@@ -48,12 +49,5 @@ class Setting extends Model
     public static function publicSpecEnabled(): bool
     {
         return static::bool(self::PUBLIC_SPEC_ID, true);
-    }
-
-    public static function realtimeScheduleUrl(): ?string
-    {
-        $url = static::get(self::REALTIME_SCHEDULE_URL_ID);
-
-        return ($url !== null && $url !== '') ? $url : null;
     }
 }

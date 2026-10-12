@@ -20,8 +20,8 @@ class LaboratoryController extends Controller
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
@@ -31,6 +31,7 @@ class LaboratoryController extends Controller
     public function index(Request $request)
     {
         $laboratories = $this->filteredQuery($request)->latest()->paginate(10)->withQueryString();
+
         return view('laboratories.index', compact('laboratories'));
     }
 
@@ -38,7 +39,7 @@ class LaboratoryController extends Controller
     {
         return Excel::download(
             new LaboratoryExport($this->filteredQuery($request)->latest()),
-            'laboratorium-' . now()->format('Y-m-d') . '.xlsx'
+            'laboratorium-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
@@ -55,11 +56,8 @@ class LaboratoryController extends Controller
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
-            'show_in_schedule' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
-
-        $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
 
         Laboratory::create($validated);
 
@@ -85,15 +83,12 @@ class LaboratoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:laboratories,code,' . $laboratory->id,
+            'code' => 'required|string|max:50|unique:laboratories,code,'.$laboratory->id,
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
-            'show_in_schedule' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
-
-        $validated['show_in_schedule'] = $request->boolean('show_in_schedule');
 
         $laboratory->update($validated);
 
@@ -116,6 +111,6 @@ class LaboratoryController extends Controller
 
         Laboratory::whereIn('id', $request->ids)->delete();
 
-        return redirect()->route('laboratories.index')->with('success', count($request->ids) . ' laboratorium berhasil dihapus.');
+        return redirect()->route('laboratories.index')->with('success', count($request->ids).' laboratorium berhasil dihapus.');
     }
 }

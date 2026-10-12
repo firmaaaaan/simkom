@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AkademikJadwalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BoxScanController;
@@ -22,20 +23,17 @@ use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\PublicTrackerController;
 use App\Http\Controllers\PublicComputerCardController;
-use App\Http\Controllers\PublicLabScheduleController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
-use App\Http\Controllers\LabScheduleController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (\Illuminate\Http\Request $request) {
     $laboratories = \App\Models\Laboratory::where('status', 'Aktif')
-        ->where('show_in_schedule', true)
         ->orderBy('name')
         ->get();
     $showSpec = \App\Models\Setting::publicSpecEnabled();
@@ -106,8 +104,9 @@ Route::prefix('lab-scan')->name('lab-scan.')->group(function () {
     Route::post('/{labCode}/check-in', [LabScanController::class, 'checkIn'])->name('check-in');
 });
 
-// Public Routes (Jadwal Lab - tanpa login, read-only)
-Route::get('/jadwal-lab', [PublicLabScheduleController::class, 'index'])->name('jadwal-lab.index');
+// Public Routes (Jadwal Perkuliahan - tanpa login, read-only)
+// Jadwal mingguan dari API eksternal (SIMPTT) — publik, tanpa login.
+Route::get('/jadwal', [AkademikJadwalController::class, 'publik'])->name('jadwal.index');
 
 // Public Routes (Kartu Kendali - tanpa login, read-only riwayat pengecekan)
 Route::get('/kartu/{computer}', [PublicComputerCardController::class, 'show'])->name('kartu.show');
@@ -129,6 +128,9 @@ Route::middleware('auth')->group(function () {
     // Notifikasi realtime (polling)
     Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // Akademik — Jadwal Perkuliahan dari API eksternal (SIMPTT), versi admin
+    Route::get('/akademik/jadwal', [AkademikJadwalController::class, 'index'])->name('akademik.jadwal');
 
     // Halaman semua notifikasi + hapus (global, semua user login)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -328,8 +330,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/computers/{computer}/check', [ComputerController::class, 'storeCheck'])->name('computers.check');
         // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
         Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
-        // URL jadwal real-time yang ditautkan dari halaman jadwal publik
-        Route::post('/settings/realtime-schedule-url', [SettingController::class, 'updateRealtimeScheduleUrl'])->name('settings.realtime-schedule-url');
     });
     Route::middleware('permission:import-computers')->group(function () {
         // Import spesifikasi mengubah data komputer (izin import terpisah dari edit)
@@ -449,30 +449,6 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:delete-lab-usages')
         ->middleware('role:admin|superadmin')
         ->name('lab-usages.destroy');
-
-    // Jadwal Penggunaan Laboratorium (Admin only)
-    Route::get('lab-schedules/export', [LabScheduleController::class, 'export'])
-        ->middleware('permission:export-lab-schedules')
-        ->name('lab-schedules.export');
-    Route::post('lab-schedules/import', [LabScheduleController::class, 'import'])
-        ->middleware('permission:import-lab-schedules')
-        ->name('lab-schedules.import');
-    Route::middleware('permission:edit-lab-schedules')->group(function () {
-        // Drag & drop: pindah/tukar slot jadwal.
-        Route::post('lab-schedules/{schedule}/move', [LabScheduleController::class, 'move'])->name('lab-schedules.move');
-        // Sembunyikan/tampilkan satu entri jadwal di halaman publik /jadwal-lab.
-        Route::patch('lab-schedules/{schedule}/visibility', [LabScheduleController::class, 'toggleVisibility'])->name('lab-schedules.toggle-visibility');
-    });
-    // show dipakai modal Edit (fetch JSON detail jadwal).
-    // parameters(): nama param route diubah ke "schedule" agar cocok dengan
-    // signature controller (show/update/destroy), bukan model kosong dari DI.
-    Route::resource('lab-schedules', LabScheduleController::class)
-        ->parameters(['lab-schedules' => 'schedule'])
-        ->except(['create', 'edit'])
-        ->middlewareFor(['index', 'show'], 'permission:view-lab-schedules')
-        ->middlewareFor(['store'], 'permission:create-lab-schedules')
-        ->middlewareFor(['update'], 'permission:edit-lab-schedules')
-        ->middlewareFor(['destroy'], 'permission:delete-lab-schedules');
 
     // Backup & Restore Data — per aksi: view/edit/delete-backups
     Route::middleware('permission:view-backups')->group(function () {

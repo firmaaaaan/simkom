@@ -17,9 +17,8 @@ class ExportImportPrintPermissionTest extends TestCase
         'export-users', 'export-roles', 'export-laboratories', 'export-academic-years',
         'export-hardware', 'export-software', 'export-components', 'export-computers',
         'export-maintenance', 'export-tickets', 'export-borrowings', 'export-lab-usages',
-        'export-lab-schedules',
         'import-hardware', 'import-software', 'import-components', 'import-computers',
-        'import-maintenance', 'import-lab-schedules',
+        'import-maintenance',
         'print-components', 'print-computers', 'print-maintenance', 'print-lab-usages',
         'print-reports',
     ];
@@ -65,7 +64,7 @@ class ExportImportPrintPermissionTest extends TestCase
         $legacy = Role::create(['name' => 'legacy', 'label' => 'Legacy']);
         foreach ([
             'view-users', 'view-computers', 'edit-computers', 'create-hardware',
-            'view-reports', 'create-lab-schedules', 'view-lab-usages',
+            'view-reports', 'view-lab-usages',
         ] as $name) {
             $legacy->permissions()->attach(
                 Permission::firstOrCreate(['name' => $name], ['label' => $name])
@@ -89,8 +88,6 @@ class ExportImportPrintPermissionTest extends TestCase
         // edit-computers -> import-computers, create-hardware -> import-hardware
         $this->assertTrue($names->contains('import-computers'));
         $this->assertTrue($names->contains('import-hardware'));
-        // create-lab-schedules -> import-lab-schedules
-        $this->assertTrue($names->contains('import-lab-schedules'));
         // view-components tidak memberi import-components
         $this->assertFalse($names->contains('import-components'));
 

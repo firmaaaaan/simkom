@@ -58,7 +58,6 @@
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Lokasi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kapasitas</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
-                    <th class="text-left px-6 py-3 font-medium text-gray-500">Jadwal</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
             </thead>
@@ -80,13 +79,6 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Maintenance</span>
                         @else
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Nonaktif</span>
-                        @endif
-                    </td>
-                    <td data-label="Jadwal" class="px-6 py-4">
-                        @if($lab->show_in_schedule)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Tampil</span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Tidak</span>
                         @endif
                     </td>
                     <td data-label="Aksi" class="px-6 py-4">

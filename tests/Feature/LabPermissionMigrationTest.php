@@ -24,7 +24,6 @@ class LabPermissionMigrationTest extends TestCase
         // Migrasi 000003 memecah permission manage-* lama menjadi per-aksi (view/create/edit/delete).
         foreach (['view', 'create', 'edit', 'delete'] as $action) {
             $this->assertDatabaseHas('permissions', ['name' => "{$action}-lab-usages"]);
-            $this->assertDatabaseHas('permissions', ['name' => "{$action}-lab-schedules"]);
         }
 
         $this->assertDatabaseMissing('permissions', ['name' => 'manage-lab-usages']);
@@ -34,7 +33,7 @@ class LabPermissionMigrationTest extends TestCase
     public function test_migration_attaches_permissions_to_existing_roles(): void
     {
         // Simulasi server lama: roles sudah ada, permission belum pernah dibuat.
-        DB::table('permissions')->whereIn('name', ['manage-lab-usages', 'manage-lab-schedules'])->delete();
+        DB::table('permissions')->whereIn('name', ['manage-lab-usages'])->delete();
 
         $admin = Role::create(['name' => 'admin', 'label' => 'Admin']);
         $laboran = Role::create(['name' => 'laboran', 'label' => 'Laboran']);
@@ -43,11 +42,9 @@ class LabPermissionMigrationTest extends TestCase
 
         $adminPermissions = $admin->permissions()->pluck('name');
         $this->assertTrue($adminPermissions->contains('manage-lab-usages'));
-        $this->assertTrue($adminPermissions->contains('manage-lab-schedules'));
 
         $laboranPermissions = $laboran->permissions()->pluck('name');
         $this->assertTrue($laboranPermissions->contains('manage-lab-usages'));
-        $this->assertFalse($laboranPermissions->contains('manage-lab-schedules'));
     }
 
     public function test_migration_is_idempotent_when_permissions_already_exist(): void
@@ -56,6 +53,5 @@ class LabPermissionMigrationTest extends TestCase
         $this->runLabPermissionMigration();
 
         $this->assertSame(1, Permission::where('name', 'manage-lab-usages')->count());
-        $this->assertSame(1, Permission::where('name', 'manage-lab-schedules')->count());
     }
 }
