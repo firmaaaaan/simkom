@@ -20,7 +20,6 @@ use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
-use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicComputerCardController;
@@ -124,20 +123,6 @@ Route::get('/computers/{computer}/card', [ComputerController::class, 'card'])->n
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Monitoring PC — dashboard, data polling, dan kontrol power
-    Route::get('/monitoring-pc', [MonitoringPcController::class, 'index'])
-        ->name('monitoring-pc.index')
-        ->middleware('permission:view-monitoring');
-    Route::get('/monitoring-pc/data', [MonitoringPcController::class, 'data'])
-        ->name('monitoring-pc.data')
-        ->middleware('permission:view-monitoring');
-    Route::post('/monitoring-pc/{pc}/power-on', [MonitoringPcController::class, 'powerOn'])
-        ->name('monitoring-pc.power-on')
-        ->middleware('permission:control-monitoring');
-    Route::post('/monitoring-pc/{pc}/power-off', [MonitoringPcController::class, 'powerOff'])
-        ->name('monitoring-pc.power-off')
-        ->middleware('permission:control-monitoring');
 
     // Profil (akun sendiri): ganti email & password
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
