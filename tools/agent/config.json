@@ -1,0 +1,6 @@
+{
+    "server_url": "https://simkom.unisayogya.ac.id",
+    "api_key": "GANTI_DENGAN_API_KEY_DI_ENV",
+    "interval_seconds": 5,
+    "disk_path": ""
+}

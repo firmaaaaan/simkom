@@ -13,3 +13,7 @@ Artisan::command('inspire', function () {
 Schedule::command('backup:run')
     ->monthlyOn(1, '00:10')
     ->withoutOverlapping();
+
+// Monitoring PC: tandai PC yang tidak kirim telemetri > 30 detik sebagai offline.
+// Sub-minute schedule butuh `php artisan schedule:work` yang berjalan.
+Schedule::command('monitoring:check-offline')->everyFiveSeconds();

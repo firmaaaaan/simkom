@@ -1,42 +1,47 @@
 <?php
 
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
+use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
+use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use App\Http\Controllers\AkademikJadwalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
-use App\Http\Controllers\BoxScanController;
-use App\Http\Controllers\BoxController;
+use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\BoxComponentController;
-use App\Http\Controllers\ComputerController;
-use App\Http\Controllers\DeviceCheckController;
-use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\BoxController;
+use App\Http\Controllers\BoxScanController;
 use App\Http\Controllers\ComponentBorrowingController;
+use App\Http\Controllers\ComponentController;
+use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DeviceCheckController;
 use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\LaboratoryController;
+use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
-use App\Http\Controllers\SoftwareController;
-use App\Http\Controllers\TicketController;
-use App\Http\Controllers\PublicTicketController;
-use App\Http\Controllers\BorrowController;
-use App\Http\Controllers\PublicTrackerController;
+use App\Http\Controllers\MonitoringPcController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicComputerCardController;
+use App\Http\Controllers\PublicTicketController;
+use App\Http\Controllers\PublicTrackerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SoftwareController;
+use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
-use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
-use App\Http\Controllers\LabScanController;
-use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
+use App\Models\Computer;
+use App\Models\Laboratory;
+use App\Models\Setting;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (\Illuminate\Http\Request $request) {
-    $laboratories = \App\Models\Laboratory::where('status', 'Aktif')
+Route::get('/', function (Request $request) {
+    $laboratories = Laboratory::where('status', 'Aktif')
         ->orderBy('name')
         ->get();
-    $showSpec = \App\Models\Setting::publicSpecEnabled();
+    $showSpec = Setting::publicSpecEnabled();
 
     $selectedLabId = $request->laboratory_id;
     $selectedLab = null;
@@ -49,7 +54,7 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 
     $computers = collect();
     if ($selectedLab) {
-        $computers = \App\Models\Computer::where('laboratory_id', $selectedLab->id)
+        $computers = Computer::where('laboratory_id', $selectedLab->id)
             ->with($showSpec ? ['laboratory', 'hardware', 'software'] : ['laboratory'])
             ->withCount(['tickets' => function ($q) {
                 $q->whereIn('status', ['Open', 'In Progress']);
@@ -71,16 +76,16 @@ Route::prefix('lapor-kendala')->name('lapor-kendala.')->group(function () {
     Route::get('/', [PublicTicketController::class, 'index'])->name('index');
     Route::get('/computer/{computer}', [PublicTicketController::class, 'create'])->name('create');
     Route::post('/store', [PublicTicketController::class, 'store'])->name('store');
-    Route::get('/track', fn() => redirect()->route('track.index'))->name('track-form');
-    Route::get('/track/{tracking_code}', fn($tracking_code) => redirect()->route('track.search', ['tracking_code' => $tracking_code]))->name('track');
+    Route::get('/track', fn () => redirect()->route('track.index'))->name('track-form');
+    Route::get('/track/{tracking_code}', fn ($tracking_code) => redirect()->route('track.search', ['tracking_code' => $tracking_code]))->name('track');
 });
 
 // Public Routes (Pinjam Komputer - tanpa login)
 Route::prefix('pinjam-komputer')->name('pinjam-komputer.')->group(function () {
     Route::get('/computer/{computer}', [BorrowController::class, 'create'])->name('create');
     Route::post('/store', [BorrowController::class, 'store'])->name('store');
-    Route::get('/track', fn() => redirect()->route('track.index'))->name('track-form');
-    Route::get('/track/{tracking_code}', fn($tracking_code) => redirect()->route('track.search', ['tracking_code' => $tracking_code]))->name('track');
+    Route::get('/track', fn () => redirect()->route('track.index'))->name('track-form');
+    Route::get('/track/{tracking_code}', fn ($tracking_code) => redirect()->route('track.search', ['tracking_code' => $tracking_code]))->name('track');
 });
 
 // Public Routes (Unified Tracking - gabungan tiket & peminjaman)
@@ -119,6 +124,20 @@ Route::get('/computers/{computer}/card', [ComputerController::class, 'card'])->n
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Monitoring PC — dashboard, data polling, dan kontrol power
+    Route::get('/monitoring-pc', [MonitoringPcController::class, 'index'])
+        ->name('monitoring-pc.index')
+        ->middleware('permission:view-monitoring');
+    Route::get('/monitoring-pc/data', [MonitoringPcController::class, 'data'])
+        ->name('monitoring-pc.data')
+        ->middleware('permission:view-monitoring');
+    Route::post('/monitoring-pc/{pc}/power-on', [MonitoringPcController::class, 'powerOn'])
+        ->name('monitoring-pc.power-on')
+        ->middleware('permission:control-monitoring');
+    Route::post('/monitoring-pc/{pc}/power-off', [MonitoringPcController::class, 'powerOff'])
+        ->name('monitoring-pc.power-off')
+        ->middleware('permission:control-monitoring');
 
     // Profil (akun sendiri): ganti email & password
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -295,11 +314,12 @@ Route::middleware('auth')->group(function () {
 
     // Computers (Admin + Laboran)
     Route::middleware('permission:view-computers')->group(function () {
-        Route::get('/computers/list', function (\Illuminate\Http\Request $request) {
-            $query = \App\Models\Computer::select('id', 'code');
+        Route::get('/computers/list', function (Request $request) {
+            $query = Computer::select('id', 'code');
             if ($labId = $request->laboratory_id) {
                 $query->where('laboratory_id', $labId);
             }
+
             return response()->json($query->orderBy('code')->get());
         })->name('computers.list');
     });
