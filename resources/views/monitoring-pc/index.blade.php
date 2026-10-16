@@ -97,7 +97,7 @@
         </template>
 
         <template x-if="pcs.length > 0">
-            <div class="p-5 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+            <div class="p-5 grid grid-cols-5 gap-4">
                 <template x-for="pc in pcs" :key="pc.id">
                     <div class="rounded-xl border p-4 flex flex-col gap-4"
                          :class="pc.status === 'online' ? 'border-green-200 bg-green-50/40' : 'border-gray-200 bg-white'">
