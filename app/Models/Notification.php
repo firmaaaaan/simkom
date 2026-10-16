@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TelegramNotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     use HasUuids;
+
     protected $fillable = [
         'title',
         'message',
@@ -20,6 +22,23 @@ class Notification extends Model
     protected $casts = [
         'read_at' => 'datetime',
     ];
+
+    /**
+     * Satu titik pengiriman ke Telegram untuk semua notifikasi lonceng:
+     * begitu notifikasi tersimpan (ticket, borrowing, box_usage, lab_usage),
+     * isinya diteruskan ke chat Telegram. Gagal kirim tidak menggagalkan
+     * penyimpanan notifikasi in-app.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Notification $notification) {
+            app(TelegramNotificationService::class)->send(
+                $notification->title,
+                $notification->message,
+                $notification->url,
+            );
+        });
+    }
 
     /**
      * Notifikasi yang belum dibaca oleh user tertentu — membandingkan read_at global
