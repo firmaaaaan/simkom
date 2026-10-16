@@ -16,6 +16,13 @@ if errorlevel 1 (
 cd /d "%~dp0"
 set "TASK_NAME=SimKomAgent"
 
+if not exist "%~dp0register_task.ps1" (
+    echo [GAGAL] register_task.ps1 tidak ditemukan di folder ini.
+    echo         Salin ulang seluruh isi folder agent ke PC ini.
+    pause
+    exit /b 1
+)
+
 REM Tentukan executable: .exe bila ada, kalau tidak pakai pythonw.
 set "RUN_EXE="
 set "RUN_ARG="
@@ -24,7 +31,7 @@ if exist "%~dp0SimKomAgent.exe" (
 ) else (
     for /f "delims=" %%P in ('where pythonw.exe 2^>nul') do if not defined RUN_EXE (
         set "RUN_EXE=%%P"
-        set "RUN_ARG=\"%~dp0agent.py\""
+        set "RUN_ARG=%~dp0agent.py"
     )
 )
 
@@ -36,15 +43,13 @@ if not defined RUN_EXE (
 )
 
 echo Mendaftarkan task "%TASK_NAME%" ^(ONSTART, SYSTEM, tanpa batas waktu^)...
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-"$exe = '%RUN_EXE%'; $arg = '%RUN_ARG%';" ^
-"$action = if ($arg) { New-ScheduledTaskAction -Execute $exe -Argument $arg } else { New-ScheduledTaskAction -Execute $exe };" ^
-"$trigger = New-ScheduledTaskTrigger -AtStartup;" ^
-"$principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest;" ^
-"$settings = New-ScheduledTaskSettingsSet -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero);" ^
-"Register-ScheduledTask -TaskName '%TASK_NAME%' -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null"
+if defined RUN_ARG (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0register_task.ps1" -TaskName "%TASK_NAME%" -ExePath "%RUN_EXE%" -ScriptPath "%RUN_ARG%"
+) else (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0register_task.ps1" -TaskName "%TASK_NAME%" -ExePath "%RUN_EXE%"
+)
 if errorlevel 1 (
-    echo [GAGAL] Gagal membuat scheduled task.
+    echo [GAGAL] Gagal membuat scheduled task. ^(PowerShell di atas^)
     pause
     exit /b 1
 )

@@ -19,8 +19,9 @@ A. Dengan Python  (butuh Python 3.9+):
 
 B. Dengan .exe (tanpa Python di PC target):
    1. Build di mesin developer: build_exe.bat  (butuh pyinstaller)
-   2. Salin SimKomAgent.exe + config.json ke PC lab
-   3. Jalankan SimKomAgent.exe, lalu install.bat agar start otomatis saat login
+   2. Salin ke PC lab: SimKomAgent.exe, config.json, install.bat,
+      uninstall.bat, dan register_task.ps1
+   3. Jalankan install.bat (prompt UAC "Yes") — agent mulai sejak PC hidup.
 
 install.bat   : mendaftarkan scheduled task ONSTART (mulai sejak PC hidup,
                 berjalan sebagai SYSTEM selama PC hidup; butuh UAC sekali).
