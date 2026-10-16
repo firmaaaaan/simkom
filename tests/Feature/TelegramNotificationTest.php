@@ -18,6 +18,7 @@ class TelegramNotificationTest extends TestCase
     {
         config()->set('telegram.bot_token', 'test-token');
         config()->set('telegram.chat_id', '1166966295');
+        config()->set('telegram.retry_delay_ms', 0);
     }
 
     private function notify(array $attributes = []): Notification
@@ -71,13 +72,51 @@ class TelegramNotificationTest extends TestCase
     public function test_telegram_connection_failure_does_not_break_notification(): void
     {
         $this->configureTelegram();
-        Http::fake(function () {
+        $calls = 0;
+        Http::fake(function () use (&$calls) {
+            $calls++;
+
             throw new ConnectionException('cURL error 28: Operation timed out');
         });
 
         $this->notify();
 
+        // Gagal di semua percobaan tetap tidak melempar dan notifikasi tersimpan.
+        $this->assertSame(2, $calls);
         $this->assertSame(1, Notification::count());
+    }
+
+    public function test_retries_after_connection_failure_then_succeeds(): void
+    {
+        $this->configureTelegram();
+        $calls = 0;
+        Http::fake(function () use (&$calls) {
+            $calls++;
+            if ($calls === 1) {
+                throw new ConnectionException('cURL error 28: Connection timed out after 5012 milliseconds');
+            }
+
+            return Http::response(['ok' => true], 200);
+        });
+
+        $this->notify();
+
+        $this->assertSame(2, $calls);
+        $this->assertSame(1, Notification::count());
+        Http::assertSent(fn (Request $request) => str_contains($request['text'], 'Notifikasi Uji'));
+    }
+
+    public function test_retries_after_server_error(): void
+    {
+        $this->configureTelegram();
+        Http::fake([
+            'api.telegram.org/*' => Http::sequence()->pushStatus(500)->pushStatus(200, ['ok' => true]),
+        ]);
+
+        $this->notify();
+
+        $this->assertSame(1, Notification::count());
+        Http::assertSentCount(2);
     }
 
     public function test_qr_box_scan_forwards_to_telegram(): void
