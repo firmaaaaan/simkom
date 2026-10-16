@@ -22,8 +22,9 @@ B. Dengan .exe (tanpa Python di PC target):
    2. Salin SimKomAgent.exe + config.json ke PC lab
    3. Jalankan SimKomAgent.exe, lalu install.bat agar start otomatis saat login
 
-install.bat   : mendaftarkan agent ke registry Run (start saat login user).
-uninstall.bat : melepas pendaftaran tersebut.
+install.bat   : mendaftarkan scheduled task ONSTART (mulai sejak PC hidup,
+                berjalan sebagai SYSTEM selama PC hidup; butuh UAC sekali).
+uninstall.bat : menghapus task tersebut.
 
 Log ditulis ke agent.log di folder yang sama dengan script/exe.
 """
@@ -102,6 +103,26 @@ def get_disk_path(config):
     return "C:/" if os.name == "nt" else "/"
 
 
+def get_active_user():
+    """User yang sedang login di sesi console.
+
+    Akurat walau agent berjalan sebagai SYSTEM (task ONSTART): psutil.users()
+    mengembalikan sesi login interaktif. Sebelum ada user login (layar login
+    Windows), kembalikan None sehingga dashboard menampilkan "—".
+    """
+    try:
+        users = psutil.users()
+        if users:
+            return users[-1].name
+    except Exception:
+        pass
+
+    user = getpass.getuser()
+    if user.upper() in {"SYSTEM", "LOCAL SERVICE", "NETWORK SERVICE"}:
+        return None
+    return user
+
+
 def collect(config):
     return {
         "hostname": socket.gethostname(),
@@ -110,7 +131,7 @@ def collect(config):
         "cpu_usage": float(psutil.cpu_percent(interval=0.5)),
         "ram_usage": float(psutil.virtual_memory().percent),
         "disk_usage": float(psutil.disk_usage(get_disk_path(config)).percent),
-        "active_user": getpass.getuser(),
+        "active_user": get_active_user(),
     }
 
 
