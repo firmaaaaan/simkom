@@ -24,6 +24,7 @@ class RoleSeeder extends Seeder
         'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
         'reports' => ['Laporan', ['view', 'print']],
+        'monitoring' => ['Monitoring PC', ['view', 'control']],
     ];
 
     private const ACTION_LABELS = [
@@ -34,12 +35,14 @@ class RoleSeeder extends Seeder
         'export' => 'Export',
         'import' => 'Import',
         'print' => 'Cetak',
+        'control' => 'Kendalikan',
     ];
 
     /** Modul yang diberikan ke laboran (sinkron dengan daftar lama). */
     private const LABORAN_MODULES = [
         'hardware', 'software', 'components', 'computers',
         'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
+        'monitoring',
     ];
 
     public function run(): void

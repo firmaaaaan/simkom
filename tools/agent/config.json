@@ -1,0 +1,6 @@
+{
+    "server_url": "http://localhost:8000",
+    "api_key": "GANTI_DENGAN_API_KEY_DARI_MONITORING_API_KEY_DI_ENV_SERVER",
+    "interval_seconds": 10,
+    "disk_path": "C:/"
+}

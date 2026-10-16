@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // API key untuk agent telemetry PC (header X-API-KEY).
+    'monitoring' => [
+        'api_key' => env('MONITORING_API_KEY'),
+    ],
+
 ];

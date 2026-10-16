@@ -20,6 +20,7 @@ use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicComputerCardController;
@@ -466,6 +467,17 @@ Route::middleware('auth')->group(function () {
     });
     Route::middleware('permission:delete-backups')->group(function () {
         Route::delete('backups/files/{filename}', [BackupController::class, 'destroyFile'])->name('backups.files.destroy');
+    });
+
+    // Monitoring PC — view-monitoring untuk membuka dashboard;
+    // aksi power (nyalakan/matikan) memakai permission:control-monitoring.
+    Route::middleware('permission:view-monitoring')->group(function () {
+        Route::get('monitoring-pc', [MonitoringPcController::class, 'index'])->name('monitoring-pc.index');
+        Route::get('monitoring-pc/data', [MonitoringPcController::class, 'data'])->name('monitoring-pc.data');
+    });
+    Route::middleware('permission:control-monitoring')->group(function () {
+        Route::post('monitoring-pc/{pc}/power-on', [MonitoringPcController::class, 'powerOn'])->name('monitoring-pc.power-on');
+        Route::post('monitoring-pc/{pc}/power-off', [MonitoringPcController::class, 'powerOff'])->name('monitoring-pc.power-off');
     });
 
     // Pengembalian Box — HANYA ADMIN/SUPERADMIN

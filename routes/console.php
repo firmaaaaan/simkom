@@ -13,3 +13,8 @@ Artisan::command('inspire', function () {
 Schedule::command('backup:run')
     ->monthlyOn(1, '00:10')
     ->withoutOverlapping();
+
+// Sinkron status PC offline & kedaluwarsakan perintah power basi.
+Schedule::command('monitoring:check-offline')
+    ->everyMinute()
+    ->withoutOverlapping();
