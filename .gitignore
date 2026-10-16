@@ -20,6 +20,8 @@
 /storage/app/backups
 /storage/pail
 /vendor
+/tools/agent/SimKomAgent.exe
+/tools/agent/build_tmp
 Homestead.json
 Homestead.yaml
 Thumbs.db
