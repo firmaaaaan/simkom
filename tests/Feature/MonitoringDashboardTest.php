@@ -109,6 +109,7 @@ class MonitoringDashboardTest extends TestCase
             ->assertJsonPath('stats.online', 1)
             ->assertJsonPath('stats.offline', 1)
             ->assertJsonPath('can_power', false)
+            ->assertJsonPath('pcs.0.software_count', 0)
             ->assertJsonCount(2, 'pcs');
 
         // Pengguna dengan control-monitoring mendapat can_power true.
@@ -126,5 +127,28 @@ class MonitoringDashboardTest extends TestCase
             ->get(route('monitoring-pc.index'))
             ->assertOk()
             ->assertSee('Belum ada PC yang terhubung.');
+    }
+
+    public function test_software_endpoint_lists_inventory(): void
+    {
+        $pc = PcMonitor::create([
+            'hostname' => 'LAB-PC-01',
+            'ip_address' => '192.168.1.10',
+            'status' => PcMonitor::STATUS_ONLINE,
+            'last_seen_at' => now(),
+            'software_synced_at' => now(),
+        ]);
+        $pc->softwares()->create(['name' => 'Google Chrome', 'version' => '120.0', 'publisher' => 'Google LLC']);
+        $pc->softwares()->create(['name' => '7-Zip', 'version' => '23.01']);
+
+        $user = $this->userWith('view-monitoring');
+
+        $this->actingAs($user)
+            ->getJson(route('monitoring-pc.software', $pc))
+            ->assertOk()
+            ->assertJsonPath('hostname', 'LAB-PC-01')
+            ->assertJsonCount(2, 'items')
+            ->assertJsonPath('items.0.name', '7-Zip')
+            ->assertJsonPath('items.1.name', 'Google Chrome');
     }
 }

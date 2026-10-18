@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PcCommand;
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use App\Services\WakeOnLanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,10 +65,15 @@ class MonitoringPcController extends Controller
     }
 
     /**
-     * Matikan PC: buat perintah pending, agent di PC mengeksekusi shutdown.
+     * Buat perintah agent (shutdown/restart/lock/logout/screenshot):
+     * antrean pending, agent di PC mengeksekusinya lalu meng-ack.
      */
-    public function powerOff(Request $request, PcMonitor $pc): JsonResponse
+    public function command(Request $request, PcMonitor $pc): JsonResponse
     {
+        $data = $request->validate([
+            'action' => 'required|in:'.implode(',', PcCommand::ACTIONS),
+        ]);
+
         if ($pc->effectiveStatus() !== PcMonitor::STATUS_ONLINE) {
             return response()->json([
                 'ok' => false,
@@ -76,23 +81,56 @@ class MonitoringPcController extends Controller
             ], 409);
         }
 
-        if ($pc->hasPendingPower()) {
+        if ($pc->hasPendingCommand()) {
             return response()->json([
                 'ok' => false,
-                'message' => "Perintah mematikan {$pc->hostname} masih menunggu di agent.",
+                'message' => "Masih ada perintah untuk {$pc->hostname} yang menunggu di agent.",
             ], 409);
         }
 
-        PcPowerCommand::create([
+        PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => $data['action'],
+            'status' => PcCommand::STATUS_PENDING,
             'requested_by' => $request->user()?->id,
         ]);
 
+        $label = PcCommand::actionLabel($data['action']);
+
         return response()->json([
             'ok' => true,
-            'message' => "Perintah mematikan {$pc->hostname} dikirim — PC mati dalam ~15 detik bila agent berjalan.",
+            'message' => "Perintah {$label} {$pc->hostname} dikirim — agent mengeksekusi dalam ~10 detik.",
+        ]);
+    }
+
+    /**
+     * Screenshot layar terakhir yang dikirim agent.
+     */
+    public function screenshot(PcMonitor $pc): mixed
+    {
+        $path = $pc->screenshotPath();
+
+        if (! $pc->hasScreenshot()) {
+            abort(404, 'Belum ada screenshot untuk PC ini.');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'image/jpeg',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    /**
+     * Daftar software terinstall pada PC (untuk modal dashboard).
+     */
+    public function software(PcMonitor $pc): JsonResponse
+    {
+        return response()->json([
+            'hostname' => $pc->hostname,
+            'synced_at' => $pc->software_synced_at?->toIso8601String(),
+            'items' => $pc->softwares()
+                ->orderBy('name')
+                ->get(['name', 'version', 'publisher', 'install_date', 'size_kb']),
         ]);
     }
 
@@ -105,7 +143,9 @@ class MonitoringPcController extends Controller
      */
     private function payload(Request $request): array
     {
-        $pcs = PcMonitor::orderBy('hostname')->get();
+        $pcs = PcMonitor::orderBy('hostname')
+            ->withCount('softwares')
+            ->get();
 
         $items = $pcs->map(fn (PcMonitor $pc) => [
             'id' => $pc->id,
@@ -119,7 +159,12 @@ class MonitoringPcController extends Controller
             'status' => $pc->effectiveStatus(),
             'last_seen_at' => $pc->last_seen_at?->toIso8601String(),
             'seconds_since_last_seen' => $pc->secondsSinceLastSeen(),
-            'pending_power' => $pc->hasPendingPower(),
+            'pending_command' => $pc->hasPendingCommand(),
+            'screenshot_url' => $pc->hasScreenshot()
+                ? route('monitoring-pc.screenshot', [$pc, 't' => $pc->updated_at?->timestamp])
+                : null,
+            'software_count' => (int) ($pc->softwares_count ?? 0),
+            'software_synced_at' => $pc->software_synced_at?->toIso8601String(),
         ])->values();
 
         $statuses = $items->pluck('status');

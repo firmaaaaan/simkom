@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\PcCommand;
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,10 +47,10 @@ class AgentCommandApiTest extends TestCase
     {
         $this->withApiKey();
         $pc = $this->pc();
-        $command = PcPowerCommand::create([
+        $command = PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
         ]);
 
         $this->getJson(route('commands.index', ['hostname' => 'LAB-PC-01']), ['X-API-KEY' => 'test-key'])
@@ -66,17 +66,17 @@ class AgentCommandApiTest extends TestCase
         $pc = $this->pc();
 
         // Kedaluwarsa: melewati TTL.
-        PcPowerCommand::create([
+        PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
-            'created_at' => now()->subSeconds(PcPowerCommand::TTL_SECONDS + 5),
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
+            'created_at' => now()->subSeconds(PcCommand::TTL_SECONDS + 5),
         ]);
         // Sudah selesai.
-        PcPowerCommand::create([
+        PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_COMPLETED,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_COMPLETED,
         ]);
 
         $this->getJson(route('commands.index', ['hostname' => 'LAB-PC-01']), ['X-API-KEY' => 'test-key'])
@@ -88,10 +88,10 @@ class AgentCommandApiTest extends TestCase
     {
         $this->withApiKey();
         $pc = $this->pc();
-        $command = PcPowerCommand::create([
+        $command = PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
         ]);
 
         $this->postJson(route('commands.ack', $command), [
@@ -100,7 +100,7 @@ class AgentCommandApiTest extends TestCase
             ->assertOk()
             ->assertJson(['ok' => true]);
 
-        $this->assertDatabaseHas('pc_power_commands', [
+        $this->assertDatabaseHas('pc_commands', [
             'id' => $command->id,
             'status' => 'completed',
         ]);
@@ -111,10 +111,10 @@ class AgentCommandApiTest extends TestCase
     {
         $this->withApiKey();
         $pc = $this->pc();
-        $command = PcPowerCommand::create([
+        $command = PcCommand::create([
             'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
         ]);
 
         $this->postJson(route('commands.ack', $command), [

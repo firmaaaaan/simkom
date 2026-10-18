@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PcCommand;
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,8 +24,8 @@ class AgentCommandController extends Controller
             return response()->json(['commands' => []]);
         }
 
-        $commands = $pc->powerCommands()->pending()->get()
-            ->map(fn (PcPowerCommand $command) => [
+        $commands = $pc->commands()->pending()->get()
+            ->map(fn (PcCommand $command) => [
                 'id' => $command->id,
                 'action' => $command->action,
             ]);
@@ -34,18 +34,21 @@ class AgentCommandController extends Controller
     }
 
     /**
-     * Konfirmasi hasil eksekusi perintah oleh agent (completed | failed).
+     * Konfirmasi hasil eksekusi perintah oleh agent (completed | failed),
+     * dengan pesan opsional (mis. "tidak ada user login").
      */
     public function ack(Request $request, string $command): JsonResponse
     {
         $data = $request->validate([
             'status' => 'required|in:completed,failed',
+            'message' => 'nullable|string|max:500',
         ]);
 
-        $powerCommand = PcPowerCommand::findOrFail($command);
+        $pcCommand = PcCommand::findOrFail($command);
 
-        $powerCommand->update([
+        $pcCommand->update([
             'status' => $data['status'],
+            'message' => $data['message'] ?? null,
             'executed_at' => now(),
         ]);
 

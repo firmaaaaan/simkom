@@ -469,15 +469,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('backups/files/{filename}', [BackupController::class, 'destroyFile'])->name('backups.files.destroy');
     });
 
-    // Monitoring PC — view-monitoring untuk membuka dashboard;
-    // aksi power (nyalakan/matikan) memakai permission:control-monitoring.
+    // Monitoring PC — view-monitoring untuk membuka dashboard & melihat
+    // screenshot; aksi kendali (nyalakan/matikan/perintah agent) memakai
+    // permission:control-monitoring.
     Route::middleware('permission:view-monitoring')->group(function () {
         Route::get('monitoring-pc', [MonitoringPcController::class, 'index'])->name('monitoring-pc.index');
         Route::get('monitoring-pc/data', [MonitoringPcController::class, 'data'])->name('monitoring-pc.data');
+        Route::get('monitoring-pc/{pc}/screenshot', [MonitoringPcController::class, 'screenshot'])->name('monitoring-pc.screenshot');
+        Route::get('monitoring-pc/{pc}/software', [MonitoringPcController::class, 'software'])->name('monitoring-pc.software');
     });
     Route::middleware('permission:control-monitoring')->group(function () {
         Route::post('monitoring-pc/{pc}/power-on', [MonitoringPcController::class, 'powerOn'])->name('monitoring-pc.power-on');
-        Route::post('monitoring-pc/{pc}/power-off', [MonitoringPcController::class, 'powerOff'])->name('monitoring-pc.power-off');
+        Route::post('monitoring-pc/{pc}/command', [MonitoringPcController::class, 'command'])->name('monitoring-pc.command');
     });
 
     // Pengembalian Box — HANYA ADMIN/SUPERADMIN

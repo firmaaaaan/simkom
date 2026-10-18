@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class PcMonitor extends Model
 {
@@ -28,6 +29,7 @@ class PcMonitor extends Model
         'active_user',
         'status',
         'last_seen_at',
+        'software_synced_at',
     ];
 
     protected $casts = [
@@ -35,11 +37,17 @@ class PcMonitor extends Model
         'ram_usage' => 'float',
         'disk_usage' => 'float',
         'last_seen_at' => 'datetime',
+        'software_synced_at' => 'datetime',
     ];
 
-    public function powerCommands(): HasMany
+    public function commands(): HasMany
     {
-        return $this->hasMany(PcPowerCommand::class);
+        return $this->hasMany(PcCommand::class);
+    }
+
+    public function softwares(): HasMany
+    {
+        return $this->hasMany(PcSoftware::class);
     }
 
     /**
@@ -66,10 +74,10 @@ class PcMonitor extends Model
         return max(0, now()->diffInSeconds($this->last_seen_at, true));
     }
 
-    /** Perintah power pending yang masih berlaku (dalam TTL). */
-    public function hasPendingPower(): bool
+    /** Perintah pending yang masih berlaku (dalam TTL). */
+    public function hasPendingCommand(): bool
     {
-        return $this->powerCommands()->pending()->exists();
+        return $this->commands()->pending()->exists();
     }
 
     public function scopeStale(Builder $query, int $seconds = self::STALE_SECONDS): Builder
@@ -78,5 +86,18 @@ class PcMonitor extends Model
             $q->whereNull('last_seen_at')
                 ->orWhere('last_seen_at', '<=', now()->subSeconds($seconds));
         });
+    }
+
+    /** Path file screenshot terakhir (belum tentu ada di disk). */
+    public function screenshotPath(): string
+    {
+        $safe = preg_replace('/[^A-Za-z0-9\-_.]/', '_', $this->hostname);
+
+        return Storage::disk('local')->path('pc-screenshots/'.$safe.'.jpg');
+    }
+
+    public function hasScreenshot(): bool
+    {
+        return is_file($this->screenshotPath());
     }
 }

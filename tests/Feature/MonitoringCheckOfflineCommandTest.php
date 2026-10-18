@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\PcCommand;
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -26,18 +26,18 @@ class MonitoringCheckOfflineCommandTest extends TestCase
             'last_seen_at' => now()->subSeconds(120),
         ]);
 
-        $freshCommand = PcPowerCommand::create([
+        $freshCommand = PcCommand::create([
             'pc_monitor_id' => $online->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
         ]);
-        $oldCommand = PcPowerCommand::create([
+        $oldCommand = PcCommand::create([
             'pc_monitor_id' => $stale->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_PENDING,
         ]);
         // created_at tidak di-fillable — atur langsung lalu save.
-        $oldCommand->created_at = now()->subSeconds(PcPowerCommand::TTL_SECONDS + 30);
+        $oldCommand->created_at = now()->subSeconds(PcCommand::TTL_SECONDS + 30);
         $oldCommand->save();
 
         $this->artisan('monitoring:check-offline')
@@ -47,7 +47,7 @@ class MonitoringCheckOfflineCommandTest extends TestCase
         $this->assertSame(PcMonitor::STATUS_OFFLINE, $stale->fresh()->status);
         $this->assertSame(PcMonitor::STATUS_ONLINE, $online->fresh()->status);
 
-        $this->assertSame(PcPowerCommand::STATUS_FAILED, $oldCommand->fresh()->status);
-        $this->assertSame(PcPowerCommand::STATUS_PENDING, $freshCommand->fresh()->status);
+        $this->assertSame(PcCommand::STATUS_FAILED, $oldCommand->fresh()->status);
+        $this->assertSame(PcCommand::STATUS_PENDING, $freshCommand->fresh()->status);
     }
 }

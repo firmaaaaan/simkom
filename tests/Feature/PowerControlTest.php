@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -56,10 +55,10 @@ class PowerControlTest extends TestCase
         $pc = $this->pc();
 
         $this->actingAs($viewer)
-            ->postJson(route('monitoring-pc.power-on', $pc))
+            ->postJson(route('monitoring-pc.command', $pc), ['action' => 'shutdown'])
             ->assertForbidden();
         $this->actingAs($viewer)
-            ->postJson(route('monitoring-pc.power-off', $pc))
+            ->postJson(route('monitoring-pc.command', $pc), ['action' => 'shutdown'])
             ->assertForbidden();
     }
 
@@ -123,55 +122,5 @@ class PowerControlTest extends TestCase
             ->postJson(route('monitoring-pc.power-on', $pc))
             ->assertStatus(500)
             ->assertJson(['ok' => false]);
-    }
-
-    public function test_power_off_creates_pending_command(): void
-    {
-        $user = $this->userWith('view-monitoring', 'control-monitoring');
-        $pc = $this->pc();
-
-        $this->actingAs($user)
-            ->postJson(route('monitoring-pc.power-off', $pc))
-            ->assertOk()
-            ->assertJson(['ok' => true]);
-
-        $this->assertDatabaseHas('pc_power_commands', [
-            'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
-            'requested_by' => $user->id,
-        ]);
-    }
-
-    public function test_power_off_rejected_when_pc_offline(): void
-    {
-        $user = $this->userWith('view-monitoring', 'control-monitoring');
-        $pc = $this->pc([
-            'status' => PcMonitor::STATUS_OFFLINE,
-            'last_seen_at' => now()->subMinutes(5),
-        ]);
-
-        $this->actingAs($user)
-            ->postJson(route('monitoring-pc.power-off', $pc))
-            ->assertStatus(409);
-
-        $this->assertDatabaseCount('pc_power_commands', 0);
-    }
-
-    public function test_power_off_rejected_while_command_pending(): void
-    {
-        $user = $this->userWith('view-monitoring', 'control-monitoring');
-        $pc = $this->pc();
-        PcPowerCommand::create([
-            'pc_monitor_id' => $pc->id,
-            'action' => PcPowerCommand::ACTION_SHUTDOWN,
-            'status' => PcPowerCommand::STATUS_PENDING,
-        ]);
-
-        $this->actingAs($user)
-            ->postJson(route('monitoring-pc.power-off', $pc))
-            ->assertStatus(409);
-
-        $this->assertSame(1, PcPowerCommand::count());
     }
 }

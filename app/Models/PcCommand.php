@@ -7,11 +7,28 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PcPowerCommand extends Model
+class PcCommand extends Model
 {
     use HasUuids;
 
     public const ACTION_SHUTDOWN = 'shutdown';
+
+    public const ACTION_RESTART = 'restart';
+
+    public const ACTION_LOCK = 'lock';
+
+    public const ACTION_LOGOUT = 'logout';
+
+    public const ACTION_SCREENSHOT = 'screenshot';
+
+    /** Whitelist aksi yang dikenali dashboard & agent. */
+    public const ACTIONS = [
+        self::ACTION_SHUTDOWN,
+        self::ACTION_RESTART,
+        self::ACTION_LOCK,
+        self::ACTION_LOGOUT,
+        self::ACTION_SCREENSHOT,
+    ];
 
     public const STATUS_PENDING = 'pending';
 
@@ -29,6 +46,7 @@ class PcPowerCommand extends Model
         'pc_monitor_id',
         'action',
         'status',
+        'message',
         'requested_by',
         'executed_at',
     ];
@@ -58,5 +76,18 @@ class PcPowerCommand extends Model
     {
         return $this->status === self::STATUS_PENDING
             && $this->created_at->lte(now()->subSeconds(self::TTL_SECONDS));
+    }
+
+    /** Label Bahasa Indonesia per aksi (untuk pesan toast dashboard). */
+    public static function actionLabel(string $action): string
+    {
+        return match ($action) {
+            self::ACTION_SHUTDOWN => 'mematikan',
+            self::ACTION_RESTART => 'merestart',
+            self::ACTION_LOCK => 'mengunci layar',
+            self::ACTION_LOGOUT => 'mengeluarkan user',
+            self::ACTION_SCREENSHOT => 'mengambil screenshot',
+            default => $action,
+        };
     }
 }

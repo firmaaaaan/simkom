@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PcCommand;
 use App\Models\PcMonitor;
-use App\Models\PcPowerCommand;
 use Illuminate\Console\Command;
 
 class MonitoringCheckOfflineCommand extends Command
@@ -20,10 +20,10 @@ class MonitoringCheckOfflineCommand extends Command
 
         // 2. Kedaluwarsakan perintah power pending yang lewat TTL —
         //    agent tidak sempat mengambilnya (mis. PC sudah dimatikan manual).
-        $expired = PcPowerCommand::query()
-            ->where('status', PcPowerCommand::STATUS_PENDING)
-            ->where('created_at', '<', now()->subSeconds(PcPowerCommand::TTL_SECONDS))
-            ->update(['status' => PcPowerCommand::STATUS_FAILED]);
+        $expired = PcCommand::query()
+            ->where('status', PcCommand::STATUS_PENDING)
+            ->where('created_at', '<', now()->subSeconds(PcCommand::TTL_SECONDS))
+            ->update(['status' => PcCommand::STATUS_FAILED]);
 
         $this->info(sprintf(
             'Monitoring: %d PC ditandai offline, %d perintah power kedaluwarsa.',

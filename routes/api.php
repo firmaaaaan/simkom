@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgentCommandController;
+use App\Http\Controllers\AgentReportController;
 use App\Http\Controllers\TelemetryController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,12 @@ Route::middleware('agent.apikey')->group(function () {
     Route::post('/v1/commands/{command}/ack', [AgentCommandController::class, 'ack'])
         ->name('commands.ack')
         ->middleware('throttle:60,1');
+
+    Route::post('/v1/screenshots', [AgentReportController::class, 'screenshot'])
+        ->name('agent.screenshots.store')
+        ->middleware('throttle:6,1');
+
+    Route::post('/v1/software', [AgentReportController::class, 'software'])
+        ->name('agent.software.store')
+        ->middleware('throttle:3,1');
 });

@@ -161,9 +161,29 @@
                             </div>
                         </div>
 
+                        {{-- Screenshot terakhir --}}
+                        <template x-if="pc.screenshot_url">
+                            <button type="button" @click="openScreenshot(pc)" class="block w-full group" title="Perbesar screenshot">
+                                <img :src="pc.screenshot_url" alt="Screenshot layar"
+                                     class="w-full h-24 object-cover rounded-lg border border-gray-200 group-hover:opacity-85 transition-opacity" loading="lazy">
+                            </button>
+                        </template>
+
+                        {{-- Inventaris software --}}
+                        <button type="button" @click="openSoftware(pc)"
+                                class="text-left text-xs text-gray-600 hover:text-green-700 transition-colors flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                            <span x-text="pc.software_count + ' aplikasi'"></span>
+                            <template x-if="pc.software_synced_at">
+                                <span class="text-gray-400" x-text="'· sync ' + relTime(secondsSince(pc.software_synced_at))"></span>
+                            </template>
+                        </button>
+
                         {{-- Aksi --}}
                         <div class="mt-auto pt-3 border-t border-gray-100 flex items-center gap-2" x-show="canPower">
-                            <template x-if="pc.pending_power">
+                            <template x-if="pc.pending_command">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
                                     <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -172,25 +192,69 @@
                                     Menunggu agent
                                 </span>
                             </template>
-                            <template x-if="!pc.pending_power && pc.status === 'online'">
-                                <button type="button" @click="powerOff(pc)" :disabled="busy === pc.id"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 disabled:opacity-50 transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
-                                    </svg>
-                                    Matikan
-                                </button>
+                            <template x-if="!pc.pending_command && pc.status === 'online'">
+                                <div class="relative w-full" x-data="{ menu: false }" @click.outside="menu = false">
+                                    <button type="button" @click="menu = !menu" :disabled="busy === pc.id"
+                                            class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                                        </svg>
+                                        Aksi
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="menu" x-transition x-cloak
+                                         class="absolute right-0 bottom-full mb-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                                        <button type="button" @click="menu = false; command('shutdown', pc)"
+                                                class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                                            </svg>
+                                            Matikan
+                                        </button>
+                                        <button type="button" @click="menu = false; command('restart', pc)"
+                                                class="w-full text-left px-3 py-2 text-xs text-amber-600 hover:bg-amber-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                            </svg>
+                                            Restart
+                                        </button>
+                                        <button type="button" @click="menu = false; command('lock', pc)"
+                                                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                            </svg>
+                                            Kunci Layar
+                                        </button>
+                                        <button type="button" @click="menu = false; command('logout', pc)"
+                                                class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                                            </svg>
+                                            Keluarkan User
+                                        </button>
+                                        <button type="button" @click="menu = false; command('screenshot', pc)"
+                                                class="w-full text-left px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                                            </svg>
+                                            Ambil Layar
+                                        </button>
+                                    </div>
+                                </div>
                             </template>
-                            <template x-if="!pc.pending_power && pc.status === 'offline' && pc.mac_address">
+                            <template x-if="!pc.pending_command && pc.status === 'offline' && pc.mac_address">
                                 <button type="button" @click="powerOn(pc)" :disabled="busy === pc.id"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50 transition-colors">
+                                        class="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-50 transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
                                     </svg>
                                     Nyalakan
                                 </button>
                             </template>
-                            <template x-if="!pc.pending_power && pc.status === 'offline' && !pc.mac_address">
+                            <template x-if="!pc.pending_command && pc.status === 'offline' && !pc.mac_address">
                                 <span class="text-xs text-gray-400">MAC belum diketahui</span>
                             </template>
                         </div>
@@ -198,6 +262,70 @@
                 </template>
             </div>
         </template>
+    </div>
+
+    {{-- MODAL SCREENSHOT --}}
+    <div x-show="screenshotModal" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" x-cloak>
+        <div class="bg-white rounded-xl overflow-hidden max-w-4xl w-full" @click.outside="screenshotModal = null">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-800" x-text="screenshotModal && screenshotModal.hostname"></p>
+                    <p class="text-xs text-gray-500">Screenshot layar terakhir dari agent</p>
+                </div>
+                <button type="button" @click="screenshotModal = null" class="text-gray-400 hover:text-gray-600" aria-label="Tutup">&times;</button>
+            </div>
+            <img x-show="screenshotModal" :src="screenshotModal && screenshotModal.url" alt="Screenshot layar PC"
+                 class="w-full max-h-[70vh] object-contain bg-gray-900">
+        </div>
+    </div>
+
+    {{-- MODAL SOFTWARE --}}
+    <div x-show="softwareModal" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" x-cloak>
+        <div class="bg-white rounded-xl overflow-hidden max-w-3xl w-full flex flex-col max-h-[85vh]" @click.outside="softwareModal = null">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 truncate">
+                        Software — <span x-text="softwareModal && softwareModal.hostname"></span>
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        <span x-text="softwareModal && softwareModal.items ? softwareModal.items.length + ' aplikasi' : 'Memuat…'"></span>
+                        <template x-if="softwareModal && softwareModal.synced_at">
+                            &middot; <span x-text="'sync ' + relTime(secondsSince(softwareModal.synced_at))"></span>
+                        </template>
+                    </p>
+                </div>
+                <button type="button" @click="softwareModal = null" class="text-gray-400 hover:text-gray-600 shrink-0" aria-label="Tutup">&times;</button>
+            </div>
+            <div class="px-4 py-3 border-b border-gray-100">
+                <input type="search" x-model="softwareSearch" placeholder="Cari nama software…"
+                       class="w-full rounded-lg border-gray-200 text-sm focus:border-green-500 focus:ring-green-500">
+            </div>
+            <div class="overflow-y-auto flex-1">
+                <p x-show="softwareModal && softwareModal.loading" class="px-4 py-8 text-center text-sm text-gray-500">Memuat daftar software…</p>
+                <p x-show="softwareModal && softwareModal.error" class="px-4 py-8 text-center text-sm text-red-600" x-text="softwareModal && softwareModal.error"></p>
+                <table x-show="softwareModal && softwareModal.items" class="w-full text-sm">
+                    <thead class="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2.5 text-left font-semibold">Nama</th>
+                            <th class="px-4 py-2.5 text-left font-semibold">Versi</th>
+                            <th class="px-4 py-2.5 text-left font-semibold">Penerbit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <template x-for="(item, index) in (softwareModal && softwareModal.items ? softwareModal.items.filter(i => !softwareSearch || (i.name || '').toLowerCase().includes(softwareSearch.toLowerCase())) : [])" :key="index">
+                            <tr>
+                                <td class="px-4 py-2 text-gray-800" x-text="item.name"></td>
+                                <td class="px-4 py-2 text-gray-600" x-text="item.version || '—'"></td>
+                                <td class="px-4 py-2 text-gray-600" x-text="item.publisher || '—'"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="softwareModal && softwareModal.items && softwareModal.items.filter(i => !softwareSearch || (i.name || '').toLowerCase().includes(softwareSearch.toLowerCase())).length === 0">
+                            <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">Tidak ada software yang cocok.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -212,6 +340,9 @@
             updatedAt: initial.generated_at,
             toast: null,
             busy: null,
+            softwareModal: null,
+            softwareSearch: '',
+            screenshotModal: null,
             textClass: { green: 'text-green-600', yellow: 'text-amber-600', red: 'text-red-600' },
             barClass: { green: 'bg-green-500', yellow: 'bg-amber-400', red: 'bg-red-500' },
 
@@ -242,11 +373,35 @@
                 return 'green';
             },
 
-            async power(action, pc) {
+            async command(action, pc) {
                 if (this.busy) return;
                 this.busy = pc.id;
                 try {
-                    const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/' + action, {
+                    const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/command', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ action: action }),
+                    });
+                    const body = await res.json().catch(() => ({}));
+                    this.toast = { ok: !!body.ok, message: body.message || 'Permintaan gagal diproses.' };
+                } catch (e) {
+                    this.toast = { ok: false, message: 'Tidak dapat terhubung ke server.' };
+                } finally {
+                    this.busy = null;
+                    this.poll();
+                }
+            },
+
+            async powerOn(pc) {
+                if (this.busy) return;
+                this.busy = pc.id;
+                try {
+                    const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/power-on', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -264,8 +419,36 @@
                 }
             },
 
-            powerOn(pc) { return this.power('power-on', pc); },
-            powerOff(pc) { return this.power('power-off', pc); },
+            openScreenshot(pc) {
+                this.screenshotModal = { hostname: pc.hostname, url: pc.screenshot_url };
+            },
+
+            async openSoftware(pc) {
+                this.softwareSearch = '';
+                this.softwareModal = { hostname: pc.hostname, synced_at: pc.software_synced_at, items: null, loading: true, error: null };
+                try {
+                    const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/software', {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    this.softwareModal = {
+                        hostname: data.hostname,
+                        synced_at: data.synced_at,
+                        items: data.items,
+                        loading: false,
+                        error: null,
+                    };
+                } catch (e) {
+                    this.softwareModal = {
+                        hostname: pc.hostname,
+                        synced_at: null,
+                        items: null,
+                        loading: false,
+                        error: 'Gagal memuat daftar software.',
+                    };
+                }
+            },
 
             secondsSince(iso) {
                 if (!iso) return null;
