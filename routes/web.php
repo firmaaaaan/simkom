@@ -20,6 +20,7 @@ use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -415,6 +416,19 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-tickets')
         ->middlewareFor(['edit', 'update'], 'permission:edit-tickets')
         ->middlewareFor(['destroy'], 'permission:delete-tickets');
+
+    // Pengadaan (Admin + Laboran)
+    Route::middleware('permission:edit-pengadaan')->group(function () {
+        Route::patch('pengadaan/{pengadaan}/status', [PengadaanController::class, 'updateStatus'])->name('pengadaan.update-status');
+    });
+    Route::middleware('permission:delete-pengadaan')->group(function () {
+        Route::delete('pengadaan/bulk-destroy', [PengadaanController::class, 'bulkDestroy'])->name('pengadaan.bulk-destroy');
+    });
+    Route::resource('pengadaan', PengadaanController::class)
+        ->middlewareFor(['index', 'show'], 'permission:view-pengadaan')
+        ->middlewareFor(['create', 'store'], 'permission:create-pengadaan')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-pengadaan')
+        ->middlewareFor(['destroy'], 'permission:delete-pengadaan');
 
     // Peminjaman Komputer (Admin + Laboran)
     Route::get('/borrowings/export', [AdminBorrowingController::class, 'export'])

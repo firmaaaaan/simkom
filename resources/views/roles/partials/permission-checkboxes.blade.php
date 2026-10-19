@@ -14,7 +14,7 @@
     $categories = [
         'Pengaturan' => ['users', 'roles', 'backups'],
         'Data Master' => ['laboratories', 'hardware', 'software', 'computers', 'components'],
-        'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports'],
+        'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports', 'pengadaan'],
     ];
 
     // Kelompokkan permission per modul: name = <aksi>-<modul>.

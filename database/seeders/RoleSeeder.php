@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
         'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
         'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete', 'export']],
         'borrowings' => ['Peminjaman', ['view', 'edit', 'export']],
+        'pengadaan' => ['Pengadaan', ['view', 'create', 'edit', 'delete']],
         'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
         'reports' => ['Laporan', ['view', 'print']],
@@ -42,7 +43,7 @@ class RoleSeeder extends Seeder
     private const LABORAN_MODULES = [
         'hardware', 'software', 'components', 'computers',
         'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
-        'monitoring',
+        'monitoring', 'pengadaan',
     ];
 
     public function run(): void

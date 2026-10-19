@@ -111,7 +111,7 @@
                 @endif
                 @endif
 
-                @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages'))
+                @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages') || auth()->user()->hasPermission('view-pengadaan'))
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
                 @if(auth()->user()->hasPermission('view-academic-years'))
                 <a href="{{ route('academic-years.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('academic-years.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
@@ -171,6 +171,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                     </svg>
                     Penggunaan Lab
+                </a>
+                @endif
+                @if(auth()->user()->hasPermission('view-pengadaan'))
+                <a href="{{ route('pengadaan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('pengadaan.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    Pengadaan
                 </a>
                 @endif
                 @endif
