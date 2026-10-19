@@ -361,6 +361,7 @@
             updatedAt: initial.generated_at,
             toast: null,
             busy: null,
+            polling: false,
             softwareModal: null,
             softwareSearch: '',
             screenshotModal: null,
@@ -373,6 +374,10 @@
             },
 
             async poll() {
+                // Satu request dalam satu waktu — respons lambat tidak boleh
+                // menimpa respons lebih baru (menyebabkan status "mundur").
+                if (this.polling) return;
+                this.polling = true;
                 try {
                     const res = await fetch('{{ route('monitoring-pc.data') }}', {
                         headers: { 'Accept': 'application/json' },
@@ -385,6 +390,8 @@
                     this.updatedAt = data.generated_at;
                 } catch (e) {
                     // server sementara tidak terjangkau — polling berikutnya mencoba lagi.
+                } finally {
+                    this.polling = false;
                 }
             },
 

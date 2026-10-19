@@ -119,6 +119,31 @@ class MonitoringDashboardTest extends TestCase
             ->assertJsonPath('can_power', true);
     }
 
+    public function test_status_window_uses_stale_seconds_constant(): void
+    {
+        // Di bawah ambang STALE_SECONDS (45) masih online; di atasnya offline.
+        PcMonitor::create([
+            'hostname' => 'LAB-PC-SEGERA',
+            'ip_address' => '192.168.1.20',
+            'status' => PcMonitor::STATUS_ONLINE,
+            'last_seen_at' => now()->subSeconds(PcMonitor::STALE_SECONDS - 5),
+        ]);
+        PcMonitor::create([
+            'hostname' => 'LAB-PC-BASI',
+            'ip_address' => '192.168.1.21',
+            'status' => PcMonitor::STATUS_ONLINE,
+            'last_seen_at' => now()->subSeconds(PcMonitor::STALE_SECONDS + 5),
+        ]);
+
+        $user = $this->userWith('view-monitoring');
+
+        $this->actingAs($user)
+            ->getJson(route('monitoring-pc.data'))
+            ->assertOk()
+            ->assertJsonPath('stats.online', 1)
+            ->assertJsonPath('stats.offline', 1);
+    }
+
     public function test_empty_state_shows_when_no_agent_reported(): void
     {
         $user = $this->userWith('view-monitoring');

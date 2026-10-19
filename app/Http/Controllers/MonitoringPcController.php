@@ -200,9 +200,10 @@ class MonitoringPcController extends Controller
     /**
      * Ringkasan + daftar PC untuk halaman/polling.
      *
-     * Status efektif diturunkan langsung dari last_seen_at (>30 detik =
-     * offline) sehingga akurat walau command monitoring:check-offline
-     * belum berjalan; kolom status tetap disinkronkan oleh command tsb.
+     * Status efektif diturunkan langsung dari last_seen_at (lewat
+     * STALE_SECONDS = offline) sehingga akurat walau command
+     * monitoring:check-offline belum berjalan; kolom status tetap
+     * disinkronkan oleh command tsb.
      */
     private function payload(Request $request): array
     {
@@ -210,8 +211,18 @@ class MonitoringPcController extends Controller
             ->withCount('softwares')
             ->get();
 
-        // Riwayat command terakhir tiap PC (1 query via subquery MAX, bukan N+1).
-        $lastCommands = PcCommand::whereIn('pc_monitor_id', $pcs->pluck('id'))
+        $pcIds = $pcs->pluck('id');
+
+        // Pending command & riwayat command terakhir — di-batch sekali query
+        // (bukan hasPendingCommand() per PC = N+1).
+        $pendingIds = PcCommand::whereIn('pc_monitor_id', $pcIds)
+            ->where('status', PcCommand::STATUS_PENDING)
+            ->where('created_at', '>=', now()->subSeconds(PcCommand::TTL_SECONDS))
+            ->pluck('pc_monitor_id')
+            ->flip()
+            ->all();
+
+        $lastCommands = PcCommand::whereIn('pc_monitor_id', $pcIds)
             ->whereRaw('created_at = (SELECT MAX(c2.created_at) FROM pc_commands c2 WHERE c2.pc_monitor_id = pc_commands.pc_monitor_id)')
             ->get()
             ->keyBy('pc_monitor_id');
@@ -228,7 +239,7 @@ class MonitoringPcController extends Controller
             'status' => $pc->effectiveStatus(),
             'last_seen_at' => $pc->last_seen_at?->toIso8601String(),
             'seconds_since_last_seen' => $pc->secondsSinceLastSeen(),
-            'pending_command' => $pc->hasPendingCommand(),
+            'pending_command' => isset($pendingIds[$pc->id]),
             'last_command' => $lastCommands->has($pc->id)
                 ? $this->lastCommandPayload($lastCommands->get($pc->id))
                 : null,

@@ -104,4 +104,27 @@ class TelemetryApiTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors('cpu_usage');
     }
+
+    public function test_telemetry_throttle_is_per_hostname_not_per_ip(): void
+    {
+        $this->withApiKey();
+
+        // Kuota 60/menit dipakai habis oleh hostname A (semua dari IP test ini).
+        for ($i = 0; $i < 60; $i++) {
+            $this->postJson(route('telemetry.store'), $this->payload(), ['X-API-KEY' => 'test-key'])
+                ->assertOk();
+        }
+
+        $this->postJson(route('telemetry.store'), $this->payload(), ['X-API-KEY' => 'test-key'])
+            ->assertStatus(429);
+
+        // Hostname B dari IP yang sama tetap lolos — kuota tidak dipakai bersama.
+        $this->postJson(
+            route('telemetry.store'),
+            $this->payload(['hostname' => 'LAB-PC-02']),
+            ['X-API-KEY' => 'test-key']
+        )->assertOk();
+
+        $this->assertTrue(PcMonitor::where('hostname', 'LAB-PC-02')->exists());
+    }
 }

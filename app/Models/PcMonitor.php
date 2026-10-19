@@ -16,8 +16,12 @@ class PcMonitor extends Model
 
     public const STATUS_OFFLINE = 'offline';
 
-    /** Detik tanpa laporan telemetri sebelum PC dianggap offline. */
-    public const STALE_SECONDS = 30;
+    /**
+     * Detik tanpa laporan telemetri sebelum PC dianggap offline.
+     * 45 detik = margin 4,5 siklus agent (interval 10 dtk) supaya satu-dua
+     * POST yang tertahan (429/timeout) tidak membuat status flap.
+     */
+    public const STALE_SECONDS = 45;
 
     protected $fillable = [
         'hostname',
