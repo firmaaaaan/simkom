@@ -84,4 +84,39 @@ class AgentReportController extends Controller
             'count' => count($data['items']),
         ]);
     }
+
+    /**
+     * Terima snapshot proses yang SEDANG berjalan dari agent (nama +
+     * judul jendela visible) — replace semua baris PC ini (snapshot
+     * terbaru menang).
+     */
+    public function processes(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'hostname' => 'required|string|max:255',
+            'items' => 'required|array|max:500',
+            'items.*.name' => 'required|string|max:200',
+            'items.*.window_title' => 'nullable|string|max:500',
+        ]);
+
+        $pc = PcMonitor::where('hostname', $data['hostname'])->first();
+        if (! $pc) {
+            return response()->json(['ok' => false, 'message' => 'Hostname tidak dikenal.'], 404);
+        }
+
+        DB::transaction(function () use ($pc, $data) {
+            $pc->processes()->delete();
+
+            foreach ($data['items'] as $item) {
+                $pc->processes()->create($item);
+            }
+
+            $pc->update(['processes_synced_at' => now()]);
+        });
+
+        return response()->json([
+            'ok' => true,
+            'count' => count($data['items']),
+        ]);
+    }
 }

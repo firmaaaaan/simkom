@@ -12,7 +12,9 @@ dashboard:
   - screenshot: kirim gambar layar (JPEG) ke POST /api/v1/screenshots
 Selain itu agent mengirim inventaris software terinstall (registry
 Uninstall Windows) ke POST /api/v1/software saat start + tiap
-software_interval_seconds (default 1 jam).
+software_interval_seconds (default 1 jam), dan snapshot software yang
+SEDANG berjalan (proses + judul jendela visible) ke
+POST /api/v1/processes tiap process_interval_seconds (default 60 dtk).
 
 CARA PAKAI
 ==========
@@ -39,6 +41,7 @@ Log ditulis ke agent.log di folder yang sama dengan script/exe.
 """
 
 import base64
+import ctypes
 import getpass
 import io
 import json
@@ -342,6 +345,96 @@ def send_software(config, hostname):
 
 
 # ---------------------------------------------------------------------------
+# Snapshot software yang SEDANG berjalan (proses + judul jendela)
+# ---------------------------------------------------------------------------
+
+def _visible_window_titles():
+    """Map pid -> judul jendela visible pertama (hanya Windows)."""
+    if os.name != "nt":
+        return {}
+
+    titles = {}
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+
+    def _handler(hwnd, _):
+        if not user32.IsWindowVisible(hwnd):
+            return True
+
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length <= 0:
+            return True
+
+        buffer = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, buffer, length + 1)
+        title = buffer.value.strip()
+        if not title:
+            return True
+
+        pid = ctypes.c_ulong()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        if pid.value:
+            titles.setdefault(pid.value, title)
+        return True
+
+    WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p)
+    user32.EnumWindows(WNDENUMPROC(_handler), 0)
+    return titles
+
+
+def collect_running_processes(max_items=50):
+    """Daftar proses yang sedang berjalan (punya jendela visible).
+
+    Mengembalikan list dict {name, window_title}. Proses background tanpa
+    jendela tidak disertakan sehingga daftar relevan dengan aplikasi yang
+    benar-benar dibuka user.
+    """
+    titles = _visible_window_titles()
+    if not titles:
+        return []
+
+    items = []
+    seen = set()
+    for proc in psutil.process_iter(["pid", "name"]):
+        try:
+            pid = proc.info["pid"]
+            name = proc.info["name"]
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+        title = titles.get(pid)
+        if not name or not title:
+            continue
+
+        key = (name.lower(), title.lower())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        items.append({
+            "name": str(name)[:200],
+            "window_title": str(title)[:500],
+        })
+
+    items.sort(key=lambda item: (item["name"].lower(), item["window_title"].lower()))
+    return items[:max_items]
+
+
+def send_processes(config, hostname):
+    items = collect_running_processes()
+    url = config["server_url"].rstrip("/") + "/api/v1/processes"
+    response = requests.post(
+        url,
+        json={"hostname": hostname, "items": items},
+        headers=api_headers(config),
+        timeout=30,
+    )
+    response.raise_for_status()
+    log.info("Snapshot proses berjalan terkirim: %d jendela", len(items))
+    return response
+
+
+# ---------------------------------------------------------------------------
 # Perintah dari dashboard
 # ---------------------------------------------------------------------------
 
@@ -419,11 +512,13 @@ def main():
 
     interval = max(1, int(config.get("interval_seconds", 10)))
     software_interval = max(60, int(config.get("software_interval_seconds", 3600)))
+    process_interval = max(15, int(config.get("process_interval_seconds", 60)))
     hostname = socket.gethostname()
     log.info("Agent dimulai. Server=%s interval=%ss hostname=%s",
              config.get("server_url"), interval, hostname)
 
     last_software_sync = 0.0  # 0 → sync pertama langsung saat start
+    last_process_sync = 0.0
 
     while True:
         try:
@@ -458,6 +553,16 @@ def main():
                 log.warning("Gagal mengirim inventaris software: %s", exc)
             except Exception as exc:
                 log.error("Kesalahan saat mengumpulkan software: %s", exc)
+
+        # Snapshot software yang sedang berjalan (proses + judul jendela).
+        if time.time() - last_process_sync >= process_interval:
+            try:
+                send_processes(config, hostname)
+                last_process_sync = time.time()
+            except requests.RequestException as exc:
+                log.warning("Gagal mengirim snapshot proses: %s", exc)
+            except Exception as exc:
+                log.error("Kesalahan saat mengumpulkan proses berjalan: %s", exc)
 
         time.sleep(interval)
 

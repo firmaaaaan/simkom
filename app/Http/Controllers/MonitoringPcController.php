@@ -121,17 +121,79 @@ class MonitoringPcController extends Controller
     }
 
     /**
-     * Daftar software terinstall pada PC (untuk modal dashboard).
+     * Daftar software terinstall pada PC (untuk modal dashboard),
+     * dilengkapi flag `running` — true bila nama software cocok dengan
+     * proses yang sedang berjalan (snapshot dari agent).
      */
     public function software(PcMonitor $pc): JsonResponse
     {
+        $processes = $pc->processes()->get(['name', 'window_title']);
+
+        // Blob teks proses ternormalisasi untuk pencocokan dua arah.
+        $processBlob = $processes
+            ->map(fn ($p) => $this->normalizeText($p->name.' '.($p->window_title ?? '')))
+            ->implode(' ');
+
+        $processTokens = $processes
+            ->flatMap(fn ($p) => [
+                $this->normalizeText($p->name),
+                $this->normalizeText($p->window_title ?? ''),
+            ])
+            ->filter()
+            ->values();
+
+        $items = $pc->softwares()
+            ->orderBy('name')
+            ->get(['name', 'version', 'publisher', 'install_date', 'size_kb'])
+            ->map(function ($software) use ($processBlob, $processTokens) {
+                $software->running = $this->isSoftwareRunning(
+                    $this->normalizeText($software->name),
+                    $processBlob,
+                    $processTokens
+                );
+
+                return $software;
+            });
+
         return response()->json([
             'hostname' => $pc->hostname,
             'synced_at' => $pc->software_synced_at?->toIso8601String(),
-            'items' => $pc->softwares()
-                ->orderBy('name')
-                ->get(['name', 'version', 'publisher', 'install_date', 'size_kb']),
+            'processes_synced_at' => $pc->processes_synced_at?->toIso8601String(),
+            'items' => $items,
         ]);
+    }
+
+    /** Normalisasi teks: huruf kecil, buang karakter non-alfanumerik. */
+    private function normalizeText(string $text): string
+    {
+        return strtolower(preg_replace('/[^A-Za-z0-9]+/', '', $text));
+    }
+
+    /**
+     * Pencocokan best-effort: nama software dianggap "sedang berjalan"
+     * bila terkandung di blob proses (nama+jendela), atau ada token
+     * proses (≥4 karakter) yang terkandung di nama software.
+     */
+    private function isSoftwareRunning(string $normalizedSoftware, string $processBlob, $processTokens): bool
+    {
+        if ($normalizedSoftware === '' || $processBlob === '') {
+            return false;
+        }
+
+        // Arah 1: nama software muncul di nama/jendela proses.
+        if (str_contains($processBlob, $normalizedSoftware)) {
+            return true;
+        }
+
+        // Arah 2: token proses yang cukup panjang muncul di nama software
+        // (mis. "chrome" → "Google Chrome", "code" → "Visual Studio Code").
+        foreach ($processTokens as $token) {
+            if (strlen($token) >= 4 && str_contains($normalizedSoftware, $token)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -165,6 +227,7 @@ class MonitoringPcController extends Controller
                 : null,
             'software_count' => (int) ($pc->softwares_count ?? 0),
             'software_synced_at' => $pc->software_synced_at?->toIso8601String(),
+            'processes_synced_at' => $pc->processes_synced_at?->toIso8601String(),
         ])->values();
 
         $statuses = $items->pluck('status');

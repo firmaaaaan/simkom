@@ -30,6 +30,7 @@ class PcMonitor extends Model
         'status',
         'last_seen_at',
         'software_synced_at',
+        'processes_synced_at',
     ];
 
     protected $casts = [
@@ -38,6 +39,7 @@ class PcMonitor extends Model
         'disk_usage' => 'float',
         'last_seen_at' => 'datetime',
         'software_synced_at' => 'datetime',
+        'processes_synced_at' => 'datetime',
     ];
 
     public function commands(): HasMany
@@ -48,6 +50,11 @@ class PcMonitor extends Model
     public function softwares(): HasMany
     {
         return $this->hasMany(PcSoftware::class);
+    }
+
+    public function processes(): HasMany
+    {
+        return $this->hasMany(PcProcess::class);
     }
 
     /**

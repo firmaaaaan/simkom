@@ -28,4 +28,8 @@ Route::middleware('agent.apikey')->group(function () {
     Route::post('/v1/software', [AgentReportController::class, 'software'])
         ->name('agent.software.store')
         ->middleware('throttle:3,1');
+
+    Route::post('/v1/processes', [AgentReportController::class, 'processes'])
+        ->name('agent.processes.store')
+        ->middleware('throttle:6,1');
 });

@@ -3,5 +3,6 @@
     "api_key": "GANTI_DENGAN_API_KEY_DARI_MONITORING_API_KEY_DI_ENV_SERVER",
     "interval_seconds": 10,
     "software_interval_seconds": 3600,
+    "process_interval_seconds": 60,
     "disk_path": "C:/"
 }

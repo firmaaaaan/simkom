@@ -151,4 +151,35 @@ class MonitoringDashboardTest extends TestCase
             ->assertJsonPath('items.0.name', '7-Zip')
             ->assertJsonPath('items.1.name', 'Google Chrome');
     }
+
+    public function test_software_endpoint_marks_running_apps(): void
+    {
+        $pc = PcMonitor::create([
+            'hostname' => 'LAB-PC-01',
+            'ip_address' => '192.168.1.10',
+            'status' => PcMonitor::STATUS_ONLINE,
+            'last_seen_at' => now(),
+            'software_synced_at' => now(),
+            'processes_synced_at' => now(),
+        ]);
+        $pc->softwares()->create(['name' => 'Google Chrome', 'version' => '120.0']);
+        $pc->softwares()->create(['name' => '7-Zip', 'version' => '23.01']);
+
+        // chrome.exe berjalan → Google Chrome harus ditandai running.
+        $pc->processes()->create(['name' => 'chrome.exe', 'window_title' => 'Google Chrome']);
+        $pc->processes()->create(['name' => 'explorer.exe', 'window_title' => 'Program Manager']);
+
+        $user = $this->userWith('view-monitoring');
+
+        $response = $this->actingAs($user)
+            ->getJson(route('monitoring-pc.software', $pc))
+            ->assertOk()
+            ->assertJsonPath('processes_synced_at', $pc->processes_synced_at->toIso8601String());
+
+        // 7-Zip (sorted first) tidak berjalan; Google Chrome berjalan.
+        $response->assertJsonPath('items.0.name', '7-Zip')
+            ->assertJsonPath('items.0.running', false)
+            ->assertJsonPath('items.1.name', 'Google Chrome')
+            ->assertJsonPath('items.1.running', true);
+    }
 }

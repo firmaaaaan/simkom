@@ -292,6 +292,9 @@
                         <template x-if="softwareModal && softwareModal.synced_at">
                             &middot; <span x-text="'sync ' + relTime(secondsSince(softwareModal.synced_at))"></span>
                         </template>
+                        <template x-if="softwareModal && softwareModal.processes_synced_at">
+                            &middot; <span class="text-green-600" x-text="'proses ' + relTime(secondsSince(softwareModal.processes_synced_at))"></span>
+                        </template>
                     </p>
                 </div>
                 <button type="button" @click="softwareModal = null" class="text-gray-400 hover:text-gray-600 shrink-0" aria-label="Tutup">&times;</button>
@@ -314,7 +317,12 @@
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(item, index) in (softwareModal && softwareModal.items ? softwareModal.items.filter(i => !softwareSearch || (i.name || '').toLowerCase().includes(softwareSearch.toLowerCase())) : [])" :key="index">
                             <tr>
-                                <td class="px-4 py-2 text-gray-800" x-text="item.name"></td>
+                                <td class="px-4 py-2 text-gray-800">
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <span x-show="item.running" class="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" title="Sedang berjalan"></span>
+                                        <span x-text="item.name"></span>
+                                    </span>
+                                </td>
                                 <td class="px-4 py-2 text-gray-600" x-text="item.version || '—'"></td>
                                 <td class="px-4 py-2 text-gray-600" x-text="item.publisher || '—'"></td>
                             </tr>
@@ -425,7 +433,7 @@
 
             async openSoftware(pc) {
                 this.softwareSearch = '';
-                this.softwareModal = { hostname: pc.hostname, synced_at: pc.software_synced_at, items: null, loading: true, error: null };
+                this.softwareModal = { hostname: pc.hostname, synced_at: pc.software_synced_at, processes_synced_at: pc.processes_synced_at, items: null, loading: true, error: null };
                 try {
                     const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/software', {
                         headers: { 'Accept': 'application/json' },
@@ -435,6 +443,7 @@
                     this.softwareModal = {
                         hostname: data.hostname,
                         synced_at: data.synced_at,
+                        processes_synced_at: data.processes_synced_at,
                         items: data.items,
                         loading: false,
                         error: null,
@@ -443,6 +452,7 @@
                     this.softwareModal = {
                         hostname: pc.hostname,
                         synced_at: null,
+                        processes_synced_at: null,
                         items: null,
                         loading: false,
                         error: 'Gagal memuat daftar software.',

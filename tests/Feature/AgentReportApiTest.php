@@ -151,4 +151,62 @@ class AgentReportApiTest extends TestCase
             'name' => 'Notepad++',
         ]);
     }
+
+    public function test_processes_unknown_hostname_returns_404(): void
+    {
+        $this->withApiKey();
+
+        $this->postJson(route('agent.processes.store'), [
+            'hostname' => 'TIDAK-ADA',
+            'items' => [['name' => 'chrome.exe']],
+        ], ['X-API-KEY' => 'test-key'])->assertNotFound();
+    }
+
+    public function test_processes_rejects_missing_item_name(): void
+    {
+        $this->withApiKey();
+        $this->pc();
+
+        $this->postJson(route('agent.processes.store'), [
+            'hostname' => 'LAB-PC-01',
+            'items' => [['window_title' => 'Tab']],
+        ], ['X-API-KEY' => 'test-key'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('items.0.name');
+    }
+
+    public function test_processes_sync_replaces_previous_snapshot(): void
+    {
+        $this->withApiKey();
+        $pc = $this->pc();
+
+        $this->postJson(route('agent.processes.store'), [
+            'hostname' => 'LAB-PC-01',
+            'items' => [
+                ['name' => 'chrome.exe', 'window_title' => 'Google Chrome'],
+                ['name' => 'WINWORD.EXE', 'window_title' => 'Laporan Praktikum.docx'],
+            ],
+        ], ['X-API-KEY' => 'test-key'])
+            ->assertOk()
+            ->assertJson(['ok' => true, 'count' => 2]);
+
+        $this->assertSame(2, $pc->processes()->count());
+        $this->assertNotNull($pc->fresh()->processes_synced_at);
+
+        // Snapshot berikutnya menggantikan seluruh isi lama.
+        $this->postJson(route('agent.processes.store'), [
+            'hostname' => 'LAB-PC-01',
+            'items' => [
+                ['name' => 'Code.exe', 'window_title' => 'index.blade.php — simlabkom'],
+            ],
+        ], ['X-API-KEY' => 'test-key'])
+            ->assertOk()
+            ->assertJson(['ok' => true, 'count' => 1]);
+
+        $this->assertSame(1, $pc->processes()->count());
+        $this->assertDatabaseHas('pc_processes', [
+            'pc_monitor_id' => $pc->id,
+            'name' => 'Code.exe',
+        ]);
+    }
 }
