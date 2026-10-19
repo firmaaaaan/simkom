@@ -49,6 +49,15 @@
                     Dashboard
                 </a>
 
+                @if(auth()->user()->hasPermission('view-monitoring'))
+                <a href="{{ route('monitoring-pc.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('monitoring-pc.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Monitoring PC
+                </a>
+                @endif
+
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Akademik</p>
 
                 <a href="{{ route('akademik.jadwal') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('akademik.jadwal') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
@@ -58,17 +67,8 @@
                     Jadwal Perkuliahan
                 </a>
 
-                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Laboratorium</p>
-
                 @if(auth()->user()->hasPermission('view-laboratories') || auth()->user()->hasPermission('view-hardware') || auth()->user()->hasPermission('view-software') || auth()->user()->hasPermission('view-computers') || auth()->user()->hasPermission('view-components'))
-                <div x-data="{ dataMasterOpen: false }">
-                <button type="button" @click="dataMasterOpen = !dataMasterOpen" :aria-expanded="dataMasterOpen" class="w-full flex items-center justify-between gap-2 px-3 pt-4 pb-1 text-[10px] font-bold text-green-400 uppercase tracking-wider hover:text-green-300 transition-colors">
-                    <span>Data Master Lab</span>
-                    <svg class="w-3 h-3 shrink-0 transition-transform duration-200" :class="dataMasterOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                </button>
-                <div x-show="dataMasterOpen" x-cloak x-transition.opacity.duration.150ms class="space-y-1">
+                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Data Master Lab</p>
                 @if(auth()->user()->hasPermission('view-laboratories'))
                 <a href="{{ route('laboratories.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('laboratories.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -109,19 +109,10 @@
                     Komponen
                 </a>
                 @endif
-                </div>
-                </div>
                 @endif
 
                 @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages'))
-                <div x-data="{ transaksiOpen: false }">
-                <button type="button" @click="transaksiOpen = !transaksiOpen" :aria-expanded="transaksiOpen" class="w-full flex items-center justify-between gap-2 px-3 pt-4 pb-1 text-[10px] font-bold text-green-400 uppercase tracking-wider hover:text-green-300 transition-colors">
-                    <span>Transaksi</span>
-                    <svg class="w-3 h-3 shrink-0 transition-transform duration-200" :class="transaksiOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                </button>
-                <div x-show="transaksiOpen" x-cloak x-transition.opacity.duration.150ms class="space-y-1">
+                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
                 @if(auth()->user()->hasPermission('view-academic-years'))
                 <a href="{{ route('academic-years.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('academic-years.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -182,18 +173,6 @@
                     Penggunaan Lab
                 </a>
                 @endif
-                </div>
-                </div>
-                @endif
-
-                @if(auth()->user()->hasPermission('view-monitoring'))
-                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Operasional</p>
-                <a href="{{ route('monitoring-pc.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('monitoring-pc.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    Monitoring PC
-                </a>
                 @endif
 
                 @if(auth()->user()->hasPermission('view-users') || auth()->user()->hasPermission('view-roles'))
