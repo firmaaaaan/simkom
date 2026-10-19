@@ -82,6 +82,88 @@
                 </div>
             </div>
 
+            {{-- Perbandingan spesifikasi vs inventaris agent (hostname = kode komputer) --}}
+            <div class="pt-4 border-t border-gray-100">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <p class="text-xs text-gray-400">Software Terdeteksi (Agent)</p>
+                    @if($pcMonitor)
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium {{ $pcMonitor->status === 'online' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $pcMonitor->status === 'online' ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                                {{ $pcMonitor->status === 'online' ? 'Online' : 'Offline' }}
+                            </span>
+                            @if($pcMonitor->software_synced_at)
+                                <span class="text-gray-400">sync {{ $pcMonitor->software_synced_at->diffForHumans(short: true) }}</span>
+                            @else
+                                <span class="text-amber-600">belum pernah sync</span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                @if(! $pcMonitor)
+                    <p class="text-sm text-gray-400">Belum ada data monitoring untuk hostname <span class="font-medium text-gray-600">{{ $computer->code }}</span> (agent belum pernah terhubung / hostname PC belum disesuaikan).</p>
+                @elseif(! $pcMonitor->software_synced_at)
+                    <p class="text-sm text-gray-400">PC ini sudah terhubung agent, tetapi inventaris software belum pernah terkirim.</p>
+                @else
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs font-semibold text-green-700 mb-1.5">Sesuai spesifikasi ({{ count($softwareComparison['matched']) }})</p>
+                            @if(count($softwareComparison['matched']))
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($softwareComparison['matched'] as $match)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700" title="Terdeteksi: {{ $match['detected'] }}">
+                                            {{ $match['catalog'] }}
+                                            @if($match['version'])
+                                                <span class="ml-1 text-green-500">v{{ $match['version'] }}</span>
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-sm text-gray-400">Tidak ada software spesifikasi yang terdeteksi.</p>
+                            @endif
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 mb-1.5">Terdeteksi tambahan ({{ count($softwareComparison['extra']) }})</p>
+                            @if(count($softwareComparison['extra']))
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach(array_slice($softwareComparison['extra'], 0, 15) as $extra)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+                                            {{ $extra['name'] }}
+                                            @if($extra['version'])
+                                                <span class="ml-1 text-amber-500">v{{ $extra['version'] }}</span>
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                    @if(count($softwareComparison['extra']) > 15)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600">+{{ count($softwareComparison['extra']) - 15 }} lainnya</span>
+                                    @endif
+                                </div>
+                            @else
+                                <p class="text-sm text-gray-400">Tidak ada software di luar spesifikasi.</p>
+                            @endif
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-semibold text-red-700 mb-1.5">Tidak terdeteksi ({{ count($softwareComparison['missing']) }})</p>
+                            @if(count($softwareComparison['missing']))
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($softwareComparison['missing'] as $missing)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                                            {{ $missing }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-sm text-gray-400">Semua software spesifikasi terdeteksi di PC ini.</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             <div class="pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
                 <div>
                     <p>Dibuat: {{ $computer->created_at->format('d M Y H:i') }}</p>

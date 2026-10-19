@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PcCommand;
 use App\Models\PcMonitor;
+use App\Services\SoftwareComparison;
 use App\Services\WakeOnLanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -166,7 +167,7 @@ class MonitoringPcController extends Controller
     /** Normalisasi teks: huruf kecil, buang karakter non-alfanumerik. */
     private function normalizeText(string $text): string
     {
-        return strtolower(preg_replace('/[^A-Za-z0-9]+/', '', $text));
+        return SoftwareComparison::normalize($text);
     }
 
     /**

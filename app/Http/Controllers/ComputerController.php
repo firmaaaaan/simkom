@@ -15,8 +15,10 @@ use App\Models\DeviceCheck;
 use App\Models\Hardware;
 use App\Models\Laboratory;
 use App\Models\MaintenanceChecklist;
+use App\Models\PcMonitor;
 use App\Models\Setting;
 use App\Models\Software;
+use App\Services\SoftwareComparison;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -251,7 +253,18 @@ class ComputerController extends Controller
     {
         $computer->load(['laboratory', 'hardware', 'software']);
 
-        return view('computers.show', compact('computer'));
+        // Pemetaan inventaris agent: hostname Windows = code komputer.
+        $pcMonitor = PcMonitor::query()
+            ->whereRaw('LOWER(hostname) = ?', [strtolower($computer->code)])
+            ->with('softwares')
+            ->first();
+
+        $softwareComparison = SoftwareComparison::compare(
+            $computer->software,
+            $pcMonitor?->softwares
+        );
+
+        return view('computers.show', compact('computer', 'pcMonitor', 'softwareComparison'));
     }
 
     public function edit(Computer $computer)
