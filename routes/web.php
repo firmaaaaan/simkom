@@ -20,9 +20,9 @@ use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
-use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicComputerCardController;
 use App\Http\Controllers\PublicTicketController;
@@ -34,8 +34,10 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
 use App\Models\Computer;
 use App\Models\Laboratory;
+use App\Models\PcMonitor;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (Request $request) {
@@ -54,17 +56,32 @@ Route::get('/', function (Request $request) {
     }
 
     $computers = collect();
+    $detectedByCode = [];
     if ($selectedLab) {
         $computers = Computer::where('laboratory_id', $selectedLab->id)
-            ->with($showSpec ? ['laboratory', 'hardware', 'software'] : ['laboratory'])
+            ->with('laboratory')
             ->withCount(['tickets' => function ($q) {
                 $q->whereIn('status', ['Open', 'In Progress']);
             }])
             ->orderBy('code')
             ->get();
+
+        // Software terdeteksi agent: hostname = kode komputer (case-insensitive).
+        if ($showSpec && $computers->isNotEmpty()) {
+            $codesLower = $computers->pluck('code')->map(fn ($code) => strtolower($code))->all();
+            $monitors = PcMonitor::whereIn(DB::raw('LOWER(hostname)'), $codesLower)
+                ->with('softwares')
+                ->get();
+            foreach ($monitors as $monitor) {
+                $detectedByCode[strtolower($monitor->hostname)] = [
+                    'synced_at' => $monitor->software_synced_at,
+                    'items' => $monitor->softwares,
+                ];
+            }
+        }
     }
 
-    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec'));
+    return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec', 'detectedByCode'));
 });
 
 // Auth Routes (guest only)

@@ -229,48 +229,38 @@
                             </div>
 
                             @if($showSpec)
-                            {{-- Data spesifikasi (dipakai modal) --}}
+                            {{-- Data spesifikasi (dipakai modal) — software terdeteksi agent --}}
+                            @php($detected = $detectedByCode[strtolower($computer->code)] ?? null)
                             <div id="spec-{{ $computer->id }}" class="hidden">
                                 <div class="space-y-6">
                                     <section>
                                         <div class="flex items-center justify-between mb-2.5">
-                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Hardware</p>
-                                            <span class="text-xs text-gray-400">{{ $computer->hardware->count() }} item</span>
+                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Software Terdeteksi (Agent)</p>
+                                            @if($detected && $detected['synced_at'])
+                                                <span class="text-xs text-gray-400">
+                                                    {{ $detected['items']->count() }} aplikasi &middot; sync {{ $detected['synced_at']->diffForHumans(short: true) }}
+                                                </span>
+                                            @elseif($detected)
+                                                <span class="text-xs text-amber-600">belum pernah sync</span>
+                                            @endif
                                         </div>
-                                        @if($computer->hardware->isNotEmpty())
+                                        @if(! $detected)
+                                            <p class="text-sm text-gray-400 italic">Belum ada data agent untuk PC ini (hostname belum terhubung).</p>
+                                        @elseif(! $detected['synced_at'])
+                                            <p class="text-sm text-gray-400 italic">Inventaris software belum pernah terkirim.</p>
+                                        @elseif($detected['items']->isNotEmpty())
                                             <div class="flex flex-wrap gap-1.5">
-                                                @foreach($computer->hardware as $hw)
-                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">
-                                                        {{ $hw->name }}
-                                                        @if($hw->category)
-                                                            <span class="ml-1 text-blue-400">({{ $hw->category }})</span>
-                                                        @endif
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <p class="text-sm text-gray-400 italic">Belum ada data hardware.</p>
-                                        @endif
-                                    </section>
-
-                                    <section>
-                                        <div class="flex items-center justify-between mb-2.5">
-                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Software</p>
-                                            <span class="text-xs text-gray-400">{{ $computer->software->count() }} item</span>
-                                        </div>
-                                        @if($computer->software->isNotEmpty())
-                                            <div class="flex flex-wrap gap-1.5">
-                                                @foreach($computer->software as $sw)
+                                                @foreach($detected['items'] as $item)
                                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
-                                                        {{ $sw->name }}
-                                                        @if($sw->version || $sw->category)
-                                                            <span class="ml-1 text-purple-400">({{ $sw->version ?? $sw->category }})</span>
+                                                        {{ $item->name }}
+                                                        @if($item->version)
+                                                            <span class="ml-1 text-purple-400">({{ $item->version }})</span>
                                                         @endif
                                                     </span>
                                                 @endforeach
                                             </div>
                                         @else
-                                            <p class="text-sm text-gray-400 italic">Belum ada data software.</p>
+                                            <p class="text-sm text-gray-400 italic">Belum ada software terdeteksi.</p>
                                         @endif
                                     </section>
                                 </div>
