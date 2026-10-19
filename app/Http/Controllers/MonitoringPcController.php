@@ -210,6 +210,12 @@ class MonitoringPcController extends Controller
             ->withCount('softwares')
             ->get();
 
+        // Riwayat command terakhir tiap PC (1 query via subquery MAX, bukan N+1).
+        $lastCommands = PcCommand::whereIn('pc_monitor_id', $pcs->pluck('id'))
+            ->whereRaw('created_at = (SELECT MAX(c2.created_at) FROM pc_commands c2 WHERE c2.pc_monitor_id = pc_commands.pc_monitor_id)')
+            ->get()
+            ->keyBy('pc_monitor_id');
+
         $items = $pcs->map(fn (PcMonitor $pc) => [
             'id' => $pc->id,
             'hostname' => $pc->hostname,
@@ -223,6 +229,9 @@ class MonitoringPcController extends Controller
             'last_seen_at' => $pc->last_seen_at?->toIso8601String(),
             'seconds_since_last_seen' => $pc->secondsSinceLastSeen(),
             'pending_command' => $pc->hasPendingCommand(),
+            'last_command' => $lastCommands->has($pc->id)
+                ? $this->lastCommandPayload($lastCommands->get($pc->id))
+                : null,
             'screenshot_url' => $pc->hasScreenshot()
                 ? route('monitoring-pc.screenshot', [$pc, 't' => $pc->updated_at?->timestamp])
                 : null,
@@ -245,6 +254,18 @@ class MonitoringPcController extends Controller
             'pcs' => $items,
             'can_power' => (bool) $request->user()?->hasPermission('control-monitoring'),
             'generated_at' => now()->toIso8601String(),
+        ];
+    }
+
+    /** Ringkasan command terakhir (untuk chip gagal/sukses di kartu PC). */
+    private function lastCommandPayload(PcCommand $command): array
+    {
+        return [
+            'action' => $command->action,
+            'action_label' => PcCommand::actionLabel($command->action),
+            'status' => $command->status,
+            'message' => $command->message,
+            'at' => ($command->executed_at ?? $command->created_at)?->toIso8601String(),
         ];
     }
 }

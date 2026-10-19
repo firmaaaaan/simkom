@@ -149,4 +149,47 @@ class PcCommandTest extends TestCase
             ->assertOk()
             ->assertHeader('Content-Type', 'image/jpeg');
     }
+
+    public function test_payload_last_command_null_without_history(): void
+    {
+        $user = $this->userWith('view-monitoring');
+        $this->pc();
+
+        $this->actingAs($user)
+            ->getJson(route('monitoring-pc.data'))
+            ->assertOk()
+            ->assertJsonPath('pcs.0.last_command', null);
+    }
+
+    public function test_payload_last_command_shows_latest_failed_with_message(): void
+    {
+        $user = $this->userWith('view-monitoring');
+        $pc = $this->pc();
+
+        $earlier = PcCommand::create([
+            'pc_monitor_id' => $pc->id,
+            'action' => PcCommand::ACTION_SHUTDOWN,
+            'status' => PcCommand::STATUS_COMPLETED,
+            'executed_at' => now()->subMinutes(2),
+        ]);
+        $earlier->created_at = now()->subMinutes(2);
+        $earlier->save();
+
+        PcCommand::create([
+            'pc_monitor_id' => $pc->id,
+            'action' => PcCommand::ACTION_LOCK,
+            'status' => PcCommand::STATUS_FAILED,
+            'message' => 'tidak ada sesi user aktif',
+            'executed_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson(route('monitoring-pc.data'))
+            ->assertOk()
+            ->assertJsonPath('pcs.0.last_command.action', 'lock')
+            ->assertJsonPath('pcs.0.last_command.action_label', 'mengunci layar')
+            ->assertJsonPath('pcs.0.last_command.status', 'failed')
+            ->assertJsonPath('pcs.0.last_command.message', 'tidak ada sesi user aktif')
+            ->assertJsonPath('pcs.0.last_command.at', now()->toIso8601String());
+    }
 }

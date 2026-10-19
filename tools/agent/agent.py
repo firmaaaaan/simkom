@@ -52,6 +52,7 @@ import socket
 import subprocess
 import sys
 import time
+from ctypes import wintypes
 
 import psutil
 import requests
@@ -206,11 +207,150 @@ def run_restart():
         subprocess.Popen(["shutdown", "-r", "+1"])
 
 
-def run_lock():
-    """Kunci layar sesi aktif (Windows only)."""
+def _active_console_session_id():
+    """Sesi console tempat user login; None bila tidak ada (layar login)."""
+    try:
+        users = psutil.users()
+    except Exception:
+        users = []
+    for entry in reversed(users):
+        pid = getattr(entry, "pid", None)
+        if not pid:
+            continue
+        try:
+            return int(psutil.Process(pid).session_id())
+        except Exception:
+            continue
+
+    if os.name == "nt":
+        try:
+            session_id = int(ctypes.windll.kernel32.WTSGetActiveConsoleSessionId())
+            if session_id >= 0:
+                return session_id
+        except Exception:
+            pass
+    return None
+
+
+class _StartupInfoW(ctypes.Structure):
+    _fields_ = [
+        ("cb", wintypes.DWORD),
+        ("lpReserved", wintypes.LPWSTR),
+        ("lpDesktop", wintypes.LPWSTR),
+        ("lpTitle", wintypes.LPWSTR),
+        ("dwX", wintypes.DWORD),
+        ("dwY", wintypes.DWORD),
+        ("dwXSize", wintypes.DWORD),
+        ("dwYSize", wintypes.DWORD),
+        ("dwXCountChars", wintypes.DWORD),
+        ("dwYCountChars", wintypes.DWORD),
+        ("dwFillAttribute", wintypes.DWORD),
+        ("dwFlags", wintypes.DWORD),
+        ("wShowWindow", wintypes.WORD),
+        ("cbReserved2", wintypes.WORD),
+        ("lpReserved2", ctypes.POINTER(ctypes.c_ubyte)),
+        ("hStdInput", wintypes.HANDLE),
+        ("hStdOutput", wintypes.HANDLE),
+        ("hStdError", wintypes.HANDLE),
+    ]
+
+
+class _ProcessInfo(ctypes.Structure):
+    _fields_ = [
+        ("hProcess", wintypes.HANDLE),
+        ("hThread", wintypes.HANDLE),
+        ("dwProcessId", wintypes.DWORD),
+        ("dwThreadId", wintypes.DWORD),
+    ]
+
+
+def _lock_session_in(session_id):
+    """Jalankan LockWorkStation di sesi user target via CreateProcessAsUser.
+
+    WTSQueryUserToken hanya boleh dipanggil oleh SYSTEM (SeTcbPrivilege) —
+    agent memang berjalan sebagai SYSTEM (task ONSTART).
+    """
     if os.name != "nt":
         raise RuntimeError("kunci layar hanya didukung di Windows")
-    subprocess.Popen(["rundll32.exe", "user32.dll,LockWorkStation"])
+
+    kernel32 = ctypes.windll.kernel32
+    advapi32 = ctypes.windll.advapi32
+
+    token = wintypes.HANDLE()
+    if not advapi32.WTSQueryUserToken(session_id, ctypes.byref(token)):
+        raise RuntimeError(
+            "WTSQueryUserToken sesi {0} gagal (error {1})".format(
+                session_id, kernel32.GetLastError()
+            )
+        )
+
+    try:
+        system_dir = ctypes.create_unicode_buffer(260)
+        if not kernel32.GetSystemDirectoryW(system_dir, 260):
+            raise RuntimeError("gagal menentukan folder system Windows")
+        rundll32 = os.path.join(system_dir.value, "rundll32.exe")
+        command_line = ctypes.create_unicode_buffer(
+            '"{0}" user32.dll,LockWorkStation'.format(rundll32)
+        )
+
+        startup = _StartupInfoW()
+        startup.cb = ctypes.sizeof(_StartupInfoW)
+        startup.lpDesktop = "winsta0\\default"
+        process_info = _ProcessInfo()
+
+        try:
+            # lpEnvironment NULL → warisi env pemanggil (aman untuk rundll32).
+            ok = advapi32.CreateProcessAsUserW(
+                token,
+                rundll32,
+                command_line,
+                None,
+                None,
+                False,
+                0,
+                None,
+                None,
+                ctypes.byref(startup),
+                ctypes.byref(process_info),
+            )
+            if not ok:
+                raise RuntimeError(
+                    "CreateProcessAsUser gagal (error {0})".format(kernel32.GetLastError())
+                )
+        finally:
+            if process_info.hThread:
+                kernel32.CloseHandle(process_info.hThread)
+            if process_info.hProcess:
+                kernel32.CloseHandle(process_info.hProcess)
+    finally:
+        kernel32.CloseHandle(token)
+
+
+def run_lock():
+    """Kunci layar sesi user login aktif (Windows only).
+
+    Agent sering berjalan sebagai SYSTEM di Session 0 (task ONSTART);
+    LockWorkStation hanya mengunci sesi pemanggil, sehingga bila sesi agent
+    berbeda dengan sesi login user, rundll32 dijalankan di sesi user via
+    CreateProcessAsUser.
+    """
+    if os.name != "nt":
+        raise RuntimeError("kunci layar hanya didukung di Windows")
+
+    target_session = _active_console_session_id()
+    if target_session is None:
+        raise RuntimeError("tidak ada sesi user aktif (layar login Windows)")
+
+    try:
+        own_session = int(psutil.Process(os.getpid()).session_id())
+    except Exception:
+        own_session = None
+
+    if own_session == target_session:
+        subprocess.Popen(["rundll32.exe", "user32.dll,LockWorkStation"])
+        return
+
+    _lock_session_in(target_session)
 
 
 def run_logout():
