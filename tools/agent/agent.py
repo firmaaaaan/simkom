@@ -477,7 +477,7 @@ def send_software(config, hostname):
         url,
         json={"hostname": hostname, "items": items},
         headers=api_headers(config),
-        timeout=30,
+        timeout=15,
     )
     response.raise_for_status()
     log.info("Inventaris software terkirim: %d aplikasi", len(items))
@@ -567,7 +567,7 @@ def send_processes(config, hostname):
         url,
         json={"hostname": hostname, "items": items},
         headers=api_headers(config),
-        timeout=30,
+        timeout=15,
     )
     response.raise_for_status()
     log.info("Snapshot proses berjalan terkirim: %d jendela", len(items))
@@ -659,8 +659,10 @@ def main():
 
     last_software_sync = 0.0  # 0 → sync pertama langsung saat start
     last_process_sync = 0.0
+    retry_backoff = 60  # gagal kirim → coba lagi dalam 60 dtk, bukan siklus berikut
 
     while True:
+        cycle_started = time.time()
         try:
             payload = collect(config)
             send(config, payload)
@@ -684,15 +686,19 @@ def main():
         except Exception as exc:
             log.error("Kesalahan saat memeriksa perintah: %s", exc)
 
-        # Inventaris software: saat start lalu berkala.
+        # Inventaris software: saat start lalu berkala. Gagal → backoff
+        # retry_backoff detik supaya siklus berikut tetap ringan (telemetri
+        # tidak boleh tersendat → last_seen basi → status flap).
         if time.time() - last_software_sync >= software_interval:
             try:
                 send_software(config, hostname)
                 last_software_sync = time.time()
             except requests.RequestException as exc:
                 log.warning("Gagal mengirim inventaris software: %s", exc)
+                last_software_sync = time.time() + retry_backoff - software_interval
             except Exception as exc:
                 log.error("Kesalahan saat mengumpulkan software: %s", exc)
+                last_software_sync = time.time() + retry_backoff - software_interval
 
         # Snapshot software yang sedang berjalan (proses + judul jendela).
         if time.time() - last_process_sync >= process_interval:
@@ -701,8 +707,20 @@ def main():
                 last_process_sync = time.time()
             except requests.RequestException as exc:
                 log.warning("Gagal mengirim snapshot proses: %s", exc)
+                last_process_sync = time.time() + retry_backoff - process_interval
             except Exception as exc:
                 log.error("Kesalahan saat mengumpulkan proses berjalan: %s", exc)
+                last_process_sync = time.time() + retry_backoff - process_interval
+
+        # Peringatan bila durasi siklus mendekati/melampaui threshold
+        # stale server (45 dtk) — tanda telemetri berikutnya berisiko telat.
+        cycle_duration = time.time() - cycle_started
+        if cycle_duration > interval + 5:
+            log.warning(
+                "Siklus lambat: %.1f detik (interval %ss) — telemetri berikutnya bisa tersendat",
+                cycle_duration,
+                interval,
+            )
 
         time.sleep(interval)
 
