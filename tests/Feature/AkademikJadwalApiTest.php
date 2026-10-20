@@ -100,7 +100,7 @@ class AkademikJadwalApiTest extends TestCase
             ->assertOk()
             ->assertSee('Jadwal Perkuliahan Laboratorium')
             ->assertSee('Klik jadwal untuk detail')
-            ->assertSee('Kembali ke Denah')
+            ->assertSee('Kembali ke Beranda')
             ->assertSee(url('/#denah'), false)
             ->assertSee('16:00–18:00');
     }
