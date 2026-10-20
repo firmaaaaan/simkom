@@ -146,17 +146,16 @@
                     <input type="text" x-model="search" @focus="open = true" @input="open = true" placeholder="Ketik nama/kode komponen..."
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <div x-show="open && search.length > 0" x-cloak
-                        class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
                         @foreach($allComponents as $comp)
                             <div class="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center justify-between"
                                 x-show="search === '' || '{{ strtolower($comp->name) }}'.includes(search.toLowerCase()) || '{{ strtolower($comp->code) }}'.includes(search.toLowerCase())"
                                 @click="
                                     document.getElementById('usedBulkComponentId').value = '{{ $comp->id }}';
+                                    document.getElementById('usedBulkComponentName').textContent = '{{ $comp->name }} ({{ $comp->code }})';
                                     document.getElementById('usedBulkComponentStock').textContent = '{{ $comp->quantity }}';
-                                    document.getElementById('usedBulkQuantity').max = '{{ $comp->quantity }}';
                                     search = '{{ $comp->name }} ({{ $comp->code }})';
                                     open = false;
-                                    updateUsedBulkSummary();
                                 ">
                                 <span class="text-gray-800">{{ $comp->name }}</span>
                                 <span class="text-xs text-gray-500 font-mono">{{ $comp->code }} | Stok: {{ $comp->quantity }}</span>
@@ -165,21 +164,34 @@
                     </div>
                 </div>
                 <input type="hidden" id="usedBulkComponentId" value="">
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="text-xs text-gray-500">Stok tersedia:</span>
-                    <span id="usedBulkComponentStock" class="text-xs font-semibold text-gray-700">-</span>
+                <div class="flex items-end gap-2 mt-2">
+                    <div class="flex-1 flex items-center gap-2 min-w-0">
+                        <span class="text-xs text-gray-500 shrink-0">Stok:</span>
+                        <span id="usedBulkComponentStock" class="text-xs font-semibold text-gray-700">-</span>
+                        <span id="usedBulkComponentName" class="text-xs text-gray-500 truncate"></span>
+                    </div>
+                    <div class="w-24 shrink-0">
+                        <input type="number" id="usedBulkPickQuantity" value="1" min="1" aria-label="Jumlah per box"
+                            class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <button type="button" onclick="addUsedSelectedComponent()"
+                        class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">
+                        Tambah
+                    </button>
                 </div>
+
+                <div id="usedBulkSelected" class="space-y-2 mt-3"></div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah per Box <span class="text-red-500">*</span></label>
-                <input type="number" id="usedBulkQuantity" name="quantity" value="1" min="1" required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    oninput="updateUsedBulkSummary()">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Box Tujuan <span class="text-red-500">*</span></label>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Box Tujuan <span class="text-red-500">*</span></label>
+                    <label class="flex items-center gap-2 text-xs font-medium text-blue-700 cursor-pointer select-none">
+                        <input type="checkbox" id="usedBulkSelectAll" onchange="usedBulkToggleSelectAll(this)"
+                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        Pilih Semua
+                    </label>
+                </div>
                 <div class="space-y-1 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
                     @foreach($usedBoxes as $box)
                         <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
@@ -201,14 +213,11 @@
                     <span class="text-blue-700">Total box dipilih:</span>
                     <span id="usedBulkBoxCount" class="font-semibold text-blue-800">0</span>
                 </div>
-                <div class="flex items-center justify-between text-sm mt-1">
-                    <span class="text-blue-700">Jumlah per box:</span>
-                    <span id="usedBulkQtyPerBox" class="font-semibold text-blue-800">0</span>
-                </div>
                 <div class="flex items-center justify-between text-sm mt-1 border-t border-blue-200 pt-2">
-                    <span class="text-blue-700 font-semibold">Total dibutuhkan:</span>
+                    <span class="text-blue-700 font-semibold">Total item dibutuhkan:</span>
                     <span id="usedBulkTotalNeeded" class="font-bold text-blue-800">0</span>
                 </div>
+                <div id="usedBulkItemLines" class="mt-2 space-y-1 text-xs"></div>
                 <div id="usedBulkStockStatus" class="mt-2 text-xs"></div>
             </div>
 
@@ -257,7 +266,7 @@
                         @endforeach
                     </div>
                 </div>
-                <input type="hidden" id="usedQuickComponentId" value="">
+                <input type="hidden" id="usedQuickComponentId" name="component_id" value="">
                 <div class="flex items-center gap-2 mt-2">
                     <span class="text-xs text-gray-500">Stok tersedia:</span>
                     <span id="usedQuickComponentStock" class="text-xs font-semibold text-gray-700">-</span>
@@ -285,6 +294,14 @@
 
 <script>
     (function() {
+        var usedSelectedComponents = [];
+
+        function usedEsc(value) {
+            return String(value).replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
         function usedCheckedIds() {
             return Array.from(document.querySelectorAll('input[name="used_box_ids[]"]:checked'))
                 .map(cb => cb.value);
@@ -311,33 +328,137 @@
             var countEl = document.getElementById('usedSelectedCount');
             if (countEl) countEl.textContent = usedCheckedIds().length;
 
-            var componentIdVal = document.getElementById('usedBulkComponentId')?.value;
+            var modalBoxes = document.querySelectorAll('#usedBulkModal input[name="used_box_ids[]"]');
             var modalChecked = document.querySelectorAll('#usedBulkModal input[name="used_box_ids[]"]:checked').length;
-            var quantity = parseInt(document.getElementById('usedBulkQuantity').value) || 0;
-            var stock = parseInt(document.getElementById('usedBulkComponentStock').textContent) || 0;
-            var totalNeeded = quantity * modalChecked;
+            var boxCount = modalChecked;
+
+            var selectAllEl = document.getElementById('usedBulkSelectAll');
+            if (selectAllEl) {
+                selectAllEl.checked = modalBoxes.length > 0 && modalChecked === modalBoxes.length;
+            }
 
             var summaryEl = document.getElementById('usedBulkSummary');
             var submitBtn = document.getElementById('usedBulkSubmitBtn');
+            var linesEl = document.getElementById('usedBulkItemLines');
+            var statusEl = document.getElementById('usedBulkStockStatus');
 
-            if (modalChecked > 0 && componentIdVal) {
+            if (boxCount > 0 && usedSelectedComponents.length > 0) {
                 summaryEl.classList.remove('hidden');
-                document.getElementById('usedBulkBoxCount').textContent = modalChecked;
-                document.getElementById('usedBulkQtyPerBox').textContent = quantity;
-                document.getElementById('usedBulkTotalNeeded').textContent = totalNeeded;
+                document.getElementById('usedBulkBoxCount').textContent = boxCount;
 
-                var statusEl = document.getElementById('usedBulkStockStatus');
-                if (stock >= totalNeeded) {
-                    statusEl.innerHTML = '<span class="text-green-600 font-semibold">✓ Stok cukup</span>';
+                var totalItems = 0;
+                var allStockOk = true;
+                var html = '';
+
+                usedSelectedComponents.forEach(function(c) {
+                    var needed = c.quantity * boxCount;
+                    totalItems += needed;
+                    var ok = c.stock >= needed;
+                    if (!ok) allStockOk = false;
+                    html += '<div class="flex items-center justify-between">' +
+                        '<span class="text-blue-700">' + usedEsc(c.name) + ' (' + usedEsc(c.code) + ') × ' + c.quantity + '/box</span>' +
+                        '<span class="' + (ok ? 'text-green-700 font-semibold' : 'text-red-600 font-semibold') + '">' +
+                            needed + '/' + c.stock + (ok ? ' ✓' : ' ✗ kurang ' + (needed - c.stock)) +
+                        '</span></div>';
+                });
+
+                document.getElementById('usedBulkTotalNeeded').textContent = totalItems;
+                linesEl.innerHTML = html;
+
+                if (allStockOk) {
+                    statusEl.innerHTML = '<span class="text-green-600 font-semibold">✓ Semua stok cukup</span>';
                     submitBtn.disabled = false;
                 } else {
-                    statusEl.innerHTML = '<span class="text-red-600 font-semibold">✗ Stok tidak cukup (kurang ' + (totalNeeded - stock) + ')</span>';
+                    statusEl.innerHTML = '<span class="text-red-600 font-semibold">✗ Ada stok yang tidak cukup</span>';
                     submitBtn.disabled = true;
                 }
             } else {
                 summaryEl.classList.add('hidden');
                 submitBtn.disabled = true;
             }
+        };
+
+        window.addUsedSelectedComponent = function() {
+            var id = document.getElementById('usedBulkComponentId').value;
+            if (!id) return;
+
+            var qty = parseInt(document.getElementById('usedBulkPickQuantity').value) || 0;
+            if (qty < 1) qty = 1;
+
+            var nameEl = document.getElementById('usedBulkComponentName');
+            var stock = parseInt(document.getElementById('usedBulkComponentStock').textContent) || 0;
+            var label = (nameEl.textContent || '').trim();
+            var name = label;
+            var code = '';
+            var m = label.match(/^(.*)\s\((.*)\)$/);
+            if (m) { name = m[1]; code = m[2]; }
+
+            var existing = usedSelectedComponents.find(c => String(c.id) === String(id));
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                usedSelectedComponents.push({ id: id, name: name, code: code, stock: stock, quantity: qty });
+            }
+
+            document.getElementById('usedBulkComponentId').value = '';
+            nameEl.textContent = '';
+            document.getElementById('usedBulkComponentStock').textContent = '-';
+            document.getElementById('usedBulkPickQuantity').value = 1;
+
+            renderUsedSelected();
+            updateUsedBulkSummary();
+        };
+
+        window.removeUsedSelectedComponent = function(index) {
+            usedSelectedComponents.splice(index, 1);
+            renderUsedSelected();
+            updateUsedBulkSummary();
+        };
+
+        window.updateUsedBulkQty = function(index, value) {
+            var qty = parseInt(value) || 1;
+            if (qty < 1) qty = 1;
+            usedSelectedComponents[index].quantity = qty;
+            updateUsedBulkSummary();
+        };
+
+        function renderUsedSelected() {
+            var container = document.getElementById('usedBulkSelected');
+            if (!container) return;
+
+            if (usedSelectedComponents.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-400 italic">Belum ada komponen ditambahkan</p>';
+                return;
+            }
+
+            var html = '<div class="space-y-2">';
+            usedSelectedComponents.forEach(function(c, index) {
+                html += '<div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">' +
+                    '<div class="flex-1 min-w-0">' +
+                        '<span class="text-sm font-medium text-gray-800">' + usedEsc(c.name) + '</span>' +
+                        '<span class="text-xs text-gray-500 ml-2 font-mono">' + usedEsc(c.code) + '</span>' +
+                        '<span class="block text-xs text-gray-400">Stok: ' + usedEsc(c.stock) + '</span>' +
+                    '</div>' +
+                    '<input type="number" min="1" value="' + c.quantity + '" aria-label="Jumlah per box"' +
+                        ' onchange="updateUsedBulkQty(' + index + ', this.value)"' +
+                        ' class="w-20 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">' +
+                    '<span class="text-xs text-gray-400">/box</span>' +
+                    '<button type="button" onclick="removeUsedSelectedComponent(' + index + ')"' +
+                        ' class="p-1 text-red-500 hover:bg-red-50 rounded transition-colors" title="Hapus">' +
+                        '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
+                    '</button>' +
+                '</div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        window.usedBulkToggleSelectAll = function(el) {
+            document.querySelectorAll('#usedBulkModal input[name="used_box_ids[]"]').forEach(function(cb) {
+                cb.checked = el.checked;
+            });
+            updateUsedBulkSummary();
         };
 
         window.openUsedBulkModal = function() {
@@ -348,6 +469,9 @@
             document.getElementById('usedBulkError').classList.add('hidden');
             document.getElementById('usedBulkComponentId').value = '';
             document.getElementById('usedBulkComponentStock').textContent = '-';
+            document.getElementById('usedBulkComponentName').textContent = '';
+            usedSelectedComponents = [];
+            renderUsedSelected();
 
             // Sinkronkan pilihan dari tabel ke daftar checkbox di modal.
             var selected = usedCheckedIds();
@@ -405,13 +529,11 @@
             var errorEl = document.getElementById('usedBulkError');
             errorEl.classList.add('hidden');
 
-            var componentId = document.getElementById('usedBulkComponentId').value;
-            var quantity = document.getElementById('usedBulkQuantity').value;
             var boxIds = Array.from(document.querySelectorAll('#usedBulkModal input[name="used_box_ids[]"]:checked'))
                 .map(cb => cb.value);
 
-            if (!componentId) {
-                errorEl.textContent = 'Pilih komponen terlebih dahulu';
+            if (usedSelectedComponents.length === 0) {
+                errorEl.textContent = 'Pilih minimal satu komponen';
                 errorEl.classList.remove('hidden');
                 return;
             }
@@ -431,8 +553,9 @@
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
-                        component_id: componentId,
-                        quantity: quantity,
+                        components: usedSelectedComponents.map(function(c) {
+                            return { component_id: c.id, quantity: c.quantity };
+                        }),
                         box_ids: boxIds,
                     }),
                 });
@@ -496,6 +619,7 @@
             }
         });
 
+        renderUsedSelected();
         updateUsedBulkSummary();
     })();
 </script>

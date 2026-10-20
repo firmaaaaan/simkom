@@ -206,18 +206,33 @@ class BoxController extends Controller
     public function bulkAddComponent(Request $request)
     {
         $validated = $request->validate([
-            'component_id' => 'required|exists:components,id',
-            'quantity' => 'required|integer|min:1',
+            'component_id' => 'nullable|exists:components,id|required_without:components',
+            'quantity' => 'nullable|integer|min:1|required_without:components',
+            'components' => 'nullable|array',
+            'components.*.component_id' => 'required|exists:components,id',
+            'components.*.quantity' => 'required|integer|min:1',
             'box_names' => 'nullable|array|required_without:box_ids',
             'box_names.*' => 'required|string',
             'box_ids' => 'nullable|array|required_without:box_names',
             'box_ids.*' => 'required|exists:boxes,id',
         ], [
+            'component_id.required_without' => 'Pilih minimal satu komponen',
+            'quantity.required_without' => 'Jumlah wajib diisi',
             'box_names.required_without' => 'Pilih minimal satu box',
             'box_ids.required_without' => 'Pilih minimal satu box',
         ]);
 
-        $component = Component::findOrFail($validated['component_id']);
+        // Payload lama (component_id + quantity) dinormalkan ke daftar item;
+        // duplikat digabung agar stok tidak dicek/didekremen ganda.
+        $items = collect($validated['components'] ?? [['component_id' => $validated['component_id'], 'quantity' => $validated['quantity']]])
+            ->groupBy('component_id')
+            ->map(fn ($group) => [
+                'component_id' => $group->first()['component_id'],
+                'quantity' => (int) $group->sum('quantity'),
+            ])
+            ->values();
+
+        $components = Component::whereIn('id', $items->pluck('component_id'))->get()->keyBy('id');
 
         // Terima target berdasarkan nama grup (modal lama) maupun id unit
         // (rangkuman "Box Dipakai" — per kode box fisik).
@@ -233,41 +248,61 @@ class BoxController extends Controller
             ], 422);
         }
 
-        $totalNeeded = $validated['quantity'] * $boxes->count();
+        // Cek stok semua komponen dulu — batal semua bila ada yang kurang.
+        $totals = [];
+        foreach ($items as $item) {
+            $component = $components[$item['component_id']] ?? null;
+            $totalNeeded = $item['quantity'] * $boxes->count();
 
-        if ($component->quantity < $totalNeeded) {
-            return response()->json([
-                'success' => false,
-                'message' => "Stok tidak cukup. Dibutuhkan {$totalNeeded}, stok tersedia: {$component->quantity}",
-            ], 422);
+            if (! $component) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Komponen tidak ditemukan',
+                ], 422);
+            }
+
+            if ($component->quantity < $totalNeeded) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok tidak cukup untuk {$component->name}. Dibutuhkan {$totalNeeded}, stok tersedia: {$component->quantity}",
+                ], 422);
+            }
+
+            $totals[$item['component_id']] = $totalNeeded;
         }
 
         DB::beginTransaction();
 
         try {
             foreach ($boxes as $box) {
-                $existing = BoxComponent::where('box_id', $box->id)
-                    ->where('component_id', $validated['component_id'])
-                    ->first();
+                foreach ($items as $item) {
+                    $existing = BoxComponent::where('box_id', $box->id)
+                        ->where('component_id', $item['component_id'])
+                        ->first();
 
-                if ($existing) {
-                    $existing->increment('quantity', $validated['quantity']);
-                } else {
-                    BoxComponent::create([
-                        'box_id' => $box->id,
-                        'component_id' => $validated['component_id'],
-                        'quantity' => $validated['quantity'],
-                    ]);
+                    if ($existing) {
+                        $existing->increment('quantity', $item['quantity']);
+                    } else {
+                        BoxComponent::create([
+                            'box_id' => $box->id,
+                            'component_id' => $item['component_id'],
+                            'quantity' => $item['quantity'],
+                        ]);
+                    }
                 }
             }
 
-            $component->decrement('quantity', $totalNeeded);
+            foreach ($totals as $componentId => $totalNeeded) {
+                $components[$componentId]->decrement('quantity', $totalNeeded);
+            }
 
             DB::commit();
 
+            $totalItems = array_sum($totals);
+
             return response()->json([
                 'success' => true,
-                'message' => "{$component->name} berhasil didistribusikan ke {$boxes->count()} box ({$totalNeeded} item)",
+                'message' => "{$items->count()} jenis komponen ({$totalItems} item) berhasil didistribusikan ke {$boxes->count()} box",
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

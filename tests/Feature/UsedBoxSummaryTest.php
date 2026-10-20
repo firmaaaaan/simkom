@@ -200,6 +200,79 @@ class UsedBoxSummaryTest extends TestCase
         $this->assertSame(46, $component->fresh()->quantity);
     }
 
+    public function test_bulk_add_multiple_components(): void
+    {
+        $boxA = $this->box('BOX-IOT-050');
+        $boxB = $this->box('BOX-IOT-051');
+        $this->usage($boxA);
+        $this->usage($boxB);
+
+        $esp = $this->makeComponent(50);
+        $resistor = Component::create([
+            'name' => 'Resistor 1k',
+            'code' => 'CMP-RES-1K',
+            'category' => 'IoT',
+            'quantity' => 100,
+            'status' => 'Tersedia',
+        ]);
+
+        $admin = $this->userWith(['view-components', 'create-components'], 'bulk-multi@lab.test');
+
+        $this->actingAs($admin)
+            ->postJson(route('boxes.bulk-add-component'), [
+                'components' => [
+                    ['component_id' => $esp->id, 'quantity' => 2],
+                    ['component_id' => $resistor->id, 'quantity' => 10],
+                ],
+                'box_ids' => [$boxA->id, $boxB->id],
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertSame(4, BoxComponent::count());
+        $this->assertSame(46, $esp->fresh()->quantity);
+        $this->assertSame(80, $resistor->fresh()->quantity);
+        $this->assertSame(2, $boxA->fresh()->boxComponents()->where('component_id', $esp->id)->sum('quantity'));
+        $this->assertSame(10, $boxA->fresh()->boxComponents()->where('component_id', $resistor->id)->sum('quantity'));
+        $this->assertSame(2, $boxB->fresh()->boxComponents()->where('component_id', $esp->id)->sum('quantity'));
+        $this->assertSame(10, $boxB->fresh()->boxComponents()->where('component_id', $resistor->id)->sum('quantity'));
+    }
+
+    public function test_bulk_add_multiple_components_rejects_when_any_stock_insufficient(): void
+    {
+        $boxA = $this->box('BOX-IOT-060');
+        $boxB = $this->box('BOX-IOT-061');
+        $this->usage($boxA);
+        $this->usage($boxB);
+
+        $ok = $this->makeComponent(50);
+        $scarce = Component::create([
+            'name' => 'Sensor DHT',
+            'code' => 'CMP-DHT',
+            'category' => 'IoT',
+            'quantity' => 3,
+            'status' => 'Tersedia',
+        ]);
+
+        $admin = $this->userWith(['view-components', 'create-components'], 'bulk-scarce@lab.test');
+
+        // Dibutuhkan 2 × 2 box = 4 > stok 3 → seluruh request batal tanpa perubahan.
+        $this->actingAs($admin)
+            ->postJson(route('boxes.bulk-add-component'), [
+                'components' => [
+                    ['component_id' => $ok->id, 'quantity' => 1],
+                    ['component_id' => $scarce->id, 'quantity' => 2],
+                ],
+                'box_ids' => [$boxA->id, $boxB->id],
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('success', false);
+
+        $this->assertSame(0, BoxComponent::count());
+        $this->assertSame(50, $ok->fresh()->quantity);
+        $this->assertSame(3, $scarce->fresh()->quantity);
+    }
+
     public function test_export_used_boxes_requires_permission(): void
     {
         $box = $this->box('BOX-IOT-030');
