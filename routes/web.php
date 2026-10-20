@@ -264,6 +264,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:export-components')->group(function () {
         Route::get('components/export', [ComponentController::class, 'export'])->name('components.export');
         Route::get('boxes/export', [BoxController::class, 'export'])->name('boxes.export');
+        Route::get('boxes/used-export', [BoxController::class, 'exportUsedBoxes'])->name('boxes.export-used');
     });
     // Template dipakai proses import juga, jadi boleh export ATAU import.
     Route::get('components/template', [ComponentController::class, 'template'])

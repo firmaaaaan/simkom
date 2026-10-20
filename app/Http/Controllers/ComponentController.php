@@ -83,6 +83,21 @@ class ComponentController extends Controller
             'returned' => BoxUsage::where('status', 'Returned')->count(),
         ];
 
+        // Rangkuman box yang pernah dipakai: 1 baris per kode box (unit fisik), tanpa duplikat.
+        $usedBoxes = Box::whereHas('boxUsages')
+            ->withCount('boxUsages as usage_count')
+            ->withMax('boxUsages as last_used_at', 'used_at')
+            ->withCount('boxComponents as components_count')
+            ->withSum('boxComponents as total_quantity', 'quantity')
+            ->orderByDesc('last_used_at')
+            ->orderBy('code')
+            ->get();
+
+        $usedBoxStats = [
+            'total' => $usedBoxes->count(),
+            'without_components' => $usedBoxes->where('components_count', 0)->count(),
+        ];
+
         $borrowingQuery = ComponentBorrowing::with('component');
 
         $borrowingStatus = $request->input('borrow_status');
@@ -107,7 +122,7 @@ class ComponentController extends Controller
             'returned' => ComponentBorrowing::where('status', 'Returned')->count(),
         ];
 
-        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats', 'borrowings', 'borrowingStats', 'damageBlocked'));
+        return view('components.index', compact('components', 'boxes', 'usages', 'usageStats', 'borrowings', 'borrowingStats', 'damageBlocked', 'usedBoxes', 'usedBoxStats'));
     }
 
     public function create()

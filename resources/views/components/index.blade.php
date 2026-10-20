@@ -4,7 +4,7 @@
 @section('header', 'Data Komponen')
 
 @section('content')
-<div x-data="{ activeTab: '{{ in_array(request('tab'), ['boxes', 'history', 'borrowings']) ? request('tab') : 'components' }}', selected: [], toggleSelection(id) { if (this.selected.includes(id)) { this.selected = this.selected.filter(i => i !== id); } else { this.selected.push(id); } } }">
+<div x-data="{ activeTab: '{{ in_array(request('tab'), ['boxes', 'history', 'borrowings', 'used-boxes']) ? request('tab') : 'components' }}', selected: [], toggleSelection(id) { if (this.selected.includes(id)) { this.selected = this.selected.filter(i => i !== id); } else { this.selected.push(id); } } }">
     <div class="mb-6">
         <p class="text-sm text-gray-500">Kelola seluruh data komponen dan box penyimpanan laboratorium</p>
     </div>
@@ -17,6 +17,11 @@
         <button @click="activeTab = 'boxes'" :class="activeTab === 'boxes' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
             class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
             Box Penyimpanan
+        </button>
+        <button @click="activeTab = 'used-boxes'" :class="activeTab === 'used-boxes' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+            class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px inline-flex items-center gap-2">
+            Box Dipakai
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">{{ $usedBoxes->count() }}</span>
         </button>
         <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
             class="px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px">
@@ -263,6 +268,10 @@
 
     <div x-show="activeTab === 'boxes'" x-cloak>
         @include('components.boxes', ['boxes' => $boxes ?? collect()])
+    </div>
+
+    <div x-show="activeTab === 'used-boxes'" x-cloak>
+        @include('components.used-boxes')
     </div>
 
     <div x-show="activeTab === 'history'" x-cloak>
