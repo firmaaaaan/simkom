@@ -66,10 +66,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
             <div class="max-w-2xl">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
-                    Lapor Kendala &amp; Pinjam Komputer Laboratorium
+                    Cek Jadwal Perkuliahan, Peminjaman Komputer &amp; Laporkan Kendala Praktikum
                 </h1>
                 <p class="text-base sm:text-lg text-green-50 mb-8">
-                    Pilih laboratorium, temukan komputer yang Anda gunakan, lalu laporkan kendala atau ajukan peminjaman tanpa perlu login.
+                    Cek jadwal perkuliahan, ajukan peminjaman komputer, dan laporkan kendala praktikum — semua tanpa perlu login.
                 </p>
                 <div class="flex flex-wrap items-center gap-3">
                     <a href="#denah" class="inline-flex items-center gap-2 px-5 py-3 bg-white text-green-700 text-sm font-semibold rounded-xl hover:bg-green-50 transition-colors shadow-lg">
