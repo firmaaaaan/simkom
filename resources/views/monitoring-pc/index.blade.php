@@ -81,9 +81,18 @@
                     Diperbarui otomatis tiap 5 detik &middot; <span x-text="relTime(secondsSince(updatedAt))"></span>
                 </p>
             </div>
-            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
-            </span>
+            <div class="flex items-center gap-2">
+                <button x-show="canPower" x-cloak type="button" @click="shutdownAll()" :disabled="busy"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+                    </svg>
+                    Matikan Semua
+                </button>
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
+                </span>
+            </div>
         </div>
 
         <template x-if="pcs.length === 0">
@@ -414,6 +423,29 @@
                             'X-Requested-With': 'XMLHttpRequest',
                         },
                         body: JSON.stringify({ action: action }),
+                    });
+                    const body = await res.json().catch(() => ({}));
+                    this.toast = { ok: !!body.ok, message: body.message || 'Permintaan gagal diproses.' };
+                } catch (e) {
+                    this.toast = { ok: false, message: 'Tidak dapat terhubung ke server.' };
+                } finally {
+                    this.busy = null;
+                    this.poll();
+                }
+            },
+
+            async shutdownAll() {
+                if (this.busy) return;
+                if (! confirm('Yakin ingin mematikan SEMUA PC yang online? Perintah akan dieksekusi agent dalam ~10 detik.')) return;
+                this.busy = 'all';
+                try {
+                    const res = await fetch('{{ route('monitoring-pc.shutdown-all') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
                     });
                     const body = await res.json().catch(() => ({}));
                     this.toast = { ok: !!body.ok, message: body.message || 'Permintaan gagal diproses.' };

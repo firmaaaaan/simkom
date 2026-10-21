@@ -105,6 +105,62 @@ class MonitoringPcController extends Controller
     }
 
     /**
+     * Matikan semua PC online sekaligus: antrekan perintah shutdown ke
+     * tiap agent. PC offline & PC yang sudah punya perintah pending dilewati.
+     */
+    public function shutdownAll(Request $request): JsonResponse
+    {
+        $pcs = PcMonitor::all();
+
+        $online = $pcs->filter(fn ($pc) => $pc->effectiveStatus() === PcMonitor::STATUS_ONLINE);
+        $offlineCount = $pcs->count() - $online->count();
+        $skippedPending = 0;
+        $sent = 0;
+
+        foreach ($online as $pc) {
+            if ($pc->hasPendingCommand()) {
+                $skippedPending++;
+
+                continue;
+            }
+
+            PcCommand::create([
+                'pc_monitor_id' => $pc->id,
+                'action' => PcCommand::ACTION_SHUTDOWN,
+                'status' => PcCommand::STATUS_PENDING,
+                'requested_by' => $request->user()?->id,
+            ]);
+
+            $sent++;
+        }
+
+        if ($sent === 0) {
+            $message = $offlineCount === 0 && $skippedPending === 0
+                ? 'Tidak ada PC untuk dimatikan.'
+                : "Tidak ada perintah terkirim — {$skippedPending} PC menunggu perintah lain";
+
+            if ($offlineCount > 0) {
+                $message .= ", {$offlineCount} PC offline";
+            }
+
+            return response()->json(['ok' => false, 'message' => $message.'.'], 409);
+        }
+
+        $parts = ["perintah matikan dikirim ke {$sent} PC"];
+        if ($offlineCount > 0) {
+            $parts[] = "{$offlineCount} PC offline dilewati";
+        }
+        if ($skippedPending > 0) {
+            $parts[] = "{$skippedPending} PC masih menunggu perintah lain";
+        }
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Perintah '.implode(', ', $parts).'. Agent mengeksekusi dalam ~10 detik.',
+        ]);
+    }
+
+    /**
      * Screenshot layar terakhir yang dikirim agent.
      */
     public function screenshot(PcMonitor $pc): mixed

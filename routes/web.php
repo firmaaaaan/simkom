@@ -520,6 +520,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:control-monitoring')->group(function () {
         Route::post('monitoring-pc/{pc}/power-on', [MonitoringPcController::class, 'powerOn'])->name('monitoring-pc.power-on');
         Route::post('monitoring-pc/{pc}/command', [MonitoringPcController::class, 'command'])->name('monitoring-pc.command');
+        Route::post('monitoring-pc/shutdown-all', [MonitoringPcController::class, 'shutdownAll'])->name('monitoring-pc.shutdown-all');
     });
 
     // Pengembalian Box — HANYA ADMIN/SUPERADMIN
