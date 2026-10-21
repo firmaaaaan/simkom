@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (Request $request) {
     $laboratories = Laboratory::where('status', 'Aktif')
+        ->where('show_in_computer_list', true)
         ->orderBy('name')
         ->get();
     $showSpec = Setting::publicSpecEnabled();

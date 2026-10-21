@@ -70,6 +70,21 @@
                     </select>
                 </div>
 
+                <div class="flex items-center justify-between gap-4 border border-gray-200 rounded-lg px-4 py-3"
+                     x-data="{ on: {{ old('show_in_computer_list', $laboratory->show_in_computer_list ? '1' : '0') === '1' ? 'true' : 'false' }} }">
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700">Tampilkan di Daftar Komputer</span>
+                        <span class="block text-xs text-gray-500 mt-0.5">Laboratorium ini tampil di halaman publik daftar komputer.</span>
+                    </div>
+                    <button type="button" role="switch" :aria-checked="on.toString()" @click="on = !on"
+                        :class="on ? 'bg-green-600' : 'bg-gray-300'"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        <span :class="on ? 'translate-x-5' : 'translate-x-0.5'"
+                            class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform"></span>
+                    </button>
+                    <input type="hidden" name="show_in_computer_list" :value="on ? '1' : '0'">
+                </div>
+
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea name="description" id="description" rows="3"

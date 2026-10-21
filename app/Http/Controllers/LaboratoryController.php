@@ -56,6 +56,7 @@ class LaboratoryController extends Controller
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
+            'show_in_computer_list' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
 
@@ -87,6 +88,7 @@ class LaboratoryController extends Controller
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
+            'show_in_computer_list' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
 

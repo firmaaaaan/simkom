@@ -16,7 +16,12 @@ class Laboratory extends Model
         'location',
         'capacity',
         'status',
+        'show_in_computer_list',
         'description',
+    ];
+
+    protected $casts = [
+        'show_in_computer_list' => 'boolean',
     ];
 
     public function computers(): HasMany
