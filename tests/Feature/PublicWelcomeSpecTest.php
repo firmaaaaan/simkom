@@ -43,7 +43,7 @@ class PublicWelcomeSpecTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Lihat Spesifikasi')
+            ->assertSee('Lihat Software')
             ->assertSee('Software Terdeteksi (Agent)')
             ->assertSee('Google Chrome')
             ->assertSee('Visual Studio Code');
@@ -82,7 +82,7 @@ class PublicWelcomeSpecTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertDontSee('Lihat Spesifikasi')
+            ->assertDontSee('Lihat Software')
             ->assertDontSee('Software Terdeteksi (Agent)');
     }
 }

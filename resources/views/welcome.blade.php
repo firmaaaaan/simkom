@@ -184,7 +184,7 @@
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                                     </svg>
-                                    Lihat Spesifikasi
+                                    Lihat Software
                                 </button>
                                 @endif
 
@@ -291,14 +291,14 @@
         </div>
     </footer>
     @if($showSpec)
-    {{-- Modal Spesifikasi --}}
+    {{-- Modal Software --}}
     <div id="specModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="specModalTitle">
         <div data-spec-close class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
         <div class="relative min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div class="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col">
                 <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100">
                     <div>
-                        <p class="text-xs font-semibold text-green-600 uppercase tracking-wider mb-1">Spesifikasi</p>
+                        <p class="text-xs font-semibold text-green-600 uppercase tracking-wider mb-1">Software</p>
                         <h3 id="specModalTitle" class="text-lg font-bold text-gray-900">-</h3>
                         <p id="specModalSubtitle" class="text-sm text-gray-500"></p>
                     </div>
@@ -328,7 +328,7 @@
                 if (!source) return;
 
                 lastTrigger = trigger;
-                modalTitle.textContent = trigger.dataset.specTitle || 'Spesifikasi';
+                modalTitle.textContent = trigger.dataset.specTitle || 'Software';
                 modalSubtitle.textContent = trigger.dataset.specSubtitle || '';
                 modalBody.innerHTML = source.innerHTML;
                 modal.classList.remove('hidden');

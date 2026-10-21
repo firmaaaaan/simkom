@@ -7,7 +7,7 @@ use App\Models\Setting;
 class SettingController extends Controller
 {
     /**
-     * Saklar tombol "Lihat Spesifikasi" pada halaman publik.
+     * Saklar tombol "Lihat Software" pada halaman publik.
      */
     public function togglePublicSpec()
     {
@@ -16,7 +16,7 @@ class SettingController extends Controller
         Setting::set(Setting::PUBLIC_SPEC_ID, $enabled ? '1' : '0');
 
         return back()->with('success', $enabled
-            ? 'Tombol "Lihat Spesifikasi" ditampilkan di halaman publik.'
-            : 'Tombol "Lihat Spesifikasi" disembunyikan dari halaman publik.');
+            ? 'Tombol "Lihat Software" ditampilkan di halaman publik.'
+            : 'Tombol "Lihat Software" disembunyikan dari halaman publik.');
     }
 }
