@@ -41,6 +41,8 @@ class PublicWelcomeSpecTest extends TestCase
         PcSoftware::create(['pc_monitor_id' => $pc->id, 'name' => 'Google Chrome', 'version' => '130.0']);
         PcSoftware::create(['pc_monitor_id' => $pc->id, 'name' => 'Visual Studio Code', 'version' => '1.85.1']);
 
+        Setting::setPublicSoftwareWhitelist(['Google Chrome', 'Visual Studio Code']);
+
         $this->get('/')
             ->assertOk()
             ->assertSee('Lihat Software')
@@ -52,6 +54,7 @@ class PublicWelcomeSpecTest extends TestCase
     public function test_computer_without_agent_shows_hint(): void
     {
         $this->computer('SB-202');
+        Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
         $this->get('/')
             ->assertOk()
@@ -69,6 +72,8 @@ class PublicWelcomeSpecTest extends TestCase
             'software_synced_at' => null,
         ]);
 
+        Setting::setPublicSoftwareWhitelist(['Google Chrome']);
+
         $this->get('/')
             ->assertOk()
             ->assertSee('belum pernah sync')
@@ -79,6 +84,7 @@ class PublicWelcomeSpecTest extends TestCase
     {
         $this->computer('SB-204');
         Setting::set(Setting::PUBLIC_SPEC_ID, 'false');
+        Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
         $this->get('/')
             ->assertOk()

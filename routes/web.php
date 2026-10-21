@@ -70,8 +70,11 @@ Route::get('/', function (Request $request) {
         // Software terdeteksi agent: hostname = kode komputer (case-insensitive).
         if ($showSpec && $computers->isNotEmpty()) {
             $codesLower = $computers->pluck('code')->map(fn ($code) => strtolower($code))->all();
+            $whitelistLower = array_map('strtolower', Setting::publicSoftwareWhitelist());
             $monitors = PcMonitor::whereIn(DB::raw('LOWER(hostname)'), $codesLower)
-                ->with('softwares')
+                ->with(['softwares' => function ($q) use ($whitelistLower) {
+                    $q->whereIn(DB::raw('LOWER(name)'), $whitelistLower);
+                }])
                 ->get();
             foreach ($monitors as $monitor) {
                 $detectedByCode[strtolower($monitor->hostname)] = [
@@ -354,8 +357,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/computers/bulk-assign', [ComputerController::class, 'bulkAssign'])->name('computers.bulk-assign');
         Route::post('/computers/bulk-assign', [ComputerController::class, 'storeBulkAssign'])->name('computers.store-bulk-assign');
         Route::post('/computers/{computer}/check', [ComputerController::class, 'storeCheck'])->name('computers.check');
-        // Saklar tampil/sembunyi tombol "Lihat Spesifikasi" di halaman beranda publik
+        // Saklar tampil/sembunyi tombol "Lihat Software" di halaman beranda publik
         Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
+        // Whitelist software yang tampil di halaman beranda publik
+        Route::get('/settings/public-software', [SettingController::class, 'editPublicSoftware'])->name('settings.public-software.edit');
+        Route::put('/settings/public-software', [SettingController::class, 'updatePublicSoftware'])->name('settings.public-software.update');
     });
     Route::middleware('permission:import-computers')->group(function () {
         // Import spesifikasi mengubah data komputer (izin import terpisah dari edit)
