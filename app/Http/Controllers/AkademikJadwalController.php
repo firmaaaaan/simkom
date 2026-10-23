@@ -68,20 +68,6 @@ class AkademikJadwalController extends Controller
     }
 
     /**
-     * Halaman admin (login) Jadwal Kelas — UI sama dengan jadwal laboratorium,
-     * data dari endpoint SIMPTT terpisah untuk jadwal kelas.
-     */
-    public function indexKelas(Request $request)
-    {
-        return view('akademik.jadwal', array_merge($this->buildData($request, 'kelas'), [
-            'pageTitle' => 'Jadwal Kelas',
-            'pageSubtitle' => 'Kalender mingguan jadwal kelas — diambil dari API SIMPTT',
-            'pageRoute' => 'akademik.jadwal-kelas',
-            'publicUrl' => null,
-        ]));
-    }
-
-    /**
      * Halaman publik (tanpa login) Jadwal Laboratorium — layout mandiri
      * ala halaman publik lain. Data & perilaku sama dengan halaman admin.
      */

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,38 +23,66 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased min-h-screen flex flex-col">
 
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <a href="{{ url('/') }}" class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-4.25-11.396c.251.023.501.05.75.082M12 21a8.966 8.966 0 005.982-2.275M12 21a8.966 8.966 0 01-5.982-2.275M15.75 3.186a24.284 24.284 0 012.038.443M8.25 3.186a24.284 24.284 0 00-2.038.443M18 14.5l-6 6-6-6" />
-                        </svg>
+    @include('layouts.public-navbar')
+
+    {{-- Hero --}}
+    <header class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-8 lg:gap-12">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-3">Jadwal Laboratorium</h1>
+                    <p class="text-base sm:text-lg text-green-50 max-w-xl mb-6">
+                        Kalender mingguan jadwal penggunaan laboratorium — data langsung dari SIMPTT, tanpa perlu login.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="#kalender" class="inline-flex items-center gap-2 px-5 py-3 bg-white text-green-700 text-sm font-semibold rounded-xl hover:bg-green-50 transition-colors shadow-lg">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            Lihat Kalender
+                        </a>
+                        <a href="{{ $todayUrl }}" class="inline-flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/30 text-white text-sm font-semibold rounded-xl hover:bg-white/25 transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Ke Minggu Ini
+                        </a>
                     </div>
-                    <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Kom</span></span>
-                </a>
-                <a href="{{ url('/daftar-komputer#denah') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                    Kembali ke Beranda
-                </a>
+                </div>
+
+                {{-- Kartu ringkasan --}}
+                <div class="w-full lg:w-80 shrink-0 bg-white/10 border border-white/20 rounded-2xl backdrop-blur-sm p-5">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-green-100 mb-3">Ringkasan</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-2xl font-black">{{ $totalEntries }}</p>
+                            <p class="text-xs text-green-100">jadwal terisi</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-black">{{ $totalSlots }}</p>
+                            <p class="text-xs text-green-100">slot dari API</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/20 space-y-2 text-xs text-green-50">
+                        <p class="flex items-start gap-2">
+                            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            <span class="whitespace-nowrap">{{ $weekLabel }}</span>
+                        </p>
+                        <p class="flex items-start gap-2">
+                            <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</span>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+    </header>
 
     <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {{-- Header --}}
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Jadwal Laboratorium</h1>
-                <p class="text-gray-500 mt-1 text-sm sm:text-base">Kalender mingguan jadwal penggunaan laboratorium dari SIMPTT — tanpa perlu login.</p>
-            </div>
-            <p class="text-xs text-gray-400">Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</p>
-        </div>
 
         @if($error)
             <div class="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm flex items-start gap-2">
@@ -66,7 +94,7 @@
         @endif
 
         {{-- Toolbar: navigasi minggu + filter --}}
-        <form method="GET" action="{{ route('jadwal.index') }}" class="mb-4 bg-white rounded-xl border border-gray-200 p-4">
+        <form id="kalender" method="GET" action="{{ route('jadwal.index') }}" class="mb-4 bg-white rounded-xl border border-gray-200 p-4 scroll-mt-24">
             <div class="flex flex-col lg:flex-row lg:items-end gap-3">
                 <div class="flex items-center gap-2">
                     @if($prevUrl)

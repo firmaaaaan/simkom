@@ -160,9 +160,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
-    // Akademik — Jadwal Laboratorium & Jadwal Kelas dari API eksternal (SIMPTT), versi admin
+    // Akademik — Jadwal Laboratorium dari API eksternal (SIMPTT), versi admin
     Route::get('/akademik/jadwal', [AkademikJadwalController::class, 'index'])->name('akademik.jadwal');
-    Route::get('/akademik/jadwal-kelas', [AkademikJadwalController::class, 'indexKelas'])->name('akademik.jadwal-kelas');
 
     // Halaman semua notifikasi + hapus (global, semua user login)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
