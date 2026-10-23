@@ -35,7 +35,7 @@
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <a href="{{ url('/') }}" class="flex items-center gap-3">
+                <a href="{{ url('/daftar-komputer') }}" class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-200">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5m-4.25-11.396c.251.023.501.05.75.082M12 21a8.966 8.966 0 005.982-2.275M12 21a8.966 8.966 0 01-5.982-2.275M15.75 3.186a24.284 24.284 0 012.038.443M8.25 3.186a24.284 24.284 0 00-2.038.443M18 14.5l-6 6-6-6" />
@@ -48,7 +48,7 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                         </svg>
-                        <span class="hidden sm:inline">Jadwal Perkuliahan</span>
+                        <span class="hidden sm:inline">Jadwal Laboratorium</span>
                     </a>
                     <a href="{{ route('track.index') }}" class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 transition-colors">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -66,10 +66,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
             <div class="max-w-2xl">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-4">
-                    Cek Jadwal Perkuliahan, Peminjaman Komputer &amp; Laporkan Kendala Praktikum
+                    Cek Jadwal Laboratorium, Peminjaman Komputer &amp; Laporkan Kendala Praktikum
                 </h1>
                 <p class="text-base sm:text-lg text-green-50 mb-8">
-                    Cek jadwal perkuliahan, ajukan peminjaman komputer, dan laporkan kendala praktikum — semua tanpa perlu login.
+                    Cek jadwal laboratorium, ajukan peminjaman komputer, dan laporkan kendala praktikum — semua tanpa perlu login.
                 </p>
                 <div class="flex flex-wrap items-center gap-3">
                     <a href="#denah" class="inline-flex items-center gap-2 px-5 py-3 bg-white text-green-700 text-sm font-semibold rounded-xl hover:bg-green-50 transition-colors shadow-lg">
@@ -82,7 +82,7 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                         </svg>
-                        Jadwal Perkuliahan
+                        Jadwal Laboratorium
                     </a>
                     <a href="{{ route('track.index') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-white/15 border border-white/30 text-white text-sm font-semibold rounded-xl hover:bg-white/25 transition-colors">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

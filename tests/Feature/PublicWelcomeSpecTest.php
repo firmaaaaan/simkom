@@ -43,7 +43,7 @@ class PublicWelcomeSpecTest extends TestCase
 
         Setting::setPublicSoftwareWhitelist(['Google Chrome', 'Visual Studio Code']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertSee('Lihat Software')
             ->assertSee('Software Terdeteksi (Agent)')
@@ -56,7 +56,7 @@ class PublicWelcomeSpecTest extends TestCase
         $this->computer('SB-202');
         Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertSee('Belum ada data agent untuk PC ini');
     }
@@ -74,7 +74,7 @@ class PublicWelcomeSpecTest extends TestCase
 
         Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertSee('belum pernah sync')
             ->assertSee('Inventaris software belum pernah terkirim');
@@ -86,7 +86,7 @@ class PublicWelcomeSpecTest extends TestCase
         Setting::set(Setting::PUBLIC_SPEC_ID, 'false');
         Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertDontSee('Lihat Software')
             ->assertDontSee('Software Terdeteksi (Agent)');

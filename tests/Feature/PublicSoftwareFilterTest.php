@@ -69,7 +69,7 @@ class PublicSoftwareFilterTest extends TestCase
         $this->computerWithSoftware('SB-301', ['Google Chrome', 'WinRAR', 'Visual Studio Code']);
         Setting::setPublicSoftwareWhitelist(['Google Chrome', 'Visual Studio Code']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertSee('Google Chrome')
             ->assertSee('Visual Studio Code')
@@ -81,7 +81,7 @@ class PublicSoftwareFilterTest extends TestCase
         $this->computerWithSoftware('SB-302', ['Google Chrome', 'WinRAR']);
         Setting::setPublicSoftwareWhitelist([]);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertDontSee('Google Chrome')
             ->assertDontSee('WinRAR');
@@ -92,7 +92,7 @@ class PublicSoftwareFilterTest extends TestCase
         $this->computerWithSoftware('SB-303', ['google chrome']);
         Setting::setPublicSoftwareWhitelist(['Google Chrome']);
 
-        $this->get('/')
+        $this->get('/daftar-komputer')
             ->assertOk()
             ->assertSee('google chrome');
     }

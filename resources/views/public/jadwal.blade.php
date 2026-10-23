@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <title>Jadwal Perkuliahan - SimKom - UPT Lab Terpadu</title>
+    <title>Jadwal Laboratorium - SimKom - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,7 @@
                     </div>
                     <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Kom</span></span>
                 </a>
-                <a href="{{ url('/#denah') }}"
+                <a href="{{ url('/daftar-komputer#denah') }}"
                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -50,7 +50,7 @@
         {{-- Header --}}
         <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Jadwal Perkuliahan Laboratorium</h1>
+                <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Jadwal Laboratorium</h1>
                 <p class="text-gray-500 mt-1 text-sm sm:text-base">Kalender mingguan jadwal penggunaan laboratorium dari SIMPTT — tanpa perlu login.</p>
             </div>
             <p class="text-xs text-gray-400">Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</p>
@@ -338,7 +338,7 @@
     </main>
 
     <footer class="py-6 text-center text-xs text-gray-400 border-t border-gray-200 bg-white">
-        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 hover:text-green-600 transition-colors">
+        <a href="{{ url('/daftar-komputer') }}" class="inline-flex items-center gap-2 hover:text-green-600 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
             </svg>

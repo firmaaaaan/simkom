@@ -16,6 +16,13 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
+        $response->assertRedirect(route('jadwal.index'));
+    }
+
+    public function test_daftar_komputer_page_returns_a_successful_response(): void
+    {
+        $response = $this->get('/daftar-komputer');
+
         $response->assertStatus(200);
     }
 }

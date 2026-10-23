@@ -40,7 +40,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Request $request) {
+// Halaman pertama (landing) = Jadwal Laboratorium publik.
+Route::get('/', fn () => redirect()->route('jadwal.index'));
+
+// Daftar Komputer publik (halaman welcome lama) — pindah dari '/'.
+Route::get('/daftar-komputer', function (Request $request) {
     $laboratories = Laboratory::where('status', 'Aktif')
         ->where('show_in_computer_list', true)
         ->orderBy('name')
@@ -86,7 +90,7 @@ Route::get('/', function (Request $request) {
     }
 
     return view('welcome', compact('laboratories', 'computers', 'selectedLab', 'showSpec', 'detectedByCode'));
-});
+})->name('daftar-komputer');
 
 // Auth Routes (guest only)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
@@ -131,7 +135,7 @@ Route::prefix('lab-scan')->name('lab-scan.')->group(function () {
     Route::post('/{labCode}/check-in', [LabScanController::class, 'checkIn'])->name('check-in');
 });
 
-// Public Routes (Jadwal Perkuliahan - tanpa login, read-only)
+// Public Routes (Jadwal Laboratorium - tanpa login, read-only)
 // Jadwal mingguan dari API eksternal (SIMPTT) — publik, tanpa login.
 Route::get('/jadwal', [AkademikJadwalController::class, 'publik'])->name('jadwal.index');
 
@@ -156,8 +160,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
-    // Akademik — Jadwal Perkuliahan dari API eksternal (SIMPTT), versi admin
+    // Akademik — Jadwal Laboratorium & Jadwal Kelas dari API eksternal (SIMPTT), versi admin
     Route::get('/akademik/jadwal', [AkademikJadwalController::class, 'index'])->name('akademik.jadwal');
+    Route::get('/akademik/jadwal-kelas', [AkademikJadwalController::class, 'indexKelas'])->name('akademik.jadwal-kelas');
 
     // Halaman semua notifikasi + hapus (global, semua user login)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

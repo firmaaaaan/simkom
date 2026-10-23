@@ -54,32 +54,53 @@ class AkademikJadwalController extends Controller
     ];
 
     /**
-     * Halaman admin (login) Jadwal Perkuliahan — layout aplikasi + sidebar.
+     * Halaman admin (login) Jadwal Laboratorium — layout aplikasi + sidebar.
+     * Data dari API SIMPTT sumber 'lab'.
      */
     public function index(Request $request)
     {
-        return view('akademik.jadwal', $this->buildData($request));
+        return view('akademik.jadwal', array_merge($this->buildData($request, 'lab'), [
+            'pageTitle' => 'Jadwal Laboratorium',
+            'pageSubtitle' => 'Kalender mingguan jadwal penggunaan laboratorium — diambil dari API SIMPTT',
+            'pageRoute' => 'akademik.jadwal',
+            'publicUrl' => route('jadwal.index'),
+        ]));
     }
 
     /**
-     * Halaman publik (tanpa login) Jadwal Perkuliahan — layout mandiri
+     * Halaman admin (login) Jadwal Kelas — UI sama dengan jadwal laboratorium,
+     * data dari endpoint SIMPTT terpisah untuk jadwal kelas.
+     */
+    public function indexKelas(Request $request)
+    {
+        return view('akademik.jadwal', array_merge($this->buildData($request, 'kelas'), [
+            'pageTitle' => 'Jadwal Kelas',
+            'pageSubtitle' => 'Kalender mingguan jadwal kelas — diambil dari API SIMPTT',
+            'pageRoute' => 'akademik.jadwal-kelas',
+            'publicUrl' => null,
+        ]));
+    }
+
+    /**
+     * Halaman publik (tanpa login) Jadwal Laboratorium — layout mandiri
      * ala halaman publik lain. Data & perilaku sama dengan halaman admin.
      */
     public function publik(Request $request)
     {
-        return view('public.jadwal', $this->buildData($request));
+        return view('public.jadwal', $this->buildData($request, 'lab'));
     }
 
     /**
-     * Siapkan data kalender mingguan dari API eksternal GET
-     * /api/v1/jadwal/lab (SIMPTT), satu request API per tanggal minggu
-     * tersebut (di-pool paralel + cache). Minggu lampau disembunyikan:
-     * navigasi ‹ tidak bisa mundur melewati minggu berjalan, dan minggu
-     * lampau yang dibuka lewat URL manual tampil kosong tanpa memanggil API.
+     * Siapkan data kalender mingguan dari API eksternal SIMPTT — sumber
+     * 'lab' (/api/v1/jadwal/lab) atau 'kelas' (/api/v1/jadwal/kelas), satu
+     * request API per tanggal minggu tersebut (di-pool paralel + cache
+     * terpisah per sumber). Minggu lampau disembunyikan: navigasi ‹ tidak
+     * bisa mundur melewati minggu berjalan, dan minggu lampau yang dibuka
+     * lewat URL manual tampil kosong tanpa memanggil API.
      *
      * @return array<string, mixed>
      */
-    private function buildData(Request $request): array
+    private function buildData(Request $request, string $source = 'lab'): array
     {
         $validated = $request->validate([
             'tanggal' => 'nullable|date_format:Y-m-d',
@@ -88,7 +109,9 @@ class AkademikJadwalController extends Controller
 
         $anchor = $validated['tanggal'] ?? now()->toDateString();
         $kdruang = isset($validated['kdruang']) ? (int) $validated['kdruang'] : null;
-        $endpoint = config('jadwal.api_url');
+        $endpoint = $source === 'kelas'
+            ? config('jadwal.kelas_api_url')
+            : config('jadwal.api_url');
 
         $monday = Carbon::parse($anchor)->startOfWeek(Carbon::MONDAY);
         $sunday = $monday->copy()->addDays(6);
@@ -126,7 +149,7 @@ class AkademikJadwalController extends Controller
         }
 
         // Minggu lampau tidak diambil dari API — disembunyikan, tampil kosong.
-        [$payloads, $error] = $isPastWeek ? [[], null] : $this->fetchDates($dates, $today);
+        [$payloads, $error] = $isPastWeek ? [[], null] : $this->fetchDates($dates, $today, $endpoint, $source);
 
         // Susun entri per tanggal (slot terisi, difilter per ruang) + sel per slot 2 jam.
         $roomMap = [];
@@ -218,25 +241,27 @@ class AkademikJadwalController extends Controller
 
     /**
      * Ambil payload API untuk daftar tanggal: cek cache per tanggal dulu,
-     * sisanya di-pool paralel per batch. Tanggal lampau di-cache lebih lama
-     * (data historis tidak berubah), tanggal berjalan/hari depan pakai TTL
-     * pendek. Kegagalan di-negative-cache singkat supaya halaman tidak
-     * menunggu timeout berulang saat API sedang mati.
+     * sisanya di-pool paralel per batch. Cache disimpan terpisah per sumber
+     * (lab/kelas) agar kedua halaman tidak saling bentrok. Tanggal lampau
+     * di-cache lebih lama (data historis tidak berubah), tanggal
+     * berjalan/hari depan pakai TTL pendek. Kegagalan di-negative-cache
+     * singkat supaya halaman tidak menunggu timeout berulang saat API
+     * sedang mati.
      *
      * @return array{0: array<string, array>, 1: string|null}
      */
-    private function fetchDates(array $dates, string $today): array
+    private function fetchDates(array $dates, string $today, string $endpoint, string $source): array
     {
         $payloads = [];
         $missing = [];
         $failed = 0;
 
         foreach ($dates as $date) {
-            $cached = Cache::get($this->cacheKey($date));
+            $cached = Cache::get($this->cacheKey($date, $source));
 
             if (is_array($cached)) {
                 $payloads[$date] = $cached;
-            } elseif (Cache::get($this->failKey($date))) {
+            } elseif (Cache::get($this->failKey($date, $source))) {
                 // Baru saja gagal — jangan langsung request ulang.
                 $failed++;
             } else {
@@ -251,18 +276,18 @@ class AkademikJadwalController extends Controller
             if ($abort) {
                 foreach ($chunk as $date) {
                     $failed++;
-                    $this->markFailed($date);
+                    $this->markFailed($date, $source);
                 }
 
                 continue;
             }
 
             try {
-                $results = Http::pool(function ($pool) use ($chunk) {
+                $results = Http::pool(function ($pool) use ($chunk, $endpoint) {
                     foreach ($chunk as $date) {
                         $pool->timeout(config('jadwal.timeout'))
                             ->acceptJson()
-                            ->get(config('jadwal.api_url'), ['tanggal' => $date]);
+                            ->get($endpoint, ['tanggal' => $date]);
                     }
                 }, $chunkSize);
             } catch (\Throwable $e) {
@@ -283,15 +308,15 @@ class AkademikJadwalController extends Controller
                 if ($payload === null) {
                     $chunkFailed++;
                     $failed++;
-                    $this->markFailed($date);
+                    $this->markFailed($date, $source);
 
                     continue;
                 }
 
                 $payloads[$date] = $payload;
-                Cache::forget($this->failKey($date));
+                Cache::forget($this->failKey($date, $source));
                 $ttl = $date < $today ? 86400 : (int) config('jadwal.cache_ttl');
-                Cache::put($this->cacheKey($date), $payload, $ttl);
+                Cache::put($this->cacheKey($date, $source), $payload, $ttl);
             }
 
             // Seluruh batch gagal → kemungkinan host sedang mati;
@@ -403,18 +428,18 @@ class AkademikJadwalController extends Controller
         return $hour < $gridSlots[0]['start'] ? 0 : count($gridSlots) - 1;
     }
 
-    private function markFailed(string $date): void
+    private function markFailed(string $date, string $source): void
     {
-        Cache::put($this->failKey($date), 1, 60);
+        Cache::put($this->failKey($date, $source), 1, 60);
     }
 
-    private function failKey(string $date): string
+    private function failKey(string $date, string $source): string
     {
-        return 'akademik-jadwal:fail:'.$date;
+        return 'akademik-jadwal:'.$source.':fail:'.$date;
     }
 
-    private function cacheKey(string $date): string
+    private function cacheKey(string $date, string $source): string
     {
-        return 'akademik-jadwal:'.$date;
+        return 'akademik-jadwal:'.$source.':'.$date;
     }
 }
