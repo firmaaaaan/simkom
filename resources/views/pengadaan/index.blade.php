@@ -121,7 +121,7 @@
                             </td>
                             <td data-label="Jumlah" class="px-4 py-3 text-gray-600">{{ $pengadaan->jumlah }}</td>
                             <td data-label="Total Harga" class="px-4 py-3 text-gray-600">Rp {{ number_format($pengadaan->total, 0, ',', '.') }}</td>
-                            <td data-label="Tanggal" class="px-4 py-3 text-gray-500 text-xs">{{ $pengadaan->tanggal->format('d M Y') }}</td>
+                            <td data-label="Tanggal" class="px-4 py-3 text-gray-500 text-xs">{{ $pengadaan->tanggal->translatedFormat('d M Y') }}</td>
                             <td data-label="Semester" class="px-4 py-3 text-gray-600 text-xs">{{ $pengadaan->academicYear->name ?? '-' }}</td>
                             <td data-label="Status" class="px-4 py-3">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$pengadaan->status] ?? '' }}">{{ $pengadaan->status }}</span>

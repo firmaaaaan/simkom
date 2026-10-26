@@ -204,7 +204,7 @@
                                     </td>
                                 @endif
                                 <td data-label="Waktu Pakai" class="px-4 py-3">
-                                    <div class="text-sm text-gray-900">{{ $usage->used_at->format('d M Y') }}</div>
+                                    <div class="text-sm text-gray-900">{{ $usage->used_at->translatedFormat('d M Y') }}</div>
                                     <div class="text-xs text-gray-500">{{ $usage->used_at->format('H:i') }}</div>
                                 </td>
                                 <td data-label="Box" class="px-4 py-3">

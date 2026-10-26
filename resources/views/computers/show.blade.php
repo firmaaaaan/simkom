@@ -166,10 +166,10 @@
 
             <div class="pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
                 <div>
-                    <p>Dibuat: {{ $computer->created_at->format('d M Y H:i') }}</p>
+                    <p>Dibuat: {{ $computer->created_at->translatedFormat('d M Y H:i') }}</p>
                 </div>
                 <div>
-                    <p>Diperbarui: {{ $computer->updated_at->format('d M Y H:i') }}</p>
+                    <p>Diperbarui: {{ $computer->updated_at->translatedFormat('d M Y H:i') }}</p>
                 </div>
             </div>
 

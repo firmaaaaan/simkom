@@ -51,7 +51,7 @@
         </div>
         <div>
             <p class="text-xs text-gray-400 mb-1">Tanggal</p>
-            <p class="text-sm font-semibold text-gray-800">{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->format('d M Y') }}</p>
+            <p class="text-sm font-semibold text-gray-800">{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->translatedFormat('d M Y') }}</p>
         </div>
         <div>
             <p class="text-xs text-gray-400 mb-1">Petugas</p>

@@ -157,7 +157,7 @@
                                 @endif
                             </td>
                             <td data-label="Pelapor" class="px-4 py-3 text-gray-600">{{ $ticket->reporter_name ?? '-' }}</td>
-                            <td data-label="Tanggal" class="px-4 py-3 text-gray-500 text-xs">{{ $ticket->created_at->format('d M Y') }}</td>
+                            <td data-label="Tanggal" class="px-4 py-3 text-gray-500 text-xs">{{ $ticket->created_at->translatedFormat('d M Y') }}</td>
                             <td data-label="Aksi" class="px-4 py-3 text-center">
                                 <div class="flex items-center justify-center gap-1">
                                     <a href="{{ route('tickets.show', $ticket) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat">

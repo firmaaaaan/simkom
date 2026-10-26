@@ -44,7 +44,7 @@ class AcademicYear extends Model
 
     public function periodLabel(): string
     {
-        return $this->periodStart()->format('d M Y') . ' - ' . $this->periodEnd()->format('d M Y');
+        return $this->periodStart()->translatedFormat('d M Y') . ' - ' . $this->periodEnd()->translatedFormat('d M Y');
     }
 
     public function coversDate(\DateTimeInterface $date): bool

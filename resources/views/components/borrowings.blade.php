@@ -113,7 +113,7 @@
                         @forelse($borrowings as $borrowing)
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                                 <td data-label="Tanggal Pinjam" class="px-4 py-3">
-                                    <div class="text-sm text-gray-900">{{ $borrowing->borrowed_at->format('d M Y') }}</div>
+                                    <div class="text-sm text-gray-900">{{ $borrowing->borrowed_at->translatedFormat('d M Y') }}</div>
                                 </td>
                                 <td data-label="Komponen" class="px-4 py-3">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-gray-100 text-gray-700">

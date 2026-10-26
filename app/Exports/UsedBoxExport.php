@@ -48,7 +48,7 @@ class UsedBoxExport extends BaseExport implements WithHeadings, WithMapping
             $box->name,
             $box->location,
             (int) $box->usage_count,
-            $box->last_used_at ? Carbon::parse($box->last_used_at)->format('d M Y H:i') : '-',
+            $box->last_used_at ? Carbon::parse($box->last_used_at)->translatedFormat('d M Y H:i') : '-',
             (int) $box->components_count,
             (int) ($box->total_quantity ?? 0),
             $box->components_count > 0 ? 'Ada' : 'Belum Ada',

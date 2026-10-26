@@ -158,7 +158,7 @@ class MaintenancePrintTest extends TestCase
             ->assertSee('KONTROL PEMELIHARAAN LABORATORIUM KOMPUTER')
             ->assertSee('Lab Komputer 1')
             ->assertSee('Tahun Ajaran 2025/2026')
-            ->assertSee('20 August 2025')
+            ->assertSee('20 Agustus 2025')
             ->assertSee('10 September 2025')
             ->assertSee('K1-001')
             ->assertSee('K1-002')

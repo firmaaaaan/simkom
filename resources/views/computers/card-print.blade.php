@@ -89,7 +89,7 @@
                 @foreach($checks as $index => $check)
                     <tr>
                         <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td>{{ $check->created_at->format('d M Y H:i') }}</td>
+                        <td>{{ $check->created_at->translatedFormat('d M Y H:i') }}</td>
                         <td class="status-col" style="font-weight: bold; color: {{ $check->overall_status === 'Baik' ? '#16a34a' : ($check->overall_status === 'Kritis' ? '#dc2626' : '#ca8a04') }};">{{ $check->overall_status }}</td>
                         <td>{{ $check->checkedBy?->name ?? 'System' }}</td>
                         <td>{{ $check->notes ?? '-' }}</td>

@@ -83,7 +83,7 @@
             <div class="flex items-start justify-between mb-4">
                 <div>
                     <h3 class="text-xl font-bold text-gray-900">{{ $borrowing->purpose }}</h3>
-                    <p class="text-sm text-gray-500 mt-1">Diajukan {{ $borrowing->created_at->format('d M Y H:i') }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Diajukan {{ $borrowing->created_at->translatedFormat('d M Y H:i') }}</p>
                 </div>
                 @php
                     $statusColors = [
@@ -109,7 +109,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Tanggal</p>
-                    <p class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($borrowing->borrow_date)->format('d M Y') }}</p>
+                    <p class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($borrowing->borrow_date)->translatedFormat('d M Y') }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Jam</p>

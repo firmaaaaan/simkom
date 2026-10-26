@@ -51,7 +51,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Terakhir Diperbarui</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $component->updated_at->format('d M Y H:i') }}</p>
+                    <p class="text-sm font-medium text-gray-900">{{ $component->updated_at->translatedFormat('d M Y H:i') }}</p>
                 </div>
             </div>
 

@@ -73,7 +73,7 @@
                                 <p class="text-xs text-yellow-600 mt-1">Kelas: {{ $activeUsage->user_kelas }}</p>
                             @endif
                             <p class="text-xs text-yellow-600 mt-1">
-                                Sejak {{ $activeUsage->used_at->format('d M Y H:i') }}
+                                Sejak {{ $activeUsage->used_at->translatedFormat('d M Y H:i') }}
                             </p>
 
                             @if($otherActiveUsages->count() > 1)

@@ -77,7 +77,7 @@
                 @forelse($checks as $index => $item)
                     <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <td data-label="No" class="px-6 py-4 text-gray-500">{{ $checks->firstItem() + $index }}</td>
-                        <td data-label="Tanggal" class="px-6 py-4 text-gray-800">{{ $item->check_date?->format('d M Y') ?? '-' }}</td>
+                        <td data-label="Tanggal" class="px-6 py-4 text-gray-800">{{ $item->check_date?->translatedFormat('d M Y') ?? '-' }}</td>
                         <td data-label="Laboratorium" class="px-6 py-4 font-medium text-gray-800">{{ $item->laboratory->name ?? '-' }}</td>
                         <td data-label="Tahun Ajaran" class="px-6 py-4 text-gray-600">{{ $item->academicYear->name ?? '-' }}</td>
                         <td data-label="Petugas" class="px-6 py-4 text-gray-600">{{ $item->officer_name ?: '-' }}</td>

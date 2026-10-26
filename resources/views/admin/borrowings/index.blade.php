@@ -139,7 +139,7 @@
                         <td data-label="Prodi" class="px-6 py-4 text-gray-600">{{ $borrowing->borrower_prodi ?? '-' }}</td>
                         <td data-label="Komputer" class="px-6 py-4 font-medium text-gray-800">{{ $borrowing->computer->code ?? '-' }}</td>
                         <td data-label="Laboratorium" class="px-6 py-4 text-gray-600">{{ $borrowing->laboratory->name ?? '-' }}</td>
-                        <td data-label="Tanggal" class="px-6 py-4 text-gray-600">{{ \Carbon\Carbon::parse($borrowing->borrow_date)->format('d M Y') }}</td>
+                        <td data-label="Tanggal" class="px-6 py-4 text-gray-600">{{ \Carbon\Carbon::parse($borrowing->borrow_date)->translatedFormat('d M Y') }}</td>
                         <td data-label="Jam" class="px-6 py-4 text-gray-600">{{ $borrowing->borrow_time_start }} - {{ $borrowing->borrow_time_end }}</td>
                         <td data-label="Keperluan" class="px-6 py-4 text-gray-600">{{ $borrowing->purpose }}</td>
                         <td data-label="Status" class="px-6 py-4">
@@ -157,7 +157,7 @@
                         </td>
                         <td data-label="Dikembalikan" class="px-6 py-4 text-gray-600">
                             @if($borrowing->returned_at)
-                                <p class="text-gray-700">{{ \Carbon\Carbon::parse($borrowing->returned_at)->format('d M Y') }}</p>
+                                <p class="text-gray-700">{{ \Carbon\Carbon::parse($borrowing->returned_at)->translatedFormat('d M Y') }}</p>
                                 <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($borrowing->returned_at)->format('H:i') }} WIB &middot; divalidasi admin</p>
                             @else
                                 <span class="text-xs text-gray-400">&ndash;</span>

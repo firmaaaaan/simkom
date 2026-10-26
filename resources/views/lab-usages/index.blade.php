@@ -204,7 +204,7 @@
                         </td>
                         <td data-label="Laboratorium" class="px-6 py-4 text-gray-600">{{ $usage->laboratory->name ?? '-' }}</td>
                         <td data-label="Hari" class="px-6 py-4 text-gray-600">{{ $usage->day }}</td>
-                        <td data-label="Check-in" class="px-6 py-4 text-gray-600">{{ $usage->checked_in_at->format('d M Y H:i') }}</td>
+                        <td data-label="Check-in" class="px-6 py-4 text-gray-600">{{ $usage->checked_in_at->translatedFormat('d M Y H:i') }}</td>
                         <td data-label="Durasi" class="px-6 py-4 text-gray-600">{{ $usage->duration }}</td>
                         <td data-label="Status" class="px-6 py-4">
                             @if($usage->status === 'In')
@@ -215,7 +215,7 @@
                         </td>
                         <td data-label="Divalidasi" class="px-6 py-4 text-gray-600">
                             @if($usage->validated_at)
-                                <p>{{ $usage->validated_at->format('d M Y H:i') }}</p>
+                                <p>{{ $usage->validated_at->translatedFormat('d M Y H:i') }}</p>
                                 <p class="text-xs text-gray-400">oleh {{ $usage->validatedBy->name ?? '-' }}</p>
                                 @if(filled($usage->exit_note))
                                     <p class="text-xs text-gray-500 mt-0.5" title="{{ $usage->exit_note }}">{{ \Illuminate\Support\Str::limit($usage->exit_note, 40) }}</p>

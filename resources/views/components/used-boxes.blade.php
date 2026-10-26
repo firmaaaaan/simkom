@@ -77,7 +77,7 @@
                                 </td>
                                 <td data-label="Terakhir Dipakai" class="px-4 py-3 text-gray-700">
                                     @if($box->last_used_at)
-                                        <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($box->last_used_at)->format('d M Y H:i') }}</span>
+                                        <span class="font-medium">{{ \Illuminate\Support\Carbon::parse($box->last_used_at)->translatedFormat('d M Y H:i') }}</span>
                                         <br><span class="text-xs text-gray-400">{{ \Illuminate\Support\Carbon::parse($box->last_used_at)->diffForHumans() }}</span>
                                     @else
                                         <span class="text-gray-400">-</span>

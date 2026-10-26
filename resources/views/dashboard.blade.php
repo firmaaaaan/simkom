@@ -333,7 +333,7 @@
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$activity['status']] ?? 'bg-gray-100 text-gray-600' }}">
                             {{ $activity['status'] }}
                         </span>
-                        <p class="text-xs text-gray-400 mt-1" title="{{ $activity['at']->format('d M Y H:i') }}">
+                        <p class="text-xs text-gray-400 mt-1" title="{{ $activity['at']->translatedFormat('d M Y H:i') }}">
                             {{ $activity['at']->locale('id')->diffForHumans() }}
                         </p>
                     </div>
@@ -473,7 +473,7 @@
                             @if($can['maintenance'])
                                 <td data-label="Pemeliharaan Terakhir" class="px-6 py-4">
                                     @if($row['last_maintenance'])
-                                        <p class="text-gray-700">{{ \Illuminate\Support\Carbon::parse($row['last_maintenance']->maintenance_date)->format('d M Y') }}</p>
+                                        <p class="text-gray-700">{{ \Illuminate\Support\Carbon::parse($row['last_maintenance']->maintenance_date)->translatedFormat('d M Y') }}</p>
                                         <p class="text-xs text-gray-400">{{ $row['last_maintenance']->inspector_name ?: 'Tanpa pemeriksa' }}</p>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Belum ada</span>
@@ -484,7 +484,7 @@
                             @if($can['computers'])
                                 <td data-label="Pengecekan Terakhir" class="px-6 py-4">
                                     @if($row['last_checked_at'])
-                                        <p class="text-gray-700">{{ $row['last_checked_at']->format('d M Y H:i') }}</p>
+                                        <p class="text-gray-700">{{ $row['last_checked_at']->translatedFormat('d M Y H:i') }}</p>
                                         <p class="text-xs text-gray-400">
                                             {{ $row['total_checks'] }} pengecekan &middot; {{ $row['last_checked_at']->locale('id')->diffForHumans() }}
                                         </p>
@@ -542,7 +542,7 @@
                                     {{ $ticket->status }}
                                 </span>
                             </td>
-                            <td data-label="Tanggal" class="px-6 py-4 text-gray-500">{{ $ticket->created_at->format('d M Y H:i') }}</td>
+                            <td data-label="Tanggal" class="px-6 py-4 text-gray-500">{{ $ticket->created_at->translatedFormat('d M Y H:i') }}</td>
                             <td data-label="Aksi" class="px-6 py-4">
                                 <a href="{{ route('tickets.show', $ticket) }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
                                     Detail

@@ -81,7 +81,7 @@
                         </td>
                         <td data-label="Pesan" class="px-6 py-4 text-gray-600">{{ $notification->message }}</td>
                         <td data-label="Tipe" class="px-6 py-4 text-gray-600">{{ $typeLabels[$notification->type] ?? ucfirst($notification->type) }}</td>
-                        <td data-label="Waktu" class="px-6 py-4 text-gray-500">{{ $notification->created_at->format('d M Y H:i') }}</td>
+                        <td data-label="Waktu" class="px-6 py-4 text-gray-500">{{ $notification->created_at->translatedFormat('d M Y H:i') }}</td>
                         <td data-label="Aksi" class="px-6 py-4">
                             <form action="{{ route('notifications.destroy', $notification) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus notifikasi ini?')">
                                 @csrf

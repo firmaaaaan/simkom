@@ -160,7 +160,7 @@
                                         @endif
                                     </td>
                                     <td data-label="Tanggal" class="px-4 py-4 text-gray-700 whitespace-nowrap">
-                                        {{ $row['check']?->check_date?->format('d M Y') ?? '—' }}
+                                        {{ $row['check']?->check_date?->translatedFormat('d M Y') ?? '—' }}
                                         @if($row['check'])
                                             <span class="block text-xs text-gray-400">{{ $row['check']->created_at->format('H:i') }} WIB</span>
                                         @endif

@@ -76,7 +76,7 @@ class AcademicYearDateInputTest extends TestCase
         $year = AcademicYear::first();
         $this->assertFalse(Schema::hasColumn('academic_years', 'start_date'));
         $this->assertFalse(Schema::hasColumn('academic_years', 'end_date'));
-        $this->assertSame('01 Aug 2030 - 30 Jun 2031', $year->periodLabel());
+        $this->assertSame('01 Agt 2030 - 30 Jun 2031', $year->periodLabel());
     }
 
     public function test_store_ignores_posted_dates(): void
@@ -95,7 +95,7 @@ class AcademicYearDateInputTest extends TestCase
         $year = AcademicYear::first();
         $this->assertArrayNotHasKey('start_date', $year->getAttributes());
         $this->assertArrayNotHasKey('end_date', $year->getAttributes());
-        $this->assertSame('01 Aug 2031 - 30 Jun 2032', $year->periodLabel());
+        $this->assertSame('01 Agt 2031 - 30 Jun 2032', $year->periodLabel());
     }
 
     public function test_update_ignores_posted_dates(): void

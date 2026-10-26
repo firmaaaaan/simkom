@@ -28,7 +28,7 @@
                 <div class="flex items-start justify-between mb-4">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">{{ $ticket->title }}</h3>
-                        <p class="text-sm text-gray-500 mt-1">Dibuat {{ $ticket->created_at->format('d M Y H:i') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Dibuat {{ $ticket->created_at->translatedFormat('d M Y H:i') }}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         @php
@@ -108,7 +108,7 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-sm font-medium text-gray-900">{{ $comment->user->name ?? 'Unknown' }}</span>
-                                        <span class="text-xs text-gray-400">{{ $comment->created_at->format('d M Y H:i') }}</span>
+                                        <span class="text-xs text-gray-400">{{ $comment->created_at->translatedFormat('d M Y H:i') }}</span>
                                         @if($comment->user_id === auth()->id())
                                             <form onsubmit="return confirm('Hapus komentar ini?')" method="POST" class="inline">
                                                 @csrf
@@ -209,11 +209,11 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-500">Dibuat</span>
-                        <span class="font-medium text-gray-900">{{ $ticket->created_at->format('d M Y') }}</span>
+                        <span class="font-medium text-gray-900">{{ $ticket->created_at->translatedFormat('d M Y') }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-500">Diperbarui</span>
-                        <span class="font-medium text-gray-900">{{ $ticket->updated_at->format('d M Y') }}</span>
+                        <span class="font-medium text-gray-900">{{ $ticket->updated_at->translatedFormat('d M Y') }}</span>
                     </div>
                 </div>
             </div>
