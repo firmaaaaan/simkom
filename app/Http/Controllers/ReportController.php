@@ -283,7 +283,7 @@ class ReportController extends Controller
             $ramCounts[$ramKey] = ($ramCounts[$ramKey] ?? 0) + 1;
 
             $storageLabels = $storageNames
-                ->map(fn ($name) => $this->storageType($name))
+                ->map(fn ($name) => $this->storageLabel($name))
                 ->unique()
                 ->values();
 
@@ -375,6 +375,44 @@ class ReportController extends Controller
     }
 
     /**
+     * Kapasitas storage dari nama komponen: "SSD 512GB" -> ["512 GB", 512],
+     * "HDD 1TB" -> ["1 TB", 1024], "1.5 TB NVMe" -> ["1.5 TB", 1536].
+     * Null bila tidak terbaca.
+     */
+    private function storageCapacity(string $name): ?array
+    {
+        if (! preg_match('/(\d+(?:[.,]\d+)?)\s*(tb|gb)\b/i', $name, $match)) {
+            return null;
+        }
+
+        $value = (float) str_replace(',', '.', $match[1]);
+        $isTerabyte = mb_strtolower($match[2]) === 'tb';
+        $label = rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.').($isTerabyte ? ' TB' : ' GB');
+
+        return [
+            'label' => $label,
+            'gb' => (int) round($value * ($isTerabyte ? 1024 : 1)),
+        ];
+    }
+
+    /**
+     * Label storage untuk rekap & rincian: "SSD 512 GB" bila tipe dan
+     * kapasitas terbaca, "SSD" bila kapasitas tidak terbaca, dan "512 GB"
+     * bila tipe tidak dikenali.
+     */
+    private function storageLabel(string $name): string
+    {
+        $type = $this->storageType($name);
+        $capacity = $this->storageCapacity($name);
+
+        if ($capacity === null) {
+            return $type;
+        }
+
+        return $type === 'Lainnya' ? $capacity['label'] : $type.' '.$capacity['label'];
+    }
+
+    /**
      * Rekap RAM: kapasitas urut numerik, "Tidak diketahui"/"Tidak tercatat"
      * di belakang.
      */
@@ -391,15 +429,38 @@ class ReportController extends Controller
             ->map(fn ($row) => ['label' => $row['label'], 'count' => $row['count']]);
     }
 
+    /**
+     * Rekap storage: dikelompokkan per tipe lalu kapasitas terbesar dulu,
+     * sehingga "SSD 512 GB" dan "SSD 1 TB" tampil terpisah.
+     */
     private function storageRecap(array $counts)
     {
-        $order = ['SSD' => 0, 'HDD' => 1, 'Lainnya' => 2, 'Tidak tercatat' => 3];
-
         return collect($counts)
             ->map(fn ($count, $label) => ['label' => $label, 'count' => $count])
             ->values()
-            ->sortBy(fn ($row) => $order[$row['label']] ?? 9)
+            ->sort(function ($a, $b) {
+                $order = $this->storageTypeOrder($a['label']) <=> $this->storageTypeOrder($b['label']);
+
+                if ($order !== 0) {
+                    return $order;
+                }
+
+                $capacityA = $this->storageCapacity($a['label'])['gb'] ?? 0;
+                $capacityB = $this->storageCapacity($b['label'])['gb'] ?? 0;
+
+                return ($capacityB <=> $capacityA) ?: strcmp($a['label'], $b['label']);
+            })
             ->values();
+    }
+
+    private function storageTypeOrder(string $label): int
+    {
+        return match (true) {
+            str_starts_with($label, 'SSD') => 0,
+            str_starts_with($label, 'HDD') => 1,
+            str_starts_with($label, 'Tidak') => 3,
+            default => 2,
+        };
     }
 
     private function resolveJenis(Request $request): string

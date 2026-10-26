@@ -80,6 +80,7 @@ class InventoryReportTest extends TestCase
         $this->computer($lab, 'K1-001', ['RAM' => '8GB DDR4', 'Storage' => 'SSD 512GB', 'Processor' => 'Intel Core i5-12400']);
         $this->computer($lab, 'K1-002', ['RAM' => '2x8GB DDR4', 'Storage' => 'HDD 1TB', 'Processor' => 'Intel Core i5-12400']);
         $this->computer($lab, 'K1-003', ['RAM' => '4GB DDR3', 'Storage' => 'SSD NVMe 256GB', 'Processor' => 'AMD Ryzen 5 5600G']);
+        $this->computer($lab, 'K1-004', ['RAM' => '16GB DDR5', 'Storage' => '1.5 TB NVMe', 'Processor' => 'Intel Core i5-12400']);
 
         $this->actingAs($admin)
             ->get(route('reports.inventory', ['laboratory_id' => $lab->id]))
@@ -88,8 +89,10 @@ class InventoryReportTest extends TestCase
             ->assertSee('8 GB')
             ->assertSee('16 GB')
             ->assertSee('4 GB')
-            ->assertSee('SSD')
-            ->assertSee('HDD')
+            ->assertSee('SSD 512 GB')
+            ->assertSee('SSD 256 GB')
+            ->assertSee('SSD 1.5 TB')
+            ->assertSee('HDD 1 TB')
             ->assertSee('Intel Core i5-12400')
             ->assertSee('AMD Ryzen 5 5600G')
             ->assertSee('K1-001')

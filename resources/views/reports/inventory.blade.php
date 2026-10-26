@@ -37,6 +37,7 @@
         <p class="text-xs text-gray-500 mt-3">
             Spesifikasi diambil dari komponen hardware yang terpasang pada tiap komputer (kategori RAM, Storage, Processor).
             Kapasitas RAM dibaca dari nama komponen, mis. "8GB DDR4" &rarr; 8 GB, "2x8GB" &rarr; 16 GB.
+            Kapasitas storage juga dibaca dari namanya, mis. "SSD 512GB" &rarr; SSD 512 GB, "HDD 1TB" &rarr; HDD 1 TB.
         </p>
     </div>
 
