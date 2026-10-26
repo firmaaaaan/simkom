@@ -398,6 +398,7 @@ Route::middleware('auth')->group(function () {
         Route::get('device-checks/export', [DeviceCheckController::class, 'export'])->name('device-checks.export');
     });
     Route::middleware('permission:print-maintenance')->group(function () {
+        Route::get('maintenance/print-all', [MaintenanceController::class, 'printAll'])->name('maintenance.print-all');
         Route::get('maintenance/{maintenance}/print', [MaintenanceController::class, 'print'])->name('maintenance.print');
         Route::get('device-checks/report/print', [DeviceCheckController::class, 'reportPrint'])->name('device-checks.report-print');
         Route::get('device-checks/{deviceCheck}/print', [DeviceCheckController::class, 'print'])->name('device-checks.print');

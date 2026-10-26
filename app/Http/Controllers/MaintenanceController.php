@@ -16,26 +16,41 @@ use Maatwebsite\Excel\Facades\Excel;
 class MaintenanceController extends Controller
 {
     /**
-     * Query daftar pemeliharaan — dipakai halaman daftar & export Excel.
+     * Query daftar pemeliharaan — dipakai halaman daftar, cetak, & export Excel.
+     * Filter laboratorium & tahun ajaran: "all"/kosong berarti semua.
      */
-    private function listQuery()
+    private function listQuery(Request $request)
     {
         return MaintenanceChecklist::with(['laboratory', 'academicYear'])
+            ->when(
+                $request->filled('laboratory_id') && $request->input('laboratory_id') !== 'all',
+                fn ($query) => $query->where('laboratory_id', $request->input('laboratory_id'))
+            )
+            ->when(
+                $request->filled('academic_year_id') && $request->input('academic_year_id') !== 'all',
+                fn ($query) => $query->where('academic_year_id', $request->input('academic_year_id'))
+            )
             ->latest('maintenance_date')
             ->latest('id');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $checklists = $this->listQuery()->paginate(10);
+        $checklists = $this->listQuery($request)->paginate(10)->withQueryString();
 
-        return view('maintenance.index', compact('checklists'));
+        return view('maintenance.index', [
+            'checklists' => $checklists,
+            'laboratories' => Laboratory::orderBy('name')->get(),
+            'academicYears' => AcademicYear::orderByDesc('start_year')->get(),
+            'selectedLaboratoryId' => $request->input('laboratory_id', 'all'),
+            'selectedAcademicYearId' => $request->input('academic_year_id', 'all'),
+        ]);
     }
 
-    public function export()
+    public function export(Request $request)
     {
         return Excel::download(
-            new MaintenanceExport($this->listQuery()),
+            new MaintenanceExport($this->listQuery($request)),
             'pemeliharaan-'.now()->format('Y-m-d').'.xlsx'
         );
     }
@@ -329,16 +344,46 @@ class MaintenanceController extends Controller
     {
         $maintenance->load(['laboratory', 'academicYear']);
 
-        $computers = Computer::where('laboratory_id', $maintenance->laboratory_id)
+        return view('maintenance.print', [
+            'sheets' => $this->printSheets(collect([$maintenance])),
+            'checklistItems' => MaintenanceChecklist::getChecklistItems(),
+        ]);
+    }
+
+    /**
+     * Cetak semua pemeliharaan sesuai filter halaman daftar: satu halaman per
+     * data, jadi tidak perlu membuka detail satu per satu.
+     */
+    public function printAll(Request $request)
+    {
+        $checklists = $this->listQuery($request)->get();
+
+        return view('maintenance.print', [
+            'sheets' => $this->printSheets($checklists),
+            'checklistItems' => MaintenanceChecklist::getChecklistItems(),
+        ]);
+    }
+
+    /**
+     * Satu halaman cetak per pemeliharaan: komputer lab terkait + peta centang
+     * item. Query tetap (tidak tumbuh seiring jumlah data yang dicetak).
+     */
+    private function printSheets($checklists)
+    {
+        $computersByLab = Computer::whereIn('laboratory_id', $checklists->pluck('laboratory_id')->unique())
             ->orderBy('code')
-            ->get();
-
-        $items = MaintenanceChecklistItem::where('maintenance_checklist_id', $maintenance->id)
             ->get()
-            ->keyBy(fn ($item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
+            ->groupBy('laboratory_id');
 
-        $checklistItems = MaintenanceChecklist::getChecklistItems();
+        $itemsByChecklist = MaintenanceChecklistItem::whereIn('maintenance_checklist_id', $checklists->pluck('id'))
+            ->get()
+            ->groupBy('maintenance_checklist_id');
 
-        return view('maintenance.print', compact('maintenance', 'computers', 'items', 'checklistItems'));
+        return $checklists->map(fn (MaintenanceChecklist $checklist) => [
+            'maintenance' => $checklist,
+            'computers' => $computersByLab->get($checklist->laboratory_id, collect()),
+            'items' => $itemsByChecklist->get($checklist->id, collect())
+                ->keyBy(fn (MaintenanceChecklistItem $item) => "{$item->category}_{$item->item_number}_{$item->computer_id}"),
+        ])->values();
     }
 }

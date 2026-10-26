@@ -16,6 +16,10 @@
         }
         .print-btn:hover { background: #15803d; }
 
+        .empty { font-size: 12px; }
+
+        .sheet + .sheet { page-break-before: always; }
+
         .header { text-align: center; margin-bottom: 14px; }
         .header h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
         .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
@@ -60,95 +64,114 @@
         Cetak
     </button>
 
-    <div class="header">
-        <h1>KONTROL PEMELIHARAAN LABORATORIUM KOMPUTER</h1>
-        <h2>UNIVERSITAS 'AISYIYAH YOGYAKARTA</h2>
-    </div>
+    @forelse($sheets as $sheet)
+        @php
+            $maintenance = $sheet['maintenance'];
+            $computers = $sheet['computers'];
+            $items = $sheet['items'];
+        @endphp
+        <div class="sheet">
+            <div class="header">
+                <h1>KONTROL PEMELIHARAAN LABORATORIUM KOMPUTER</h1>
+                <h2>UNIVERSITAS 'AISYIYAH YOGYAKARTA</h2>
+            </div>
 
-    <div class="info">
-        <table>
-            <tr>
-                <td>Nama Lab</td>
-                <td>: {{ $maintenance->laboratory->name ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td>Tahun Ajaran</td>
-                <td>: {{ $maintenance->academicYear->name ?? '-' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <table class="checklist-table">
-        <colgroup>
-            <col style="width: 28px;">
-            <col style="width: 200px;">
-            @foreach($computers as $computer)
-                <col style="width: 18px;">
-            @endforeach
-        </colgroup>
-        <thead>
-            <tr>
-                <th class="no-col" rowspan="2">No</th>
-                <th class="item-col" rowspan="2">Item</th>
-                <th colspan="{{ $computers->count() }}" class="id-pc-header">ID PC</th>
-            </tr>
-            <tr>
-                @foreach($computers as $computer)
-                    <th class="pc-col">{{ $computer->code }}</th>
-                @endforeach
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($checklistItems as $category => $categoryData)
-                <tr class="cat-row">
-                    <td colspan="{{ 2 + $computers->count() }}">{{ $category }}. {{ $categoryData['name'] }}</td>
-                </tr>
-                @foreach($categoryData['items'] as $itemIndex => $question)
-                    @php $itemNum = $itemIndex + 1; @endphp
+            <div class="info">
+                <table>
                     <tr>
-                        <td class="no-col">{{ $itemNum }}</td>
-                        <td class="item-col">{{ $question }}</td>
+                        <td>Nama Lab</td>
+                        <td>: {{ $maintenance->laboratory->name ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Tahun Ajaran</td>
+                        <td>: {{ $maintenance->academicYear->name ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal</td>
+                        <td>: {{ \Carbon\Carbon::parse($maintenance->maintenance_date)->translatedFormat('d F Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Petugas</td>
+                        <td>: {{ $maintenance->inspector_name ?? '-' }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="checklist-table">
+                <colgroup>
+                    <col style="width: 28px;">
+                    <col style="width: 200px;">
+                    @foreach($computers as $computer)
+                        <col style="width: 18px;">
+                    @endforeach
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="no-col" rowspan="2">No</th>
+                        <th class="item-col" rowspan="2">Item</th>
+                        <th colspan="{{ $computers->count() }}" class="id-pc-header">ID PC</th>
+                    </tr>
+                    <tr>
                         @foreach($computers as $computer)
-                            @php $key = "{$category}_{$itemNum}_{$computer->id}"; @endphp
-                            <td class="pc-col">
-                                @if(isset($items[$key]) && $items[$key]->is_checked)
-                                    <span class="checkbox checked"></span>
-                                @else
-                                    <span class="checkbox"></span>
-                                @endif
-                            </td>
+                            <th class="pc-col">{{ $computer->code }}</th>
                         @endforeach
                     </tr>
-                @endforeach
-            @endforeach
-            <tr class="cat-row">
-                <td colspan="{{ 2 + $computers->count() }}">CATATAN LAIN:</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Komputer</td>
-                <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_computer ?? '' }}</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Mouse dan Keyboard</td>
-                <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_mouse_keyboard ?? '' }}</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan UPS</td>
-                <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_ups ?? '' }}</td>
-            </tr>
-            <tr>
-                <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Monitor</td>
-                <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_monitor ?? '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @foreach($checklistItems as $category => $categoryData)
+                        <tr class="cat-row">
+                            <td colspan="{{ 2 + $computers->count() }}">{{ $category }}. {{ $categoryData['name'] }}</td>
+                        </tr>
+                        @foreach($categoryData['items'] as $itemIndex => $question)
+                            @php $itemNum = $itemIndex + 1; @endphp
+                            <tr>
+                                <td class="no-col">{{ $itemNum }}</td>
+                                <td class="item-col">{{ $question }}</td>
+                                @foreach($computers as $computer)
+                                    @php $key = "{$category}_{$itemNum}_{$computer->id}"; @endphp
+                                    <td class="pc-col">
+                                        @if(isset($items[$key]) && $items[$key]->is_checked)
+                                            <span class="checkbox checked"></span>
+                                        @else
+                                            <span class="checkbox"></span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    @endforeach
+                    <tr class="cat-row">
+                        <td colspan="{{ 2 + $computers->count() }}">CATATAN LAIN:</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Komputer</td>
+                        <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_computer ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Mouse dan Keyboard</td>
+                        <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_mouse_keyboard ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan UPS</td>
+                        <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_ups ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="item-col" style="font-weight: bold;">Pemeriksaan Monitor</td>
+                        <td colspan="{{ $computers->count() }}" style="text-align: left; padding: 4px 6px;">{{ $maintenance->notes_monitor ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <div style="margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px;">
-        <div style="width: 220px;">
-            <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-            <p>Penanggung jawab</p>
-            <p style="margin-top: 50px; padding-top: 4px; width: 180px;">Firmansyah, S.Kom</p>
+            <div style="margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px;">
+                <div style="width: 220px;">
+                    <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+                    <p>Penanggung jawab</p>
+                    <p style="margin-top: 50px; padding-top: 4px; width: 180px;">Firmansyah, S.Kom</p>
+                </div>
+            </div>
         </div>
-    </div>
+    @empty
+        <p class="empty">Tidak ada data pemeliharaan pada filter ini.</p>
+    @endforelse
 </body>
 </html>
