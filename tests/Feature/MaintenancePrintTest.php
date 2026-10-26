@@ -154,6 +154,7 @@ class MaintenancePrintTest extends TestCase
         $response = $this->actingAs($printer)
             ->get(route('maintenance.print-all', ['laboratory_id' => $lab1->id, 'academic_year_id' => $year1->id]))
             ->assertOk()
+            ->assertSee('<title>Pemeliharaan-Lab Komputer 1-Tahun Ajaran 2025-2026</title>', false)
             ->assertSee('KONTROL PEMELIHARAAN LABORATORIUM KOMPUTER')
             ->assertSee('Lab Komputer 1')
             ->assertSee('Tahun Ajaran 2025/2026')
@@ -175,6 +176,7 @@ class MaintenancePrintTest extends TestCase
         $this->actingAs($printer)
             ->get(route('maintenance.print-all', ['laboratory_id' => $lab2->id, 'academic_year_id' => $year2->id]))
             ->assertOk()
+            ->assertSee('<title>Pemeliharaan-Lab Komputer 2-Tahun Ajaran 2024-2025</title>', false)
             ->assertSee('Tidak ada data pemeliharaan pada filter ini.');
     }
 
@@ -184,7 +186,10 @@ class MaintenancePrintTest extends TestCase
         $printer = $this->userWith('printer-print-maint@uji.test', ['print-maintenance']);
 
         $this->actingAs($viewer)->get(route('maintenance.print-all'))->assertForbidden();
-        $this->actingAs($printer)->get(route('maintenance.print-all'))->assertOk();
+        $this->actingAs($printer)
+            ->get(route('maintenance.print-all'))
+            ->assertOk()
+            ->assertSee('<title>Pemeliharaan-Semua Laboratorium-Semua Tahun Ajaran</title>', false);
 
         $this->actingAs($viewer)
             ->get(route('maintenance.index'))
@@ -203,6 +208,7 @@ class MaintenancePrintTest extends TestCase
         $response = $this->actingAs($printer)
             ->get(route('maintenance.print', $checklist))
             ->assertOk()
+            ->assertSee('<title>Pemeliharaan-Lab Komputer 1-Tahun Ajaran 2025-2026</title>', false)
             ->assertSee('Lab Komputer 1')
             ->assertSee('Tahun Ajaran 2025/2026')
             ->assertSee('Petugas Satu');

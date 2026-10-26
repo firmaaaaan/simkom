@@ -347,6 +347,7 @@ class MaintenanceController extends Controller
         return view('maintenance.print', [
             'sheets' => $this->printSheets(collect([$maintenance])),
             'checklistItems' => MaintenanceChecklist::getChecklistItems(),
+            'title' => $this->printTitle($maintenance->laboratory, $maintenance->academicYear),
         ]);
     }
 
@@ -358,10 +359,29 @@ class MaintenanceController extends Controller
     {
         $checklists = $this->listQuery($request)->get();
 
+        $laboratoryId = $request->input('laboratory_id');
+        $academicYearId = $request->input('academic_year_id');
+
         return view('maintenance.print', [
             'sheets' => $this->printSheets($checklists),
             'checklistItems' => MaintenanceChecklist::getChecklistItems(),
+            'title' => $this->printTitle(
+                $laboratoryId && $laboratoryId !== 'all' ? Laboratory::find($laboratoryId) : null,
+                $academicYearId && $academicYearId !== 'all' ? AcademicYear::find($academicYearId) : null,
+            ),
         ]);
+    }
+
+    /**
+     * Judul dokumen cetak sekaligus nama file saat disimpan sebagai PDF,
+     * mis. "Pemeliharaan-Lab. Komputer 2-Tahun Ajaran 2025-2026".
+     */
+    private function printTitle(?Laboratory $laboratory, ?AcademicYear $academicYear): string
+    {
+        $title = 'Pemeliharaan-'.($laboratory?->name ?? 'Semua Laboratorium')
+            .'-'.($academicYear?->name ?? 'Semua Tahun Ajaran');
+
+        return str_replace(['/', '\\'], '-', $title);
     }
 
     /**
