@@ -20,11 +20,9 @@
         table.report thead th { background: #000; color: #fff; text-align: center; font-weight: bold; }
         table.report tbody tr:nth-child(even) { background: #f5f5f5; }
         .empty { text-align: center; color: #555; font-style: italic; padding: 20px; border: 1px dashed #999; }
-        .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; vertical-align: middle; }
-        .checkbox.checked { position: relative; }
-        .checkbox.checked::after { content: '✓'; position: absolute; top: -2px; left: 1px; font-size: 12px; font-weight: bold; }
-        .signature { margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px; }
-        .signature-block { width: 220px; }
+        .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; vertical-align: middle; text-align: center; line-height: 12px; font-size: 11px; font-weight: bold; font-family: 'DejaVu Sans', sans-serif; }
+        .signature { margin-top: 40px; text-align: right; font-size: 11px; }
+        .signature-block { display: inline-block; width: 220px; text-align: left; }
         .signature-block .line { border-top: 1px solid #000; margin-top: 60px; margin-bottom: 4px; }
         @media print { .page { padding: 0; } }
         @page { size: A4 portrait; margin: 10mm; }
@@ -152,7 +150,7 @@
                                 <td style="text-align: center;">{{ $row->latestCheck?->created_at?->translatedFormat('d M Y') ?? '-' }}</td>
                                 <td style="text-align: center;">
                                     @if($row->is_baik)
-                                        <span class="checkbox checked"></span>
+                                        <span class="checkbox checked">&#10003;</span>
                                     @elseif($row->latestCheck)
                                         <span class="checkbox"></span>
                                     @else
@@ -161,7 +159,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     @if($row->latestCheck && !$row->is_baik)
-                                        <span class="checkbox checked"></span>
+                                        <span class="checkbox checked">&#10003;</span>
                                     @elseif($row->latestCheck)
                                         <span class="checkbox"></span>
                                     @else

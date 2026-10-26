@@ -21,7 +21,7 @@ use ZipArchive;
 
 /**
  * Laporan per jenis (dropdown), lab, dan tahun ajaran (termasuk "Semua").
- * Hasil cetak berupa ZIP berisi file HTML terpisah per kombinasi lab &
+ * Hasil cetak berupa ZIP berisi file PDF terpisah per kombinasi lab &
  * tahun ajaran dengan layout khusus jenis laporan.
  * Nama tahun ajaran saja yang tampil — periodLabel tidak boleh muncul.
  */
@@ -131,6 +131,28 @@ class LaporanTest extends TestCase
         return $files;
     }
 
+    /**
+     * Ambil teks dari content stream PDF (di-inflate) agar isi laporan bisa
+     * di-assert tanpa library pembaca PDF. Escape PDF untuk kurung dibalikkan
+     * supaya pencocokan teks tetap akurat.
+     */
+    private function pdfText(string $pdf): string
+    {
+        preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $pdf, $matches);
+
+        $text = '';
+        foreach ($matches[1] as $stream) {
+            $decoded = @gzuncompress($stream);
+            if ($decoded === false) {
+                $decoded = @gzinflate($stream);
+            }
+
+            $text .= $decoded === false ? '' : $decoded;
+        }
+
+        return str_replace(['\\(', '\\)', '\\\\'], ['(', ')', '\\'], $text);
+    }
+
     public function test_preview_hanya_menampilkan_jenis_terpilih(): void
     {
         $user = $this->userWith('Viewer', 'viewer@uji.test', ['view-reports']);
@@ -214,7 +236,12 @@ class LaporanTest extends TestCase
         $this->assertStringContainsString('Lab-Komputer-1', $entryNames);
         $this->assertStringContainsString('Lab-Komputer-2', $entryNames);
 
-        $content = implode("\n", $files);
+        foreach ($files as $name => $content) {
+            $this->assertStringEndsWith('.pdf', $name);
+            $this->assertStringStartsWith('%PDF', $content);
+        }
+
+        $content = implode("\n", array_map(fn ($pdf) => $this->pdfText($pdf), $files));
         $this->assertStringContainsString('Budi Mahasiswa', $content);
         $this->assertStringNotContainsString('Sari Luar Periode', $content);
         $this->assertStringNotContainsString($yearA->periodLabel(), $content);
@@ -240,7 +267,7 @@ class LaporanTest extends TestCase
 
         // Pengadaan tidak terikat lab: 1 file per tahun ajaran.
         $this->assertCount(2, $files);
-        $this->assertStringContainsString('Monitor 24 inch', implode("\n", $files));
+        $this->assertStringContainsString('Monitor 24 inch', $this->pdfText(implode("\n", $files)));
         $this->assertStringNotContainsString('Lab Komputer 1', implode("\n", array_keys($files)));
     }
 
@@ -260,7 +287,7 @@ class LaporanTest extends TestCase
         $files = $this->extractZip($response);
 
         $this->assertCount(1, $files);
-        $content = implode("\n", $files);
+        $content = $this->pdfText(implode("\n", $files));
         $this->assertStringContainsString('Mouse tidak berfungsi', $content);
         $this->assertStringContainsString($year->name, $content);
         $this->assertStringNotContainsString($year->periodLabel(), $content);
@@ -287,11 +314,12 @@ class LaporanTest extends TestCase
         $files = $this->extractZip($response);
 
         $this->assertCount(1, $files);
-        $content = implode("\n", $files);
+        $content = $this->pdfText(implode("\n", $files));
         $this->assertStringContainsString($computer->code, $content);
-        $this->assertStringContainsString('Semua komponen normal', $content);
-        $this->assertStringContainsString('checkbox checked', $content);
+        // Catatan panjang dibungkus dompdf menjadi beberapa baris teks.
+        $this->assertStringContainsString('Semua komponen', $content);
         $this->assertStringContainsString($year->name, $content);
+        $this->assertStringContainsString('DejaVuSans', implode("\n", $files));
     }
 
     public function test_akses_tanpa_izin_ditolak(): void

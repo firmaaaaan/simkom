@@ -12,6 +12,7 @@ use App\Models\Laboratory;
 use App\Models\MaintenanceChecklist;
 use App\Models\Pengadaan;
 use App\Models\Ticket;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipArchive;
@@ -47,8 +48,8 @@ class ReportController extends Controller
     }
 
     /**
-     * Unduh ZIP: satu file HTML siap cetak per kombinasi laboratorium &
-     * tahun ajaran, layout menyesuaikan jenis laporan terpilih.
+     * Unduh ZIP: satu file PDF per kombinasi laboratorium & tahun ajaran,
+     * layout menyesuaikan jenis laporan terpilih.
      *
      * ZipArchive butuh file nyata (seekable) — dipakai file sementara yang
      * dihapus otomatis setelah dikirim (deleteFileAfterSend).
@@ -84,15 +85,15 @@ class ReportController extends Controller
                 $labIds = $lab->id ? collect([$lab->id]) : collect();
                 $rows = $this->rowsFor($jenis, $labIds, $year);
 
-                $html = view('reports.print-file', [
+                $pdf = Pdf::loadView('reports.print-file', [
                     'jenis' => $jenis,
                     'jenisTitle' => $jenisTitle,
                     'rows' => $rows,
                     'lab' => $isPengadaan ? null : $lab,
                     'year' => $year,
-                ])->render();
+                ])->setPaper('a4', 'portrait')->output();
 
-                $zip->addFromString($this->zipEntryName($jenisTitle, $isPengadaan ? null : $lab, $year), $html);
+                $zip->addFromString($this->zipEntryName($jenisTitle, $isPengadaan ? null : $lab, $year), $pdf);
             }
         }
 
@@ -255,7 +256,7 @@ class ReportController extends Controller
 
         $name = preg_replace('/[^A-Za-z0-9]+/', '-', implode('_', $parts));
 
-        return trim(preg_replace('/-+/', '-', $name), '-').'.html';
+        return trim(preg_replace('/-+/', '-', $name), '-').'.pdf';
     }
 
     /**
