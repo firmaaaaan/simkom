@@ -57,35 +57,10 @@
 
     @forelse($rows as $row)
         <div class="sheet">
-            <div class="header" style="text-align: center; margin-bottom: 20px;">
-  <!-- Logo/Emblem -->
-  <div style="width: 80px; height: 80px; margin: 0 auto 15px; position: relative;">
-    <div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #d4f4e2 0%, #a8e6cf 100%); border: 3px solid #2e7d32; position: relative;">
-      <!-- Top curve text -->
-      <div style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); color: #1b5e20; font-size: 10px; font-weight: bold; text-align: center; white-space: nowrap;">
-        UNIVERSITAS 'Aisyiyah
-      </div>
-      <!-- Bottom curve text -->
-      <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); color: #1b5e20; font-size: 10px; font-weight: bold; text-align: center; white-space: nowrap;">
-        YOGYAKARTA
-      </div>
-      <!-- Center star/emblem -->
-      <div style="position: absolute; width: 40px; height: 40px; background: #ffeb3b; border-radius: 50%; top: 20px; left: 50%; transform: translate(-50%, -50%); text-align: center; line-height: 40px;">
-        ★
-      </div>
-    </div>
-  </div>
-  
-  <!-- Title -->
-  <h1 style="color: #1b5e20; font-size: 16px; font-weight: bold; text-transform: uppercase; margin: 10px 0; font-family: 'Times New Roman', serif; letter-spacing: 1px;">
-    Laporan Data Inventaris per Ruang dengan KodeBarcode
-  </h1>
-  
-  <!-- Subtitle -->
-  <h2 style="color: #37474f; font-size: 12px; font-family: 'Times New Roman', serif; margin: 5px 0;">
-    Universitas 'Aisyiyah Yogyakarta
-  </h2>
-</div>
+            <div class="header">
+                <h1>Laporan Inventaris Laboratorium Komputer</h1>
+                <h2>Universitas 'Aisyiyah Yogyakarta</h2>
+            </div>
 
             <div class="info">
                 <table>
@@ -203,8 +178,3 @@
     @endforelse
 </body>
 </html>
-<div class="signature" style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #dee2e6; text-align: right;">
-                    <p>Yogyakarta, 26 Oktober 2026</p>
-                    <p>Kepala UPT Laboratorium Terpadu</p>
-                    <p style="margin-top: 15px;">Dr. Dhesi Ari Astuti, S.Si.T.,M.Kes</p>
-                </div>

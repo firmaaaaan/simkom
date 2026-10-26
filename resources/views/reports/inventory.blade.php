@@ -71,11 +71,6 @@
                 </div>
             </div>
         </div>
-                <div class="signature" style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #dee2e6; text-align: right;">
-                    <p>Yogyakarta, 26 Oktober 2026</p>
-                    <p>Kepala UPT Laboratorium Terpadu</p>
-                    <p style="margin-top: 15px;">Dr. Dhesi Ari Astuti, S.Si.T.,M.Kes</p>
-                </div>
 
         {{-- Rincian per komputer --}}
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
