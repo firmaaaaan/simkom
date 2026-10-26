@@ -154,7 +154,6 @@
                         <th>RAM</th>
                         <th>Storage</th>
                         <th>Processor</th>
-                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -165,11 +164,10 @@
                             <td>{{ $detail['ram'] }}</td>
                             <td>{{ $detail['storage'] }}</td>
                             <td>{{ $detail['processor'] }}</td>
-                            <td>{{ $detail['computer']->status ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="muted">Belum ada komputer di laboratorium ini</td>
+                            <td colspan="5" class="muted">Belum ada komputer di laboratorium ini</td>
                         </tr>
                     @endforelse
                 </tbody>

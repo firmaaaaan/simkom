@@ -86,7 +86,6 @@
                             <th class="text-left px-6 py-3 font-medium text-gray-500">RAM</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Storage</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Processor</th>
-                            <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,15 +96,10 @@
                                 <td data-label="RAM" class="px-6 py-3 text-gray-600">{{ $detail['ram'] }}</td>
                                 <td data-label="Storage" class="px-6 py-3 text-gray-600">{{ $detail['storage'] }}</td>
                                 <td data-label="Processor" class="px-6 py-3 text-gray-600">{{ $detail['processor'] }}</td>
-                                <td data-label="Status" class="px-6 py-3">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $detail['computer']->status === 'Aktif' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
-                                        {{ $detail['computer']->status ?? '-' }}
-                                    </span>
-                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
                                     Belum ada komputer di laboratorium ini
                                 </td>
                             </tr>
