@@ -400,6 +400,7 @@ class ReportController extends Controller
      * kapasitas terbaca, "SSD" bila kapasitas tidak terbaca, dan "512 GB"
      * bila tipe tidak dikenali.
      */
+
     private function storageLabel(string $name): string
     {
         $type = $this->storageType($name);
@@ -409,13 +410,48 @@ class ReportController extends Controller
             return $type;
         }
 
-        return $type === 'Lainnya' ? $capacity['label'] : $type.' '.$capacity['label'];
-    }
+        // Check if name contains both SSD and HDD (comma-separated like "1 TB HDD, 512 GB SSD")
+        $hasSsd = mb_strpos(mb_strtolower($name), "ssd") !== false || mb_strpos(mb_strtolower($name), "nvme") !== false;
+        $hasHdd = mb_strpos(mb_strtolower($name), "hdd") !== false || mb_strpos(mb_strtolower($name), "hard disk") !== false || mb_strpos(mb_strtolower($name), "harddisk") !== false;
 
-    /**
-     * Rekap RAM: kapasitas urut numerik, "Tidak diketahui"/"Tidak tercatat"
-     * di belakang.
-     */
+        if ($hasSsd && $hasHdd) {
+            // Extract capacities for both types
+            $capacities = [];
+            if (preg_match("/(\d+(?:[.,]\d+)?)\s*tb/i", mb_strtolower($name), $m)) {
+                $capacities[] = ["value" => (float)str_replace(",", ".", $m[1]), "is_tb" => true];
+            }
+            if (preg_match("/(\d+(?:[.,]\d+)?)\s*gb/i", mb_strtolower($name), $m)) {
+                $capacities[] = ["value" => (float)str_replace(",", ".", $m[1]), "is_tb" => false];
+            }
+
+            // Remove duplicate values (same capacity for both types)
+            $uniqueCapacities = [];
+            foreach ($capacities as $cap) {
+                $found = false;
+                foreach ($uniqueCapacities as $uc) {
+                    if ($uc["value"] == $cap["value"] && $uc["is_tb"] == $cap["is_tb"]) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $uniqueCapacities[] = $cap;
+                }
+            }
+
+            // Build labels for each unique capacity
+            $labels = [];
+            foreach ($uniqueCapacities as $cap) {
+                $capLabel = rtrim(rtrim(number_format($cap["value"], 2, ".", ""), "0"), ".") . ($cap["is_tb"] ? " TB" : " GB");
+                $labels[] = "SSD " . $capLabel;
+            }
+
+            return implode(", ", $labels);
+        }
+
+        // Single type case (original logic preserved)
+        return $type === "Lainnya" ? $capacity["label"] : $type." ".$capacity["label"];
+    }
     private function ramRecap(array $counts)
     {
         return collect($counts)
