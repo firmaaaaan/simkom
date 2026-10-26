@@ -111,7 +111,7 @@
                 @endif
                 @endif
 
-                @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-reports') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages') || auth()->user()->hasPermission('view-pengadaan'))
+                @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages') || auth()->user()->hasPermission('view-pengadaan'))
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
                 @if(auth()->user()->hasPermission('view-academic-years'))
                 <a href="{{ route('academic-years.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('academic-years.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
@@ -133,26 +133,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
                     </svg>
                     Pengecekan Perangkat
-                </a>
-                <a href="{{ route('device-checks.report') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('device-checks.report', 'device-checks.report-print') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
-                    </svg>
-                    Laporan Pengecekan
-                </a>
-                @endif
-                @if(auth()->user()->hasPermission('view-reports'))
-                <a href="{{ route('reports.card-control') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('reports.card-control', 'reports.card-control-print') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                    Kartu Kendali
-                </a>
-                <a href="{{ route('reports.laporan') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('reports.laporan', 'reports.laporan-download') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zM10.5 8.25H6m3.75-3.75v3.75m0-3.75L9 4.5m3 1.125L15 4.5m-3 1.125v3.75" />
-                    </svg>
-                    Laporan
                 </a>
                 @endif
                 @if(auth()->user()->hasPermission('view-tickets'))
@@ -187,6 +167,32 @@
                     Pengadaan
                 </a>
                 @endif
+                @endif
+
+                @if(auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-reports'))
+                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Laporan</p>
+                @endif
+                @if(auth()->user()->hasPermission('view-maintenance'))
+                <a href="{{ route('device-checks.report') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('device-checks.report', 'device-checks.report-print') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+                    </svg>
+                    Laporan Pengecekan
+                </a>
+                @endif
+                @if(auth()->user()->hasPermission('view-reports'))
+                <a href="{{ route('reports.card-control') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('reports.card-control', 'reports.card-control-print') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    Kartu Kendali
+                </a>
+                <a href="{{ route('reports.laporan') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('reports.laporan', 'reports.laporan-download') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zM10.5 8.25H6m3.75-3.75v3.75m0-3.75L9 4.5m3 1.125L15 4.5m-3 1.125v3.75" />
+                    </svg>
+                    Laporan
+                </a>
                 @endif
 
                 @if(auth()->user()->hasPermission('view-users') || auth()->user()->hasPermission('view-roles') || auth()->user()->hasPermission('edit-computers'))
