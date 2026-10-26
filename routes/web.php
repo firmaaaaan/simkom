@@ -321,8 +321,12 @@ Route::middleware('auth')->group(function () {
     // Reports (Admin + Laboran)
     Route::middleware('permission:view-reports')->group(function () {
         Route::get('/reports/card-control', [ComputerController::class, 'reportCardControl'])->name('reports.card-control');
+        Route::get('/reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
         Route::get('/reports/laporan', [ReportController::class, 'index'])->name('reports.laporan');
     });
+    Route::get('/reports/inventory/print', [ReportController::class, 'inventoryPrint'])
+        ->middleware('permission:print-reports')
+        ->name('reports.inventory-print');
     Route::get('/reports/card-control/print', [ComputerController::class, 'reportCardControlPrint'])
         ->middleware('permission:print-reports')
         ->name('reports.card-control-print');

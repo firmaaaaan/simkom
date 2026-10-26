@@ -7,13 +7,14 @@ use App\Models\Computer;
 use App\Models\ComputerBorrowing;
 use App\Models\ComputerCheck;
 use App\Models\DeviceCheck;
-use App\Models\LabUsage;
 use App\Models\Laboratory;
+use App\Models\LabUsage;
 use App\Models\MaintenanceChecklist;
 use App\Models\Pengadaan;
 use App\Models\Ticket;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipArchive;
 
@@ -108,7 +109,7 @@ class ReportController extends Controller
      * diurutkan terbaru lebih dulu. Saat "Semua TA", setiap baris diberi
      * atribut academic_year_name untuk kolom Tahun Ajaran.
      */
-    private function collectRows(string $jenis, $labIds, $years, bool $tagYear): \Illuminate\Support\Collection
+    private function collectRows(string $jenis, $labIds, $years, bool $tagYear): Collection
     {
         $rows = collect();
 
@@ -212,6 +213,193 @@ class ReportController extends Controller
         });
 
         return $computers;
+    }
+
+    /**
+     * Laporan inventaris per laboratorium: jumlah komputer menurut kapasitas
+     * RAM, tipe storage, dan jenis processor. Inventaris adalah kondisi saat
+     * ini, jadi tidak difilter tahun ajaran.
+     */
+    public function inventory(Request $request)
+    {
+        return view('reports.inventory', $this->inventoryData($request));
+    }
+
+    public function inventoryPrint(Request $request)
+    {
+        return view('reports.inventory-print', $this->inventoryData($request));
+    }
+
+    private function inventoryData(Request $request): array
+    {
+        $laboratories = Laboratory::orderBy('name')->get();
+        $selectedLabId = (string) $request->input('laboratory_id', 'all');
+
+        $labs = $selectedLabId === 'all'
+            ? $laboratories
+            : $laboratories->where('id', $selectedLabId)->values();
+
+        $computersByLab = Computer::with('hardware')
+            ->whereIn('laboratory_id', $labs->pluck('id'))
+            ->orderBy('code')
+            ->get()
+            ->groupBy('laboratory_id');
+
+        $rows = $labs->map(
+            fn (Laboratory $lab) => $this->inventoryRow($lab, $computersByLab->get($lab->id, collect()))
+        );
+
+        return [
+            'laboratories' => $laboratories,
+            'selectedLabId' => $selectedLabId,
+            'rows' => $rows,
+            'title' => 'Inventaris-'.($rows->count() === 1
+                ? $rows->first()['laboratory']->name
+                : 'Semua Laboratorium'),
+        ];
+    }
+
+    /**
+     * Rekap satu laboratorium: hitungan RAM / storage / processor untuk tabel
+     * ringkasan, plus rincian spesifikasi tiap komputer.
+     */
+    private function inventoryRow(Laboratory $laboratory, $computers): array
+    {
+        $ramCounts = [];
+        $storageCounts = [];
+        $processorCounts = [];
+        $details = [];
+
+        foreach ($computers as $computer) {
+            $ramNames = $this->hardwareNames($computer->hardware, 'RAM');
+            $storageNames = $this->hardwareNames($computer->hardware, 'Storage');
+            $processorNames = $this->hardwareNames($computer->hardware, 'Processor')
+                ->unique(fn ($name) => mb_strtolower($name))
+                ->values();
+
+            $ramTotal = $ramNames->sum(fn ($name) => $this->ramCapacity($name) ?? 0);
+            $ramKey = $ramNames->isEmpty() ? 'Tidak tercatat' : ($ramTotal > 0 ? $ramTotal : 'Tidak diketahui');
+            $ramLabel = is_int($ramKey) ? $ramKey.' GB' : $ramKey;
+            $ramCounts[$ramKey] = ($ramCounts[$ramKey] ?? 0) + 1;
+
+            $storageLabels = $storageNames
+                ->map(fn ($name) => $this->storageType($name))
+                ->unique()
+                ->values();
+
+            if ($storageLabels->isEmpty()) {
+                $storageLabels = collect(['Tidak tercatat']);
+            }
+
+            foreach ($storageLabels as $type) {
+                $storageCounts[$type] = ($storageCounts[$type] ?? 0) + 1;
+            }
+
+            if ($processorNames->isEmpty()) {
+                $processorNames = collect(['Tidak tercatat']);
+            }
+
+            foreach ($processorNames as $name) {
+                $key = mb_strtolower($name);
+                $processorCounts[$key] ??= ['label' => $name, 'count' => 0];
+                $processorCounts[$key]['count']++;
+            }
+
+            $details[] = [
+                'computer' => $computer,
+                'ram' => $ramLabel,
+                'storage' => $storageLabels->implode(', '),
+                'processor' => $processorNames->implode(', '),
+            ];
+        }
+
+        return [
+            'laboratory' => $laboratory,
+            'computers_count' => $computers->count(),
+            'ram' => $this->ramRecap($ramCounts),
+            'storage' => $this->storageRecap($storageCounts),
+            'processors' => collect($processorCounts)
+                ->sortBy([['count', 'desc'], ['label', 'asc']])
+                ->values(),
+            'details' => $details,
+        ];
+    }
+
+    /**
+     * Nama komponen untuk satu kategori, dicocokkan tanpa memedulikan besar
+     * kecil huruf karena kategori hasil import mempertahankan judul kolom file.
+     */
+    private function hardwareNames($hardware, string $category)
+    {
+        return $hardware
+            ->filter(fn ($item) => mb_strtolower((string) $item->category) === mb_strtolower($category))
+            ->pluck('name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Total kapasitas RAM (GB) dari nama komponen bebas: "8GB DDR4" -> 8,
+     * "2x8GB" -> 16, "16 GB DDR4 3200" -> 16. Null bila tidak terbaca.
+     */
+    private function ramCapacity(string $name): ?int
+    {
+        if (preg_match('/^\s*(\d+)\s*[x×]\s*(\d+)\s*gb/i', $name, $match)) {
+            return (int) $match[1] * (int) $match[2];
+        }
+
+        if (preg_match('/(\d+)\s*gb/i', $name, $match)) {
+            return (int) $match[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Tipe storage dari nama komponen: SSD (termasuk NVMe), HDD, atau lainnya.
+     */
+    private function storageType(string $name): string
+    {
+        $name = mb_strtolower($name);
+
+        if (str_contains($name, 'ssd') || str_contains($name, 'nvme')) {
+            return 'SSD';
+        }
+
+        if (str_contains($name, 'hdd') || str_contains($name, 'hard disk') || str_contains($name, 'harddisk')) {
+            return 'HDD';
+        }
+
+        return 'Lainnya';
+    }
+
+    /**
+     * Rekap RAM: kapasitas urut numerik, "Tidak diketahui"/"Tidak tercatat"
+     * di belakang.
+     */
+    private function ramRecap(array $counts)
+    {
+        return collect($counts)
+            ->map(fn ($count, $key) => [
+                'label' => is_int($key) ? $key.' GB' : $key,
+                'count' => $count,
+                'sort' => is_int($key) ? $key : PHP_INT_MAX,
+            ])
+            ->sortBy([['sort', 'asc'], ['label', 'asc']])
+            ->values()
+            ->map(fn ($row) => ['label' => $row['label'], 'count' => $row['count']]);
+    }
+
+    private function storageRecap(array $counts)
+    {
+        $order = ['SSD' => 0, 'HDD' => 1, 'Lainnya' => 2, 'Tidak tercatat' => 3];
+
+        return collect($counts)
+            ->map(fn ($count, $label) => ['label' => $label, 'count' => $count])
+            ->values()
+            ->sortBy(fn ($row) => $order[$row['label']] ?? 9)
+            ->values();
     }
 
     private function resolveJenis(Request $request): string
