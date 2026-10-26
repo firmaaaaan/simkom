@@ -27,6 +27,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicComputerCardController;
 use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\PublicTrackerController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SoftwareController;
@@ -320,10 +321,14 @@ Route::middleware('auth')->group(function () {
     // Reports (Admin + Laboran)
     Route::middleware('permission:view-reports')->group(function () {
         Route::get('/reports/card-control', [ComputerController::class, 'reportCardControl'])->name('reports.card-control');
+        Route::get('/reports/laporan', [ReportController::class, 'index'])->name('reports.laporan');
     });
     Route::get('/reports/card-control/print', [ComputerController::class, 'reportCardControlPrint'])
         ->middleware('permission:print-reports')
         ->name('reports.card-control-print');
+    Route::get('/reports/laporan/download', [ReportController::class, 'download'])
+        ->middleware('permission:print-reports')
+        ->name('reports.laporan-download');
 
     // Computers (Admin + Laboran)
     Route::middleware('permission:view-computers')->group(function () {
