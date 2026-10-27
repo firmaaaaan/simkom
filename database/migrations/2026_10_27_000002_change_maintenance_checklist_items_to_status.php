@@ -26,7 +26,7 @@ return new class extends Migration
 
         Schema::table('maintenance_checklist_items', function (Blueprint $table) {
             $table->dropColumn('is_checked');
-            $table->index(['maintenance_checklist_id', 'status']);
+            $table->index(['maintenance_checklist_id', 'status'], 'idx_maint_chk_items_chk_id_status');
         });
     }
 
@@ -45,7 +45,7 @@ return new class extends Migration
             ->update(['is_checked' => false]);
 
         Schema::table('maintenance_checklist_items', function (Blueprint $table) {
-            $table->dropIndex(['maintenance_checklist_id', 'status']);
+            $table->dropIndex('idx_maint_chk_items_chk_id_status');
             $table->dropColumn('status');
         });
     }
