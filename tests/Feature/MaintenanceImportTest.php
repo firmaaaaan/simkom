@@ -124,14 +124,14 @@ class MaintenanceImportTest extends TestCase
     }
 
     /**
-     * Peta "kode.KATEGORI.nomor" => tercentang untuk sebuah pemeliharaan.
+     * Peta "kode.KATEGORI.nomor" => status item untuk sebuah pemeliharaan.
      */
     private function matrix(MaintenanceChecklist $checklist): array
     {
         $map = [];
 
         foreach ($checklist->items()->with('computer')->get() as $item) {
-            $map[$item->computer->code.'.'.$item->category.'.'.$item->item_number] = (bool) $item->is_checked;
+            $map[$item->computer->code.'.'.$item->category.'.'.$item->item_number] = $item->status;
         }
 
         return $map;
@@ -183,24 +183,55 @@ class MaintenanceImportTest extends TestCase
         $this->assertSame(3 * count($this->questions()), MaintenanceChecklistItem::count());
 
         $matrix = $this->matrix($checklist);
-        $this->assertTrue($matrix['K1-001.A.1']);
-        $this->assertTrue($matrix['K1-001.A.2']);
-        $this->assertFalse($matrix['K1-001.A.3']);
-        $this->assertFalse($matrix['K1-001.A.4']);
-        $this->assertFalse($matrix['K1-001.A.5']);
-        $this->assertFalse($matrix['K1-001.A.6']);
-        $this->assertFalse($matrix['K1-001.A.7']);
-        $this->assertTrue($matrix['K1-001.B.1']);
-        $this->assertFalse($matrix['K1-001.B.2']);
-        $this->assertTrue($matrix['K1-001.C.1']);
-        $this->assertTrue($matrix['K1-001.D.1']);
+        $this->assertSame('sudah', $matrix['K1-001.A.1']);
+        $this->assertSame('sudah', $matrix['K1-001.A.2']);
+        $this->assertSame('belum', $matrix['K1-001.A.3']);
+        $this->assertSame('belum', $matrix['K1-001.A.4']);
+        $this->assertSame('belum', $matrix['K1-001.A.5']);
+        $this->assertSame('belum', $matrix['K1-001.A.6']);
+        $this->assertSame('belum', $matrix['K1-001.A.7']);
+        $this->assertSame('sudah', $matrix['K1-001.B.1']);
+        $this->assertSame('belum', $matrix['K1-001.B.2']);
+        // "x" adalah token tercentang lama — tetap diterima sebagai "sudah".
+        $this->assertSame('sudah', $matrix['K1-001.C.1']);
+        $this->assertSame('sudah', $matrix['K1-001.D.1']);
 
-        $this->assertFalse($matrix['K1-002.A.1']);
-        $this->assertTrue($matrix['K1-002.A.2']);
-        $this->assertFalse($matrix['K1-002.D.1']);
+        $this->assertSame('belum', $matrix['K1-002.A.1']);
+        $this->assertSame('sudah', $matrix['K1-002.A.2']);
+        $this->assertSame('belum', $matrix['K1-002.D.1']);
 
-        $this->assertFalse($matrix['K1-003.A.1']);
-        $this->assertFalse($matrix['K1-003.D.1']);
+        $this->assertSame('belum', $matrix['K1-003.A.1']);
+        $this->assertSame('belum', $matrix['K1-003.D.1']);
+    }
+
+    public function test_import_parses_belum_and_tidak_ada_tokens(): void
+    {
+        $admin = $this->admin();
+        $lab = $this->seedLab();
+        $year = $this->seedYear();
+
+        $grid = [
+            $this->header(),
+            [1, 'K1-001', 'belum', '✗', '–', 'tidak ada', 'n/a', '0', 'sudah', 'true', 'false', 'ta', 'ya'],
+        ];
+
+        $this->actingAs($admin)
+            ->post(route('maintenance.store-import'), $this->importPayload($lab, $year, $grid))
+            ->assertRedirect(route('maintenance.import'))
+            ->assertSessionHas('success', fn ($message) => str_contains($message, 'pemeliharaan baru'));
+
+        $matrix = $this->matrix(MaintenanceChecklist::first());
+        $this->assertSame('belum', $matrix['K1-001.A.1']);
+        $this->assertSame('belum', $matrix['K1-001.A.2']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.A.3']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.A.4']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.A.5']);
+        $this->assertSame('belum', $matrix['K1-001.A.6']);
+        $this->assertSame('sudah', $matrix['K1-001.A.7']);
+        $this->assertSame('sudah', $matrix['K1-001.B.1']);
+        $this->assertSame('belum', $matrix['K1-001.B.2']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.C.1']);
+        $this->assertSame('sudah', $matrix['K1-001.D.1']);
     }
 
     public function test_import_supports_two_row_group_header(): void
@@ -223,17 +254,17 @@ class MaintenanceImportTest extends TestCase
             ->assertSessionHas('success', fn ($message) => str_contains($message, 'pemeliharaan baru'));
 
         $matrix = $this->matrix(MaintenanceChecklist::first());
-        $this->assertTrue($matrix['K1-001.A.1']);
-        $this->assertFalse($matrix['K1-001.A.2']);
-        $this->assertTrue($matrix['K1-001.A.3']);
-        $this->assertFalse($matrix['K1-001.A.4']);
-        $this->assertTrue($matrix['K1-001.A.5']);
-        $this->assertFalse($matrix['K1-001.A.6']);
-        $this->assertTrue($matrix['K1-001.A.7']);
-        $this->assertFalse($matrix['K1-001.B.1']);
-        $this->assertTrue($matrix['K1-001.B.2']);
-        $this->assertFalse($matrix['K1-001.C.1']);
-        $this->assertTrue($matrix['K1-001.D.1']);
+        $this->assertSame('sudah', $matrix['K1-001.A.1']);
+        $this->assertSame('belum', $matrix['K1-001.A.2']);
+        $this->assertSame('sudah', $matrix['K1-001.A.3']);
+        $this->assertSame('belum', $matrix['K1-001.A.4']);
+        $this->assertSame('sudah', $matrix['K1-001.A.5']);
+        $this->assertSame('belum', $matrix['K1-001.A.6']);
+        $this->assertSame('sudah', $matrix['K1-001.A.7']);
+        $this->assertSame('belum', $matrix['K1-001.B.1']);
+        $this->assertSame('sudah', $matrix['K1-001.B.2']);
+        $this->assertSame('belum', $matrix['K1-001.C.1']);
+        $this->assertSame('sudah', $matrix['K1-001.D.1']);
     }
 
     public function test_import_updates_instead_of_duplicating_for_same_context(): void
@@ -259,9 +290,10 @@ class MaintenanceImportTest extends TestCase
         $this->assertSame(1, MaintenanceChecklist::count());
         $this->assertSame(3 * count($this->questions()), MaintenanceChecklistItem::count());
 
+        // Sel kosong saat import = belum (pertanyaan tidak terisi).
         $matrix = $this->matrix(MaintenanceChecklist::first());
-        $this->assertFalse($matrix['K1-001.A.1']);
-        $this->assertFalse($matrix['K1-001.D.1']);
+        $this->assertSame('belum', $matrix['K1-001.A.1']);
+        $this->assertSame('belum', $matrix['K1-001.D.1']);
     }
 
     public function test_import_reports_bad_rows_without_aborting_the_file(): void
@@ -298,8 +330,8 @@ class MaintenanceImportTest extends TestCase
         // Baris valid tetap tersimpan meski ada baris gagal.
         $this->assertSame(1, MaintenanceChecklist::count());
         $matrix = $this->matrix(MaintenanceChecklist::first());
-        $this->assertTrue($matrix['K1-001.A.1']);
-        $this->assertTrue($matrix['K1-002.B.1']);
+        $this->assertSame('sudah', $matrix['K1-001.A.1']);
+        $this->assertSame('sudah', $matrix['K1-002.B.1']);
     }
 
     public function test_template_headers_match_checklist_and_reupload_is_noop(): void

@@ -39,26 +39,40 @@
     </div>
 </div>
 
-<div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div>
-            <p class="text-xs text-gray-400 mb-1">Laboratorium</p>
-            <p class="text-sm font-semibold text-gray-800">{{ $maintenance->laboratory->name ?? '-' }}</p>
+    @php
+        $statusLabels = \App\Models\MaintenanceChecklistItem::statuses();
+        $statusSymbols = \App\Models\MaintenanceChecklistItem::symbols();
+    @endphp
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Laboratorium</p>
+                <p class="text-sm font-semibold text-gray-800">{{ $maintenance->laboratory->name ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Tahun Ajaran</p>
+                <p class="text-sm font-semibold text-gray-800">{{ $maintenance->academicYear->name ?? '-' }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Tanggal</p>
+                <p class="text-sm font-semibold text-gray-800">{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->translatedFormat('d M Y') }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 mb-1">Petugas</p>
+                <p class="text-sm font-semibold text-gray-800">{{ $maintenance->inspector_name ?? '-' }}</p>
+            </div>
         </div>
-        <div>
-            <p class="text-xs text-gray-400 mb-1">Tahun Ajaran</p>
-            <p class="text-sm font-semibold text-gray-800">{{ $maintenance->academicYear->name ?? '-' }}</p>
-        </div>
-        <div>
-            <p class="text-xs text-gray-400 mb-1">Tanggal</p>
-            <p class="text-sm font-semibold text-gray-800">{{ \Carbon\Carbon::parse($maintenance->maintenance_date)->translatedFormat('d M Y') }}</p>
-        </div>
-        <div>
-            <p class="text-xs text-gray-400 mb-1">Petugas</p>
-            <p class="text-sm font-semibold text-gray-800">{{ $maintenance->inspector_name ?? '-' }}</p>
+        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <span class="font-medium text-gray-700">Ringkasan:</span>
+            @foreach($statusLabels as $statusKey => $statusLabel)
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold text-white
+                        {{ $statusKey === \App\Models\MaintenanceChecklistItem::STATUS_SUDAH ? 'bg-green-600' : ($statusKey === \App\Models\MaintenanceChecklistItem::STATUS_BELUM ? 'bg-red-600' : 'bg-gray-500') }}">{{ $statusSymbols[$statusKey] }}</span>
+                    {{ $statusLabel }}: <strong>{{ $summary[$statusKey] ?? 0 }}</strong>
+                </span>
+            @endforeach
         </div>
     </div>
-</div>
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
     <div class="overflow-x-auto">
@@ -89,18 +103,23 @@
                             @foreach($computers as $computer)
                                 @php $key = "{$category}_{$itemNum}_{$computer->id}"; @endphp
                                 <td class="text-center border border-gray-200">
-                                    @if(isset($items[$key]) && $items[$key]->is_checked)
-                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-green-100">
+                                    @php $status = $items[$key]->status ?? null; @endphp
+                                    @if($status === \App\Models\MaintenanceChecklistItem::STATUS_SUDAH)
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-green-100" title="Sudah">
                                             <svg class="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                             </svg>
                                         </span>
-                                    @else
-                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-red-100">
+                                    @elseif($status === \App\Models\MaintenanceChecklistItem::STATUS_BELUM)
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-red-100" title="Belum">
                                             <svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </span>
+                                    @elseif($status === \App\Models\MaintenanceChecklistItem::STATUS_TIDAK_ADA)
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-gray-100 text-gray-500 text-xs font-bold" title="Tidak Ada">–</span>
+                                    @else
+                                        <span class="text-gray-300">·</span>
                                     @endif
                                 </td>
                             @endforeach

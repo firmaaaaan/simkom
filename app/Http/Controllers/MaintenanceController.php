@@ -150,8 +150,9 @@ class MaintenanceController extends Controller
         }
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
+        $statuses = old('items', []);
 
-        return view('maintenance.create', compact('laboratories', 'academicYears', 'computers', 'selectedLab', 'selectedYear', 'checklistItems'));
+        return view('maintenance.create', compact('laboratories', 'academicYears', 'computers', 'selectedLab', 'selectedYear', 'checklistItems', 'statuses'));
     }
 
     public function store(Request $request)
@@ -166,6 +167,7 @@ class MaintenanceController extends Controller
             'notes_ups' => 'nullable|string',
             'notes_monitor' => 'nullable|string',
         ]);
+        $this->validateItems($request);
 
         $checklist = MaintenanceChecklist::create([
             'laboratory_id' => $request->laboratory_id,
@@ -179,27 +181,57 @@ class MaintenanceController extends Controller
         ]);
 
         $computers = Computer::where('laboratory_id', $request->laboratory_id)->get();
-        $allItems = MaintenanceChecklist::getChecklistItems();
+        $this->syncItems($checklist, $computers, $request->input('items', []));
+
+        return redirect()->route('maintenance.show', $checklist)->with('success', 'Data pemeliharaan berhasil disimpan.');
+    }
+
+    /**
+     * Validasi matriks status per sel: items[CAT_NUM][computerId] harus
+     * salah satu dari Sudah / Belum / Tidak Ada.
+     */
+    private function validateItems(Request $request): void
+    {
+        $request->validate([
+            'items' => 'nullable|array',
+            'items.*' => 'nullable|array',
+            'items.*.*' => 'in:'.implode(',', MaintenanceChecklistItem::statusKeys()),
+        ]);
+    }
+
+    /**
+     * Tulis ulang seluruh matriks item (komputer × pertanyaan). Sel yang
+     * tidak dikirim form dianggap "sudah" — sama seperti nilai awal radio.
+     */
+    private function syncItems(MaintenanceChecklist $checklist, $computers, array $statuses): void
+    {
+        $rows = [];
+        $now = now();
 
         foreach ($computers as $computer) {
-            foreach ($allItems as $category => $categoryData) {
+            foreach (MaintenanceChecklist::getChecklistItems() as $category => $categoryData) {
                 foreach ($categoryData['items'] as $index => $question) {
                     $itemNumber = $index + 1;
-                    $key = "{$category}_{$itemNumber}_{$computer->id}";
-                    $isChecked = $request->has($key);
+                    $key = "{$category}_{$itemNumber}";
+                    $status = $statuses[$key][$computer->id] ?? MaintenanceChecklistItem::STATUS_SUDAH;
 
-                    MaintenanceChecklistItem::create([
+                    $rows[] = [
+                        'id' => (string) \Illuminate\Support\Str::uuid(),
                         'maintenance_checklist_id' => $checklist->id,
                         'computer_id' => $computer->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'is_checked' => $isChecked,
-                    ]);
+                        'status' => $status,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
                 }
             }
         }
 
-        return redirect()->route('maintenance.show', $checklist)->with('success', 'Data pemeliharaan berhasil disimpan.');
+        foreach (array_chunk($rows, 500) as $chunk) {
+            MaintenanceChecklistItem::insert($chunk);
+        }
     }
 
     public function show(MaintenanceChecklist $maintenance)
@@ -216,7 +248,23 @@ class MaintenanceController extends Controller
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
 
-        return view('maintenance.show', compact('maintenance', 'computers', 'items', 'checklistItems'));
+        $summary = $this->summarize($items);
+
+        return view('maintenance.show', compact('maintenance', 'computers', 'items', 'checklistItems', 'summary'));
+    }
+
+    /**
+     * Ringkasan jumlah sel per status — dipakai halaman detail & cetak.
+     */
+    private function summarize($items): array
+    {
+        $summary = array_fill_keys(MaintenanceChecklistItem::statusKeys(), 0);
+
+        foreach ($items as $item) {
+            $summary[$item->status] = ($summary[$item->status] ?? 0) + 1;
+        }
+
+        return $summary;
     }
 
     public function edit(MaintenanceChecklist $maintenance)
@@ -235,7 +283,15 @@ class MaintenanceController extends Controller
 
         $checklistItems = MaintenanceChecklist::getChecklistItems();
 
-        return view('maintenance.edit', compact('maintenance', 'laboratories', 'academicYears', 'computers', 'items', 'checklistItems'));
+        // Bentuk nested (items[CAT_NUM][computerId] => status) agar mudah
+        // dibaca view; old() diprioritaskan agar input validasi tidak hilang.
+        $itemStatuses = [];
+        foreach ($items as $item) {
+            $itemStatuses["{$item->category}_{$item->item_number}"][$item->computer_id] = $item->status;
+        }
+        $statuses = old('items', $itemStatuses);
+
+        return view('maintenance.edit', compact('maintenance', 'laboratories', 'academicYears', 'computers', 'items', 'checklistItems', 'statuses'));
     }
 
     public function saveComputer(Request $request, MaintenanceChecklist $maintenance, Computer $computer)
@@ -245,6 +301,9 @@ class MaintenanceController extends Controller
             return response()->json(['success' => false, 'message' => 'Komputer tidak sesuai laboratorium'], 400);
         }
 
+        $this->validateItems($request);
+        $statuses = $request->input('items', []);
+
         $allItems = MaintenanceChecklist::getChecklistItems();
         $savedCount = 0;
         $totalItems = 0;
@@ -252,8 +311,8 @@ class MaintenanceController extends Controller
         foreach ($allItems as $category => $categoryData) {
             foreach ($categoryData['items'] as $index => $question) {
                 $itemNumber = $index + 1;
-                $key = "{$category}_{$itemNumber}_{$computer->id}";
-                $isChecked = $request->boolean($key);
+                $key = "{$category}_{$itemNumber}";
+                $status = $statuses[$key][$computer->id] ?? MaintenanceChecklistItem::STATUS_SUDAH;
                 $totalItems++;
 
                 MaintenanceChecklistItem::updateOrCreate(
@@ -264,7 +323,7 @@ class MaintenanceController extends Controller
                         'item_number' => $itemNumber,
                     ],
                     [
-                        'is_checked' => $isChecked,
+                        'status' => $status,
                         'checked_by' => auth()->user()?->name ?? $request->input('inspector_name'),
                         'saved_at' => now(),
                     ]
@@ -294,6 +353,7 @@ class MaintenanceController extends Controller
             'notes_ups' => 'nullable|string',
             'notes_monitor' => 'nullable|string',
         ]);
+        $this->validateItems($request);
 
         $maintenance->update([
             'laboratory_id' => $request->laboratory_id,
@@ -309,25 +369,7 @@ class MaintenanceController extends Controller
         $maintenance->items()->delete();
 
         $computers = Computer::where('laboratory_id', $request->laboratory_id)->get();
-        $allItems = MaintenanceChecklist::getChecklistItems();
-
-        foreach ($computers as $computer) {
-            foreach ($allItems as $category => $categoryData) {
-                foreach ($categoryData['items'] as $index => $question) {
-                    $itemNumber = $index + 1;
-                    $key = "{$category}_{$itemNumber}_{$computer->id}";
-                    $isChecked = $request->has($key);
-
-                    MaintenanceChecklistItem::create([
-                        'maintenance_checklist_id' => $maintenance->id,
-                        'computer_id' => $computer->id,
-                        'category' => $category,
-                        'item_number' => $itemNumber,
-                        'is_checked' => $isChecked,
-                    ]);
-                }
-            }
-        }
+        $this->syncItems($maintenance, $computers, $request->input('items', []));
 
         return redirect()->route('maintenance.show', $maintenance)->with('success', 'Data pemeliharaan berhasil diperbarui.');
     }
@@ -399,11 +441,16 @@ class MaintenanceController extends Controller
             ->get()
             ->groupBy('maintenance_checklist_id');
 
-        return $checklists->map(fn (MaintenanceChecklist $checklist) => [
-            'maintenance' => $checklist,
-            'computers' => $computersByLab->get($checklist->laboratory_id, collect()),
-            'items' => $itemsByChecklist->get($checklist->id, collect())
-                ->keyBy(fn (MaintenanceChecklistItem $item) => "{$item->category}_{$item->item_number}_{$item->computer_id}"),
-        ])->values();
+        return $checklists->map(function (MaintenanceChecklist $checklist) use ($computersByLab, $itemsByChecklist) {
+            $items = $itemsByChecklist->get($checklist->id, collect())
+                ->keyBy(fn (MaintenanceChecklistItem $item) => "{$item->category}_{$item->item_number}_{$item->computer_id}");
+
+            return [
+                'maintenance' => $checklist,
+                'computers' => $computersByLab->get($checklist->laboratory_id, collect()),
+                'items' => $items,
+                'summary' => $this->summarize($items),
+            ];
+        })->values();
     }
 }

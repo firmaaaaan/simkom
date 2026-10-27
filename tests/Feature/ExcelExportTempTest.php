@@ -45,14 +45,16 @@ class ExcelExportTempTest extends TestCase
     {
         $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
 
-        foreach ([
-            'view-users', 'view-roles', 'view-laboratories', 'view-academic-years',
-            'view-computers', 'view-maintenance', 'view-tickets', 'view-borrowings',
-            'view-components', 'view-lab-usages',
-            'export-users', 'export-roles', 'export-laboratories', 'export-academic-years',
-            'export-computers', 'export-maintenance', 'export-tickets', 'export-borrowings',
-            'export-components', 'export-lab-usages',
-        ] as $name) {
+        foreach (
+            [
+                'view-users', 'view-roles', 'view-laboratories', 'view-academic-years',
+                'view-computers', 'view-maintenance', 'view-tickets', 'view-borrowings',
+                'view-components', 'view-lab-usages',
+                'export-users', 'export-roles', 'export-laboratories', 'export-academic-years',
+                'export-computers', 'export-maintenance', 'export-tickets', 'export-borrowings',
+                'export-components', 'export-lab-usages',
+            ] as $name
+        ) {
             $role->permissions()->attach(Permission::firstOrCreate(['name' => $name], ['label' => $name]));
         }
 
@@ -81,13 +83,14 @@ class ExcelExportTempTest extends TestCase
             'maintenance_date' => '2026-09-10', 'inspector_name' => 'Firmansyah',
             'notes_computer' => 'Debu dibersihkan',
         ]);
-        foreach ([[1, true], [2, false]] as [$number, $checked]) {
+        // Changed is_checked to status, using STATUS_SUDAH for true, STATUS_BELUM for false
+        foreach ([[1, MaintenanceChecklistItem::STATUS_SUDAH], [2, MaintenanceChecklistItem::STATUS_BELUM]] as [$number, $status]) {
             MaintenanceChecklistItem::create([
                 'maintenance_checklist_id' => $maintenance->id,
                 'computer_id' => $computer->id,
                 'category' => 'A',
                 'item_number' => $number,
-                'is_checked' => $checked,
+                'status' => $status,
             ]);
         }
 
@@ -160,9 +163,7 @@ class ExcelExportTempTest extends TestCase
         return compact('lab', 'computer', 'year', 'check', 'box');
     }
 
-    /**
-     * Baca isi file xlsx dari response unduhan.
-     */
+    /** Baca isi file xlsx dari response unduhan. */
     private function rows(TestResponse $response): array
     {
         $path = $response->baseResponse->getFile()->getPathname();
@@ -243,8 +244,7 @@ class ExcelExportTempTest extends TestCase
         $admin = $this->admin();
         $data = $this->seedData();
 
-        // Pengguna: tanpa password. Cari via email karena urutan latest()
-        // tidak menentu saat created_at dua user sama persis (tie detik).
+        // Pengguna: tanpa password. Cari via email karena urutan latest() tidak menentu saat created_at dua user sama persis (tie detik).
         $users = $this->rows($this->actingAs($admin)->get(route('users.export')));
         $this->assertSame(['Nama', 'Email', 'Role', 'Jumlah Role', 'Terdaftar'], $users[0]);
         $adminRow = collect($users)->slice(1)->firstWhere(1, 'admin@e.test');
@@ -264,11 +264,14 @@ class ExcelExportTempTest extends TestCase
         $this->assertSame('LK1-001', $computers[1][0]);
         $this->assertSame('Lab Komputer 1', $computers[1][1]);
 
-        // Pemeliharaan: 1 dari 2 item dicentang.
+        // Pemeliharaan: 1 dari 2 item dicentang (kolom: 0=Tanggal, 1=Laboratorium, 2=Tahun Ajaran, 3=Petugas, 4=Sudah, 5=Belum, 6=Tidak Ada, 7=Total, 8=Persentase, 9=Catatan Komputer)
         $maintenance = $this->rows($this->actingAs($admin)->get(route('maintenance.export')));
-        $this->assertSame(1, $maintenance[1][4]);
-        $this->assertSame(2, $maintenance[1][5]);
-        $this->assertSame('Debu dibersihkan', $maintenance[1][6]);
+        $this->assertSame(1, $maintenance[1][4]);  // Item Sudah = 1
+        $this->assertSame(1, $maintenance[1][5]);  // Item Belum = 1
+        $this->assertSame(0, $maintenance[1][6]);  // Item Tidak Ada = 0
+        $this->assertSame(2, $maintenance[1][7]);  // Total Item = 2
+        $this->assertSame('50%', $maintenance[1][8]); // Persentase Sudah = 50% (PHP round strips trailing zero)
+        $this->assertSame('Debu dibersihkan', $maintenance[1][9]); // Catatan Pemeriksaan Komputer
 
         // Pengecekan perangkat: 5 berfungsi, 3 rusak, 0 tidak ada (dari 8 sel).
         $checks = $this->rows($this->actingAs($admin)->get(route('device-checks.export')));

@@ -35,9 +35,13 @@ class MaintenanceTemplate implements FromCollection, WithHeadings, WithStyles
         $itemCount = collect(MaintenanceChecklist::getChecklistItems())
             ->sum(fn ($definition) => count($definition['items']));
 
+        // Baris contoh memamerkan token utama: ✓ (sudah), "sudah", "belum",
+        // dan "–" (tidak ada). Sel kosong pada baris data = belum.
+        $sample = ['✓', 'sudah', 'belum', '–'];
+
         return collect([
             array_merge([1, 'Contoh'], array_fill(0, $itemCount, '✓')),
-            array_merge([2, 'Contoh'], array_fill(0, $itemCount, '')),
+            array_merge([2, 'Contoh'], array_map(fn ($offset) => $sample[$offset % count($sample)], range(0, $itemCount - 1))),
         ]);
     }
 

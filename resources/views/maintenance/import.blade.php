@@ -69,7 +69,7 @@
                     <p class="text-sm font-medium text-blue-800">Aturan format file:</p>
                     <ul class="mt-1 text-xs text-blue-700 space-y-1">
                         <li>Baris judul dicari otomatis — blok judul di atasnya (Nama Lab, Periode) <span class="font-semibold">dilewati</span>. Judul kolom item berisi teks pertanyaan checklist sesuai template.</li>
-                        <li>Kolom wajib: <span class="font-semibold">Kode Komputer</span> (harus ada di laboratorium yang dipilih). Sel mendukung ✓, v, TRUE, 1 — kosong berarti tidak berfungsi.</li>
+                        <li>Kolom wajib: <span class="font-semibold">Kode Komputer</span> (harus ada di laboratorium yang dipilih). Sel mendukung ✓, v, TRUE, 1, "sudah" — kosong berarti <span class="font-semibold">belum</span>; "belum"/✗ untuk belum; "–"/"tidak ada" untuk tidak ada.</li>
                         <li>Kode komputer yang tidak ditemukan di lab atau baris kosong → baris dilewati dan dilaporkan sebagai error.</li>
                         <li>Import ulang dengan lab + tahun ajaran + tanggal yang sama <span class="font-semibold">menimpa seluruh matriks</span> — tidak menggandakan data.</li>
                         <li>Baris "Contoh" pada template otomatis dilewati.</li>

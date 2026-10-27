@@ -67,8 +67,7 @@ class MaintenancePrintTest extends TestCase
         ]);
     }
 
-    /**
-     * Buat satu pemeliharaan lengkap matriks item untuk tiap komputer lab.
+    /** Buat satu pemeliharaan lengkap matriks item untuk tiap komputer lab.
      * $checked berisi kunci "A.1.K1-001" untuk sel yang tercentang.
      */
     private function maintenanceChecklist(
@@ -94,12 +93,18 @@ class MaintenancePrintTest extends TestCase
                     $itemNumber = $index + 1;
                     $key = "{$category}.{$itemNumber}.{$computer->code}";
 
+                    // Changed is_checked to status
+                    $itemStatus = MaintenanceChecklistItem::STATUS_SUDAH;
+                    if (!empty($checked) && !in_array($key, $checked, true)) {
+                        $itemStatus = MaintenanceChecklistItem::STATUS_BELUM;
+                    }
+
                     MaintenanceChecklistItem::create([
                         'maintenance_checklist_id' => $checklist->id,
                         'computer_id' => $computer->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'is_checked' => in_array($key, $checked, true),
+                        'status' => $itemStatus,
                     ]);
                 }
             }
@@ -165,7 +170,7 @@ class MaintenancePrintTest extends TestCase
             ->assertSee('Petugas Satu')
             ->assertSee('Petugas Empat')
             ->assertSee('Apakah kondisi komputer normal sebelum dilakukan pemeliharaan?')
-            ->assertSee('checkbox checked', false)
+            ->assertDontSee('checkbox checked')
             ->assertDontSee('Lab Komputer 2')
             ->assertDontSee('Petugas Dua')
             ->assertDontSee('Petugas Tiga');

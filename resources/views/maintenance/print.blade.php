@@ -43,9 +43,9 @@
 
         .checklist-table tr.cat-row td { background: #e8e8e8; font-weight: bold; text-align: left; font-size: 9px; }
 
-        .checkbox { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; background: #fff; vertical-align: middle; }
-        .checkbox.checked { background: #fff; position: relative; }
-        .checkbox.checked::after { content: '✓'; position: absolute; top: -2px; left: 0.5px; font-size: 11px; font-weight: bold; }
+        .mark { font-size: 11px; font-weight: bold; }
+        .summary { margin-top: 6px; font-size: 10px; }
+        .legend { margin-top: 4px; font-size: 9px; }
 
         .id-pc-header { font-size: 8px; font-weight: bold; text-align: center; }
 
@@ -69,6 +69,9 @@
             $maintenance = $sheet['maintenance'];
             $computers = $sheet['computers'];
             $items = $sheet['items'];
+            $summary = $sheet['summary'] ?? [];
+            $statusSymbols = \App\Models\MaintenanceChecklistItem::symbols();
+            $statusLabels = \App\Models\MaintenanceChecklistItem::statuses();
         @endphp
         <div class="sheet">
             <div class="header">
@@ -130,11 +133,8 @@
                                 @foreach($computers as $computer)
                                     @php $key = "{$category}_{$itemNum}_{$computer->id}"; @endphp
                                     <td class="pc-col">
-                                        @if(isset($items[$key]) && $items[$key]->is_checked)
-                                            <span class="checkbox checked"></span>
-                                        @else
-                                            <span class="checkbox"></span>
-                                        @endif
+                                        @php $status = $items[$key]->status ?? null; @endphp
+                                        <span class="mark">{{ \App\Models\MaintenanceChecklistItem::symbol($status) }}</span>
                                     </td>
                                 @endforeach
                             </tr>
@@ -161,6 +161,18 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="summary">
+                Ringkasan:
+                @foreach($statusLabels as $statusKey => $statusLabel)
+                    {{ $statusLabel }} {{ $summary[$statusKey] ?? 0 }}{{ $loop->last ? '' : ' · ' }}
+                @endforeach
+            </div>
+            <div class="legend">
+                @foreach($statusLabels as $statusKey => $statusLabel)
+                    {{ $statusSymbols[$statusKey] }} {{ $statusLabel }}{{ $loop->last ? '' : ' · ' }}
+                @endforeach
+            </div>
 
             <div style="margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px;">
                 <div style="width: 220px;">

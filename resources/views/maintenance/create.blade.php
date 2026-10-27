@@ -58,18 +58,27 @@
     @if($selectedLab && $computers->count() > 0)
         @php
             $allItems = \App\Models\MaintenanceChecklist::getChecklistItems();
+            $statusLabels = \App\Models\MaintenanceChecklistItem::statuses();
+            $statusSymbols = \App\Models\MaintenanceChecklistItem::symbols();
+            $statusSudah = \App\Models\MaintenanceChecklistItem::STATUS_SUDAH;
         @endphp
 
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">Form Pemeriksaan</h2>
                     <p class="text-xs text-gray-500 mt-1">Laboratorium: <span class="font-semibold">{{ $computers->first()->laboratory->name ?? '-' }}</span> | Total: <span class="font-semibold">{{ $computers->count() }}</span> komputer</p>
                 </div>
-                <label class="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" id="checkAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                    <span class="text-sm font-medium text-gray-700">Centang Semua</span>
-                </label>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-xs text-gray-400 mr-1">Tandai semua:</span>
+                    @foreach($statusLabels as $statusKey => $statusLabel)
+                        <button type="button" data-bulk="{{ $statusKey }}"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 border text-xs font-medium rounded-lg transition-colors
+                                {{ $statusKey === $statusSudah ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100' : ($statusKey === \App\Models\MaintenanceChecklistItem::STATUS_BELUM ? 'border-red-200 text-red-700 bg-red-50 hover:bg-red-100' : 'border-gray-200 text-gray-600 bg-gray-50 hover:bg-gray-100') }}">
+                            <span>{{ $statusSymbols[$statusKey] }}</span> {{ $statusLabel }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm border-collapse">
@@ -88,10 +97,10 @@
                             <th class="px-4 py-2 border border-gray-200 min-w-[300px]"></th>
                             @foreach($computers as $computer)
                                 <th class="px-2 py-2 border border-gray-200 w-14 text-center">
-                                    <input type="checkbox" id="check-all-computer-{{ $computer->id }}" 
-                                           class="check-all-computer rounded border-gray-300 text-green-600 focus:ring-green-500" 
-                                           data-computer-id="{{ $computer->id }}" 
-                                           title="Centang semua untuk {{ $computer->code }}">
+                                    <input type="checkbox" id="check-all-computer-{{ $computer->id }}"
+                                           class="check-all-computer rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                           data-computer-id="{{ $computer->id }}"
+                                           title="Tandai semua item {{ $computer->code }} sebagai Sudah">
                                 </th>
                             @endforeach
                         </tr>
@@ -109,9 +118,22 @@
                                     <td class="px-4 py-2 text-gray-500 border border-gray-200 text-center">{{ $itemNum }}</td>
                                     <td class="px-4 py-2 text-gray-800 border border-gray-200">{{ $question }}</td>
                                     @foreach($computers as $computer)
+                                        @php
+                                            $key = "{$category}_{$itemNum}";
+                                            $selected = $statuses[$key][$computer->id] ?? $statusSudah;
+                                        @endphp
                                         <td class="text-center border border-gray-200">
-                                            <input type="checkbox" name="{{ $category }}_{{ $itemNum }}_{{ $computer->id }}" value="1"
-                                                class="check-item rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                            <div class="inline-flex border border-gray-200 rounded-md overflow-hidden">
+                                                @foreach($statusLabels as $statusKey => $statusLabel)
+                                                    <label class="cursor-pointer border-r border-gray-200 last:border-r-0" title="{{ $statusLabel }}">
+                                                        <input type="radio" class="status-radio sr-only peer" name="items[{{ $key }}][{{ $computer->id }}]" value="{{ $statusKey }}" data-computer-id="{{ $computer->id }}" {{ $selected === $statusKey ? 'checked' : '' }}>
+                                                        <span class="flex items-center justify-center w-6 h-6 text-xs font-bold text-gray-400 bg-white transition-colors peer-checked:text-white
+                                                            {{ $statusKey === $statusSudah ? 'peer-checked:bg-green-600' : ($statusKey === \App\Models\MaintenanceChecklistItem::STATUS_BELUM ? 'peer-checked:bg-red-600' : 'peer-checked:bg-gray-500') }}">
+                                                            {{ $statusSymbols[$statusKey] }}
+                                                        </span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                         </td>
                                     @endforeach
                                 </tr>
@@ -119,6 +141,16 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            <div class="px-6 py-3 border-t border-gray-100 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                <span class="font-medium">Keterangan:</span>
+                @foreach($statusLabels as $statusKey => $statusLabel)
+                    <span class="inline-flex items-center gap-1">
+                        <span class="inline-flex items-center justify-center w-4 h-4 rounded text-[10px] font-bold text-white
+                            {{ $statusKey === $statusSudah ? 'bg-green-600' : ($statusKey === \App\Models\MaintenanceChecklistItem::STATUS_BELUM ? 'bg-red-600' : 'bg-gray-500') }}">{{ $statusSymbols[$statusKey] }}</span>
+                        {{ $statusLabel }}
+                    </span>
+                @endforeach
             </div>
         </div>
 
@@ -179,49 +211,57 @@
         window.location.href = '{{ route("maintenance.create") }}?' + params.toString();
     });
 
-    document.getElementById('checkAll').addEventListener('change', function() {
-        document.querySelectorAll('.check-item').forEach(function(cb) {
-            cb.checked = document.getElementById('checkAll').checked;
+    function setAllRadios(value) {
+        document.querySelectorAll('.status-radio').forEach(function(radio) {
+            radio.checked = radio.value === value;
+            if (radio.checked) radio.dispatchEvent(new Event('change', { bubbles: false }));
         });
-        // Update per-computer checkboxes
-        document.querySelectorAll('.check-all-computer').forEach(function(cb) {
-            cb.checked = document.getElementById('checkAll').checked;
-            cb.indeterminate = false;
+    }
+
+    function setComputerRadios(computerId, value) {
+        document.querySelectorAll('.status-radio[data-computer-id="' + computerId + '"]').forEach(function(radio) {
+            radio.checked = radio.value === value;
+        });
+        syncComputerCheckbox(computerId);
+    }
+
+    function syncComputerCheckbox(computerId) {
+        const computerCheckbox = document.getElementById('check-all-computer-' + computerId);
+        if (!computerCheckbox) return;
+
+        const allItems = document.querySelectorAll('.status-radio[data-computer-id="' + computerId + '"]');
+        const checkedItems = document.querySelectorAll('.status-radio[data-computer-id="' + computerId + '"]:checked');
+
+        if (checkedItems.length === 0) {
+            computerCheckbox.checked = false;
+            computerCheckbox.indeterminate = false;
+        } else if (checkedItems.length === allItems.length) {
+            computerCheckbox.checked = true;
+            computerCheckbox.indeterminate = false;
+        } else {
+            computerCheckbox.checked = false;
+            computerCheckbox.indeterminate = true;
+        }
+    }
+
+    // Tombol "Tandai semua" per status
+    document.querySelectorAll('[data-bulk]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            setAllRadios(this.dataset.bulk);
         });
     });
 
-    // Per-computer "Centang Semua" checkboxes
+    // Checkbox header per komputer: centang = semua Sudah, uncentang = semua Belum
     document.querySelectorAll('.check-all-computer').forEach(function(computerCheckbox) {
         computerCheckbox.addEventListener('change', function() {
-            const computerId = this.dataset.computerId;
-            document.querySelectorAll('.check-item[name$="_' + computerId + '"]').forEach(function(cb) {
-                cb.checked = computerCheckbox.checked;
-            });
+            setComputerRadios(this.dataset.computerId, this.checked ? '{{ $statusSudah }}' : '{{ \App\Models\MaintenanceChecklistItem::STATUS_BELUM }}');
         });
     });
 
-    // Sync per-computer checkbox state when individual items change
-    document.querySelectorAll('.check-item').forEach(function(itemCheckbox) {
-        itemCheckbox.addEventListener('change', function() {
-            const nameMatch = this.name.match(/_(\d+)$/);
-            if (!nameMatch) return;
-            const computerId = nameMatch[1];
-            const computerCheckbox = document.getElementById('check-all-computer-' + computerId);
-            if (!computerCheckbox) return;
-
-            const allItems = document.querySelectorAll('.check-item[name$="_' + computerId + '"]');
-            const checkedItems = document.querySelectorAll('.check-item[name$="_' + computerId + '"]:checked');
-
-            if (checkedItems.length === 0) {
-                computerCheckbox.checked = false;
-                computerCheckbox.indeterminate = false;
-            } else if (checkedItems.length === allItems.length) {
-                computerCheckbox.checked = true;
-                computerCheckbox.indeterminate = false;
-            } else {
-                computerCheckbox.checked = false;
-                computerCheckbox.indeterminate = true;
-            }
+    // Sinkronkan state header saat radio individu berubah
+    document.querySelectorAll('.status-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            syncComputerCheckbox(this.dataset.computerId);
         });
     });
 </script>

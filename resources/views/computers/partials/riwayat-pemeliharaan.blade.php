@@ -64,6 +64,9 @@
             foreach ($maintenance->items as $item) {
                 $itemMap[$item->category . '.' . $item->item_number] = $item;
             }
+
+            $sudahCount = $maintenance->items->where('status', \App\Models\MaintenanceChecklistItem::STATUS_SUDAH)->count();
+            $totalCount = $maintenance->items->count();
         @endphp
 
         <div class="border border-gray-200 rounded-lg mb-3 overflow-hidden">
@@ -83,7 +86,12 @@
                         </span>
                     @endif
                 </div>
-                <span class="text-xs text-gray-500">oleh {{ $maintenance->inspector_name ?: '-' }}</span>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if($totalCount > 0)
+                        <span class="text-xs text-gray-500">{{ $sudahCount }} dari {{ $totalCount }} item sudah</span>
+                    @endif
+                    <span class="text-xs text-gray-500">oleh {{ $maintenance->inspector_name ?: '-' }}</span>
+                </div>
             </div>
 
             @foreach($categories as $categoryKey => $category)
@@ -95,13 +103,14 @@
                         @foreach($category['items'] as $index => $question)
                             @php
                                 $item = $itemMap[$categoryKey . '.' . ($index + 1)] ?? null;
-                                $isChecked = (bool) ($item->is_checked ?? false);
+                                $status = $item->status ?? \App\Models\MaintenanceChecklistItem::STATUS_BELUM;
                             @endphp
-                            <li class="flex items-start gap-2 text-sm {{ $isChecked ? 'text-gray-700' : 'text-gray-400' }}">
-                                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold flex-shrink-0 mt-0.5 {{ $isChecked ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }}">
-                                    {{ $isChecked ? '✓' : '✕' }}
+                            <li class="flex items-start gap-2 text-sm {{ $status === \App\Models\MaintenanceChecklistItem::STATUS_TIDAK_ADA ? 'text-gray-400' : 'text-gray-700' }}">
+                                <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold flex-shrink-0 mt-0.5
+                                    {{ $status === \App\Models\MaintenanceChecklistItem::STATUS_SUDAH ? 'bg-green-100 text-green-700' : ($status === \App\Models\MaintenanceChecklistItem::STATUS_BELUM ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-500') }}">
+                                    {{ \App\Models\MaintenanceChecklistItem::symbol($status) }}
                                 </span>
-                                <span class="{{ $isChecked ? '' : 'line-through' }}">{{ $question }}</span>
+                                <span>{{ $question }}</span>
                                 @if($item && $item->saved_at)
                                     <span class="text-xs text-gray-400 whitespace-nowrap ml-auto">
                                         {{ \Illuminate\Support\Carbon::parse($item->saved_at)->format('d/m/Y') }}

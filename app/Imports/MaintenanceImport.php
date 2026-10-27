@@ -21,9 +21,10 @@ use Maatwebsite\Excel\Concerns\ToCollection;
  *   dipakai sebagai judul kolom item.
  * - Kolom item dicocokkan persis per teks pertanyaan (case-insensitif) dari
  *   MaintenanceChecklist::getChecklistItems(). Kolom yang tidak ada di file
- *   → sel itu unchecked.
- * - Sel centang mendukung TRUE/1/✓/v/dsb., juga tulisan yang cocok dengan
- *   teks pertanyaannya.
+ *   → sel itu "belum".
+ * - Tiap sel berisi status: ✓/TRUE/1/"sudah"/dsb. = sudah, "belum"/✗ = belum,
+ *   "–"/"tidak ada" = tidak_ada. Sel kosong dianggap "belum" (pertanyaan yang
+ *   tidak terisi berarti belum dikerjakan).
  *
  * Perilaku:
  * - Konteks pemeliharaan (lab, tahun ajaran, tanggal, pemeriksa, catatan
@@ -38,12 +39,25 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class MaintenanceImport implements ToCollection
 {
     /**
-     * Nilai sel yang dianggap tercentang (case-insensitive).
-     * Mencakup checkbox Excel (TRUE), hasil centang teks, dan Wingdings.
+     * Nilai sel yang dianggap "sudah" (case-insensitive). Mencakup checkbox
+     * Excel (TRUE), hasil centang teks, Wingdings, dan token lama file
+     * pengecekan (r/p/x) agar re-import file lama tidak berubah makna.
      */
-    private const TRUTHY = [
+    private const SUDAH = [
         'true', '1', 'v', 'x', 'y', 'yes', 't', 'r', 'p', 'ya',
-        'þ', 'ü', '√', '✓', '☑', '✔',
+        'þ', 'ü', '√', '✓', '☑', '✔', 'sudah', 'ya, sudah',
+    ];
+
+    /** Nilai sel yang dianggap belum dikerjakan. */
+    private const BELUM = [
+        'belum', 'blm', 'n', 'no', 'false', '0', 'tak', 'tidak',
+        'belum diperiksa', 'belum dicek', '✗', '×',
+    ];
+
+    /** Nilai sel yang dianggap perangkat tidak ada/tidak terpasang. */
+    private const TIDAK_ADA = [
+        'ta', 'tdk ada', 'tidak ada', 'tidakada', 'tidak-ada', 'tidak terpasang',
+        'n/a', 'na', '–', '-', '—',
     ];
 
     private const NOTE_FIELDS = [
@@ -125,7 +139,7 @@ class MaintenanceImport implements ToCollection
                 $entry = $this->parseRow($row, $columns, $excelRow);
 
                 if ($entry !== null) {
-                    $matrix[$entry['computerId']] = $entry['checked'];
+                    $matrix[$entry['computerId']] = $entry['statuses'];
                 }
             } catch (\Throwable $e) {
                 $this->errors[] = "Baris {$excelRow}: ".$e->getMessage();
@@ -249,13 +263,13 @@ class MaintenanceImport implements ToCollection
         }
 
         $questions = $this->questionColumns();
-        $checked = [];
+        $statuses = [];
 
         foreach ($columns['items'] as $key => $column) {
-            $checked[$key] = $this->isTruthy($this->cell($row, $column['index']), $questions[$key]);
+            $statuses[$key] = $this->parseStatus($this->cell($row, $column['index']), $questions[$key]);
         }
 
-        return ['computerId' => $computer->id, 'checked' => $checked];
+        return ['computerId' => $computer->id, 'statuses' => $statuses];
     }
 
     /**
@@ -319,7 +333,7 @@ class MaintenanceImport implements ToCollection
                     'computer_id' => $computerId,
                     'category' => $category,
                     'item_number' => (int) $number,
-                    'is_checked' => (bool) ($matrix[$computerId][$key] ?? false),
+                    'status' => $matrix[$computerId][$key] ?? MaintenanceChecklistItem::STATUS_BELUM,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -331,20 +345,33 @@ class MaintenanceImport implements ToCollection
         }
     }
 
-    private function isTruthy(string $value, string $question): bool
+    /**
+     * Terjemahkan isi sel menjadi status item. Sel kosong / nilai tak
+     * dikenal dianggap "belum" — pertanyaan yang tidak terisi berarti belum
+     * dikerjakan.
+     */
+    private function parseStatus(string $value, string $question): string
     {
         $normalized = mb_strtolower(trim($value));
 
         if ($normalized === '') {
-            return false;
+            return MaintenanceChecklistItem::STATUS_BELUM;
         }
 
-        // Tulisan yang cocok dengan teks pertanyaannya dianggap tercentang.
+        // Tulisan yang cocok dengan teks pertanyaannya dianggap sudah.
         if ($normalized === $this->normalize($question)) {
-            return true;
+            return MaintenanceChecklistItem::STATUS_SUDAH;
         }
 
-        return in_array($normalized, self::TRUTHY, true);
+        if (in_array($normalized, self::SUDAH, true)) {
+            return MaintenanceChecklistItem::STATUS_SUDAH;
+        }
+
+        if (in_array($normalized, self::TIDAK_ADA, true)) {
+            return MaintenanceChecklistItem::STATUS_TIDAK_ADA;
+        }
+
+        return MaintenanceChecklistItem::STATUS_BELUM;
     }
 
     private function normalize(string $value): string
