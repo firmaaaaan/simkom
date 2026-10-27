@@ -61,6 +61,7 @@
             $statusLabels = \App\Models\MaintenanceChecklistItem::statuses();
             $statusSymbols = \App\Models\MaintenanceChecklistItem::symbols();
             $statusSudah = \App\Models\MaintenanceChecklistItem::STATUS_SUDAH;
+            $statuses = old('items', []);
         @endphp
 
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
