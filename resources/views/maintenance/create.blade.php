@@ -206,6 +206,9 @@
 
 @push('scripts')
 <script>
+    const SBM__STATUS_SUDAH = @json(\App\Models\MaintenanceChecklistItem::STATUS_SUDAH);
+    const SBM__STATUS_BELUM = @json(\App\Models\MaintenanceChecklistItem::STATUS_BELUM);
+
     document.getElementById('laboratory_id').addEventListener('change', function() {
         const params = new URLSearchParams(window.location.search);
         params.set('laboratory_id', this.value);
@@ -253,9 +256,9 @@
     });
 
     // Checkbox header per komputer: centang = semua Sudah, uncentang = semua Belum
-    document.querySelectorAll('.check-all-computer').forEach(function(computerCheckbox) {
-        computerCheckbox.addEventListener('change', function() {
-            setComputerRadios(this.dataset.computerId, this.checked ? '{{ $statusSudah }}' : '{{ \App\Models\MaintenanceChecklistItem::STATUS_BELUM }}');
+    document.querySelectorAll('.check-all-computer').forEach(function(computerCheckbox) {        computerCheckbox.addEventListener('change', function() {
+            setComputerRadios(this.dataset.computerId, this.checked ? SBM__STATUS_SUDAH : SBM__STATUS_BELUM);
+
         });
     });
 
@@ -265,6 +268,7 @@
             syncComputerCheckbox(this.dataset.computerId);
         });
     });
-</script>
-@endpush
+</script>@endpush
+
 @endsection
+

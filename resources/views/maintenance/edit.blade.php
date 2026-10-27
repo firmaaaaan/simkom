@@ -261,7 +261,7 @@
     // Checkbox header per komputer: centang = semua Sudah, uncentang = semua Belum
     document.querySelectorAll('.check-all-computer').forEach(function(computerCheckbox) {
         computerCheckbox.addEventListener('change', function() {
-            setComputerRadios(this.dataset.computerId, this.checked ? '{{ $statusSudah }}' : '{{ \App\Models\MaintenanceChecklistItem::STATUS_BELUM }}');
+            setComputerRadios(this.dataset.computerId, this.checked ? SBM__STATUS_SUDAH : SBM__STATUS_BELUM);
         });
     });
 

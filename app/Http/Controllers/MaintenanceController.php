@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\MaintenanceExport;
 use App\Exports\MaintenanceTemplate;
 use App\Imports\MaintenanceImport;
+use Illuminate\Support\Facades\View;
 use App\Models\AcademicYear;
 use App\Models\Computer;
 use App\Models\Laboratory;
@@ -152,7 +153,10 @@ class MaintenanceController extends Controller
         $checklistItems = MaintenanceChecklist::getChecklistItems();
         $statuses = old('items', []);
 
-        return view('maintenance.create', compact('laboratories', 'academicYears', 'computers', 'selectedLab', 'selectedYear', 'checklistItems', 'statuses'));
+        return view('maintenance.create', compact(
+            'laboratories', 'academicYears', 'computers', 'selectedLab', 'selectedYear',
+            'checklistItems', 'statuses',
+        ));
     }
 
     public function store(Request $request)
