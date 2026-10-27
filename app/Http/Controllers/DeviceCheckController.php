@@ -206,7 +206,7 @@ class DeviceCheckController extends Controller
 
     /**
      * Data yang dibutuhkan form & halaman detail: daftar lab, tahun ajaran,
-     * komputer pada lab terpilih, serta peta centang per komputer.
+     * komputer pada lab terpilih, serta peta status per komputer × item.
      */
     private function formData(DeviceCheck $check): array
     {
@@ -217,9 +217,9 @@ class DeviceCheckController extends Controller
             ? Computer::where('laboratory_id', $check->laboratory_id)->orderBy('code')->get()
             : collect();
 
-        $checked = $check->exists
+        $statuses = $check->exists
             ? $check->items()->get()
-                ->mapWithKeys(fn (DeviceCheckItem $item) => [$item->computer_id.'.'.$item->item_key => $item->is_checked])
+                ->mapWithKeys(fn (DeviceCheckItem $item) => [$item->computer_id.'.'.$item->item_key => $item->status])
                 ->all()
             : [];
 
@@ -228,7 +228,7 @@ class DeviceCheckController extends Controller
             'laboratories' => $laboratories,
             'academicYears' => $academicYears,
             'computers' => $computers,
-            'checked' => $checked,
+            'statuses' => $statuses,
         ];
     }
 
@@ -252,8 +252,9 @@ class DeviceCheckController extends Controller
             'covered_computers' => 0,
             'checks' => 0,
             'cells' => 0,
-            'ok' => 0,
-            'problems' => 0,
+            'berfungsi' => 0,
+            'rusak' => 0,
+            'tidak_ada' => 0,
         ];
 
         if ($selectedYear) {
@@ -299,10 +300,11 @@ class DeviceCheckController extends Controller
                         'laboratory' => $laboratory,
                         'check' => null,
                         'computers' => $computers,
-                        'checked' => [],
+                        'statuses' => [],
                         'cells' => 0,
-                        'ok' => 0,
-                        'problems' => 0,
+                        'berfungsi' => 0,
+                        'rusak' => 0,
+                        'tidak_ada' => 0,
                         'selectable' => false,
                         'selected' => false,
                     ]);
@@ -311,22 +313,23 @@ class DeviceCheckController extends Controller
                 }
 
                 foreach ($checks as $check) {
-                    $checked = $check->items
+                    $statuses = $check->items
                         ->mapWithKeys(fn (DeviceCheckItem $item) => [
-                            $item->computer_id.'.'.$item->item_key => $item->is_checked,
+                            $item->computer_id.'.'.$item->item_key => $item->status,
                         ])->all();
 
+                    $counts = array_count_values(array_values($statuses));
                     $cells = $computers->count() * $itemCount;
-                    $ok = count(array_filter($checked));
 
                     $rows->push([
                         'laboratory' => $laboratory,
                         'check' => $check,
                         'computers' => $computers,
-                        'checked' => $checked,
+                        'statuses' => $statuses,
                         'cells' => $cells,
-                        'ok' => $ok,
-                        'problems' => $cells - $ok,
+                        'berfungsi' => $counts[DeviceCheckItem::STATUS_BERFUNGSI] ?? 0,
+                        'rusak' => $counts[DeviceCheckItem::STATUS_RUSAK] ?? 0,
+                        'tidak_ada' => $counts[DeviceCheckItem::STATUS_TIDAK_ADA] ?? 0,
                         'selectable' => true,
                         'selected' => ! $hasSelection || $requested->contains($check->id),
                     ]);
@@ -345,8 +348,9 @@ class DeviceCheckController extends Controller
                 'covered_computers' => $coveredLabIds->sum(fn ($id) => $computersByLab->get($id, collect())->count()),
                 'checks' => $covered->count(),
                 'cells' => $covered->sum('cells'),
-                'ok' => $covered->sum('ok'),
-                'problems' => $covered->sum('problems'),
+                'berfungsi' => $covered->sum('berfungsi'),
+                'rusak' => $covered->sum('rusak'),
+                'tidak_ada' => $covered->sum('tidak_ada'),
             ];
         }
 
@@ -363,12 +367,14 @@ class DeviceCheckController extends Controller
             'notes' => 'nullable|string',
             'items' => 'nullable|array',
             'items.*' => 'array',
+            'items.*.*' => 'nullable|string|in:'.implode(',', DeviceCheckItem::statusKeys()),
         ]);
     }
 
     /**
-     * Tulis ulang seluruh sel matriks: satu baris database per komputer × item,
-     * termasuk sel yang tidak dicentang (is_checked = false).
+     * Tulis ulang seluruh sel matriks: satu baris database per komputer × item.
+     * Sel yang tidak dipilih pada form disimpan sebagai berfungsi (default
+     * matriks baru selalu terisi penuh).
      */
     private function syncItems(DeviceCheck $check, array $items): void
     {
@@ -381,12 +387,18 @@ class DeviceCheckController extends Controller
 
         foreach ($computerIds as $computerId) {
             foreach ($itemKeys as $itemKey) {
+                $status = $items[$itemKey][$computerId] ?? DeviceCheckItem::STATUS_BERFUNGSI;
+
+                if (! in_array($status, DeviceCheckItem::statusKeys(), true)) {
+                    $status = DeviceCheckItem::STATUS_BERFUNGSI;
+                }
+
                 $rows[] = [
                     'id' => (string) Str::uuid7(),
                     'device_check_id' => $check->id,
                     'computer_id' => $computerId,
                     'item_key' => $itemKey,
-                    'is_checked' => ! empty($items[$itemKey][$computerId]),
+                    'status' => $status,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];

@@ -31,13 +31,14 @@
         });
     });
 
-    const checkAll = document.getElementById('checkAll');
-    if (checkAll) {
-        checkAll.addEventListener('change', function () {
-            document.querySelectorAll('.check-item').forEach(function (cb) {
-                cb.checked = checkAll.checked;
+    // Tombol "Tandai semua" mengisi seluruh sel matriks dengan satu status.
+    document.querySelectorAll('[data-bulk]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var status = btn.getAttribute('data-bulk');
+            document.querySelectorAll('.status-radio').forEach(function (radio) {
+                radio.checked = radio.value === status;
             });
         });
-    }
+    });
 </script>
 @endpush

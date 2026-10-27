@@ -7,8 +7,10 @@
 @php
     $itemCount = \App\Models\DeviceCheck::itemColumnCount();
     $totalCells = $computers->count() * $itemCount;
-    $checkedCount = collect($checked)->filter()->count();
-    $problemCount = $totalCells - $checkedCount;
+    $counts = array_count_values(array_values($statuses));
+    $berfungsiCount = $counts[\App\Models\DeviceCheckItem::STATUS_BERFUNGSI] ?? 0;
+    $rusakCount = $counts[\App\Models\DeviceCheckItem::STATUS_RUSAK] ?? 0;
+    $tidakAdaCount = $counts[\App\Models\DeviceCheckItem::STATUS_TIDAK_ADA] ?? 0;
 @endphp
 
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -74,12 +76,13 @@
         <h2 class="text-base font-semibold text-gray-800">Matriks Pengecekan Perangkat</h2>
         <div class="flex flex-wrap gap-4 mt-2 text-xs">
             <span class="text-gray-600">Total: <strong class="text-gray-900">{{ $computers->count() }}</strong> komputer &times; <strong class="text-gray-900">{{ $itemCount }}</strong> item = <strong class="text-gray-900">{{ $totalCells }}</strong> sel</span>
-            <span class="text-green-600">Ada &amp; berfungsi: <strong>{{ $checkedCount }}</strong></span>
-            <span class="{{ $problemCount > 0 ? 'text-red-600' : 'text-gray-500' }}">Perlu perhatian: <strong>{{ $problemCount }}</strong></span>
+            <span class="text-green-600">Berfungsi: <strong>{{ $berfungsiCount }}</strong></span>
+            <span class="{{ $rusakCount > 0 ? 'text-red-600' : 'text-gray-500' }}">Rusak: <strong>{{ $rusakCount }}</strong></span>
+            <span class="{{ $tidakAdaCount > 0 ? 'text-gray-600' : 'text-gray-400' }}">Tidak Ada: <strong>{{ $tidakAdaCount }}</strong></span>
         </div>
     </div>
 
-    @include('device-checks.partials.matrix', ['editable' => false, 'computers' => $computers, 'checked' => $checked])
+    @include('device-checks.partials.matrix', ['editable' => false, 'computers' => $computers, 'statuses' => $statuses])
 </div>
 
 @if($check->notes)

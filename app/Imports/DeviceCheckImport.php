@@ -19,9 +19,10 @@ use Maatwebsite\Excel\Concerns\ToCollection;
  * - Header didukung 1 baris (template) maupun 2 baris (salinan hasil cetak
  *   dengan grup "Kabel Power" yang di-merge di atas PC/CPU/UPS).
  * - Kolom item cocok per label (case-insensitif), termasuk label bergrup
- *   "Kabel Power PC". Kolom item yang tidak ada di file → sel itu unchecked.
- * - Sel centang mendukung TRUE/1/✓/v/dsb., juga tulisan yang cocok dengan
- *   nama kolom itemnya.
+ *   "Kabel Power PC". Kolom item yang tidak ada di file → sel itu tidak_ada.
+ * - Tiap sel berisi status: ✓/TRUE/1/dsb. = berfungsi, "rusak"/✗ = rusak,
+ *   "–"/"tidak ada" = tidak_ada. Sel kosong dianggap tidak_ada (mempertahankan
+ *   arti sel kosong pada file lama yang berarti perangkat bermasalah/tidak ada).
  *
  * Perilaku:
  * - Konteks pengecekan (lab, tahun ajaran, tanggal, petugas, catatan) diambil
@@ -36,12 +37,23 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class DeviceCheckImport implements ToCollection
 {
     /**
-     * Nilai sel yang dianggap tercentang (case-insensitive).
-     * Mencakup checkbox Excel (TRUE), hasil centang teks, dan Wingdings.
+     * Nilai sel yang dianggap berfungsi (case-insensitive). Mencakup checkbox
+     * Excel (TRUE), hasil centang teks, dan Wingdings.
      */
-    private const TRUTHY = [
-        'true', '1', 'v', 'x', 'y', 'yes', 't', 'r', 'p', 'ya',
-        'þ', 'ü', '√', '✓', '☑', '✔',
+    private const BERFUNGSI = [
+        'true', '1', 'v', 'x', 'y', 'yes', 't', 'p', 'ya',
+        'þ', 'ü', '√', '✓', '☑', '✔', 'berfungsi', 'baik',
+    ];
+
+    /** Nilai sel yang dianggap rusak — "r" sengaja dipakai sebagai singkatan. */
+    private const RUSAK = [
+        'r', 'rusak', 'broken', '✗', '×',
+    ];
+
+    /** Nilai sel yang dianggap tidak ada/tidak terpasang. */
+    private const TIDAK_ADA = [
+        'ta', 'tdk ada', 'tidak ada', 'tidakada', 'tidak-ada', 'hilang',
+        'n/a', 'na', '–', '-', '—',
     ];
 
     protected string $laboratoryId;
@@ -118,7 +130,7 @@ class DeviceCheckImport implements ToCollection
                 $entry = $this->parseRow($row, $columns, $excelRow);
 
                 if ($entry !== null) {
-                    $matrix[$entry['computerId']] = $entry['checked'];
+                    $matrix[$entry['computerId']] = $entry['statuses'];
                 }
             } catch (\Throwable $e) {
                 $this->errors[] = "Baris {$excelRow}: ".$e->getMessage();
@@ -140,7 +152,7 @@ class DeviceCheckImport implements ToCollection
      * Header 1 baris dicoba lebih dulu (template). Bila belum lengkap dan ada
      * baris kedua, baris judul digabung (sel merge "Kabel Power" + sub-kolom)
      * lalu dicocokkan ulang — meniru format hasil cetak. Bila tetap tidak
-     * lengkap, pakai hasil pencocokan sebagian (kolom hilang = unchecked).
+     * lengkap, pakai hasil pencocokan sebagian (kolom hilang = tidak_ada).
      */
     private function buildColumns(array $headerRow, ?array $subHeaderRow, int $headerIndex): ?array
     {
@@ -263,13 +275,13 @@ class DeviceCheckImport implements ToCollection
             return null;
         }
 
-        $checked = [];
+        $statuses = [];
 
         foreach ($columns['items'] as $itemKey => $column) {
-            $checked[$itemKey] = $this->isTruthy($this->cell($row, $column['index']), $column['label']);
+            $statuses[$itemKey] = $this->parseStatus($this->cell($row, $column['index']), $column['label']);
         }
 
-        return ['computerId' => $computer->id, 'checked' => $checked];
+        return ['computerId' => $computer->id, 'statuses' => $statuses];
     }
 
     /**
@@ -327,7 +339,9 @@ class DeviceCheckImport implements ToCollection
                     'device_check_id' => $check->id,
                     'computer_id' => $computerId,
                     'item_key' => $itemKey,
-                    'is_checked' => (bool) ($matrix[$computerId][$itemKey] ?? false),
+                    // Komputer yang tidak tercantum pada file dianggap tidak_ada,
+                    // konsisten dengan sel kosong (arti lama: bermasalah/tidak ada).
+                    'status' => $matrix[$computerId][$itemKey] ?? DeviceCheckItem::STATUS_TIDAK_ADA,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -339,20 +353,37 @@ class DeviceCheckImport implements ToCollection
         }
     }
 
-    private function isTruthy(string $value, string $column): bool
+    /**
+     * Terjemahkan isi sel Excel menjadi status pengecekan.
+     * Urutan: kosong → tidak_ada; lalu token rusak; token tidak ada; nama
+     * kolom item; token berfungsi; sisanya tidak_ada.
+     */
+    private function parseStatus(string $value, string $column): string
     {
         $normalized = mb_strtolower(trim($value));
 
         if ($normalized === '') {
-            return false;
+            return DeviceCheckItem::STATUS_TIDAK_ADA;
         }
 
-        // Tulisan yang cocok dengan nama kolom itemnya dianggap tercentang.
+        if (in_array($normalized, self::RUSAK, true)) {
+            return DeviceCheckItem::STATUS_RUSAK;
+        }
+
+        if (in_array($normalized, self::TIDAK_ADA, true)) {
+            return DeviceCheckItem::STATUS_TIDAK_ADA;
+        }
+
+        // Tulisan yang cocok dengan nama kolom itemnya dianggap berfungsi.
         if ($normalized === $column) {
-            return true;
+            return DeviceCheckItem::STATUS_BERFUNGSI;
         }
 
-        return in_array($normalized, self::TRUTHY, true);
+        if (in_array($normalized, self::BERFUNGSI, true)) {
+            return DeviceCheckItem::STATUS_BERFUNGSI;
+        }
+
+        return DeviceCheckItem::STATUS_TIDAK_ADA;
     }
 
     private function normalize(string $value): string

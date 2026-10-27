@@ -2,12 +2,18 @@
 
 namespace App\Exports;
 
+use App\Models\DeviceCheckItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping
+/**
+ * Tanpa WithStrictNullComparison, sel bernilai 0 (mis. "Sel Tidak Ada" = 0)
+ * dibuang oleh writer Excel karena perbandingan null yang longgar.
+ */
+class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping, WithStrictNullComparison
 {
     public function collection(): Collection
     {
@@ -15,7 +21,9 @@ class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping
             ->with(['laboratory', 'academicYear'])
             ->withCount([
                 'items',
-                'items as checked_items_count' => fn ($query) => $query->where('is_checked', true),
+                'items as berfungsi_count' => fn ($query) => $query->where('status', DeviceCheckItem::STATUS_BERFUNGSI),
+                'items as rusak_count' => fn ($query) => $query->where('status', DeviceCheckItem::STATUS_RUSAK),
+                'items as tidak_ada_count' => fn ($query) => $query->where('status', DeviceCheckItem::STATUS_TIDAK_ADA),
                 'items as computers_count' => fn ($query) => $query->select(DB::raw('count(distinct computer_id)')),
             ])
             ->get();
@@ -30,7 +38,8 @@ class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping
             'Petugas',
             'Jumlah Komputer',
             'Sel Berfungsi',
-            'Sel Perlu Perhatian',
+            'Sel Rusak',
+            'Sel Tidak Ada',
             'Total Sel',
             'Persentase Berfungsi',
             'Catatan',
@@ -40,7 +49,9 @@ class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping
     public function map($check): array
     {
         $total = (int) $check->items_count;
-        $checked = (int) $check->checked_items_count;
+        $berfungsi = (int) $check->berfungsi_count;
+        $rusak = (int) $check->rusak_count;
+        $tidakAda = (int) $check->tidak_ada_count;
 
         return [
             $check->check_date?->format('d/m/Y'),
@@ -48,10 +59,11 @@ class DeviceCheckExport extends BaseExport implements WithHeadings, WithMapping
             $check->academicYear->name ?? '-',
             $check->officer_name ?: '-',
             $check->computers_count,
-            $checked,
-            $total - $checked,
+            $berfungsi,
+            $rusak,
+            $tidakAda,
             $total,
-            $total > 0 ? round($checked / $total * 100, 1) . '%' : '-',
+            $total > 0 ? round($berfungsi / $total * 100, 1).'%' : '-',
             $check->notes,
         ];
     }

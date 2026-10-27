@@ -1,7 +1,10 @@
 @php
     $header = \App\Models\DeviceCheck::headerGroups();
     $columns = \App\Models\DeviceCheck::itemColumns();
+    $statuses = $statuses ?? [];
     $editable = $editable ?? false;
+    $statusLabels = \App\Models\DeviceCheckItem::statuses();
+    $statusSymbols = \App\Models\DeviceCheckItem::symbols();
 @endphp
 
 <div class="overflow-x-auto">
@@ -34,21 +37,31 @@
                     <td class="px-3 py-2 text-center text-gray-500 border border-gray-200">{{ $index + 1 }}</td>
                     <td class="px-3 py-2 font-medium text-gray-900 border border-gray-200">{{ $computer->code }}</td>
                     @foreach($columns as $column)
-                        @php $key = $computer->id . '.' . $column['key']; @endphp
-                        <td class="px-2 py-2 text-center border border-gray-200">
+                        @php
+                            $key = $computer->id . '.' . $column['key'];
+                            $selected = $statuses[$key] ?? \App\Models\DeviceCheckItem::STATUS_BERFUNGSI;
+                        @endphp
+                        <td class="px-1 py-1.5 text-center border border-gray-200">
                             @if($editable)
-                                <input type="checkbox" name="items[{{ $column['key'] }}][{{ $computer->id }}]" value="1"
-                                    title="{{ $computer->code }} - {{ $column['label'] }}"
-                                    class="check-item rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                    {{ !empty($checked[$key]) ? 'checked' : '' }}>
-                            @elseif(!empty($checked[$key]))
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded border-2 border-green-500 bg-green-500">
-                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </span>
+                                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden bg-white" role="radiogroup"
+                                    aria-label="{{ $computer->code }} - {{ $column['label'] }}">
+                                    @foreach($statusLabels as $statusKey => $statusLabel)
+                                        <label class="cursor-pointer border-r border-gray-200 last:border-r-0" title="{{ $statusLabel }}">
+                                            <input type="radio" class="status-radio sr-only peer" name="items[{{ $column['key'] }}][{{ $computer->id }}]" value="{{ $statusKey }}" {{ $selected === $statusKey ? 'checked' : '' }}>
+                                            <span class="flex items-center justify-center w-6 h-6 text-xs font-bold text-gray-400 bg-white transition-colors peer-checked:text-white
+                                                {{ $statusKey === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'peer-checked:bg-green-600' : ($statusKey === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'peer-checked:bg-red-600' : 'peer-checked:bg-gray-500') }}">
+                                                {{ $statusSymbols[$statusKey] }}
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
                             @else
-                                <span class="inline-flex items-center justify-center w-5 h-5 rounded border-2 border-gray-200 bg-white"></span>
+                                @php $status = $statuses[$key] ?? null; @endphp
+                                <span class="inline-flex items-center justify-center w-5 h-5 rounded border-2 text-xs font-bold
+                                    {{ $status === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'border-green-500 bg-green-500 text-white' : ($status === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'border-red-400 bg-red-50 text-red-600' : ($status === \App\Models\DeviceCheckItem::STATUS_TIDAK_ADA ? 'border-gray-300 bg-white text-gray-400' : 'border-gray-200 bg-white text-gray-300')) }}"
+                                    title="{{ $statusLabels[$status] ?? 'Belum dicek' }}">
+                                    {{ $statusSymbols[$status] ?? '' }}
+                                </span>
                             @endif
                         </td>
                     @endforeach

@@ -1,6 +1,8 @@
 @php
     $header = \App\Models\DeviceCheck::headerGroups();
     $columns = \App\Models\DeviceCheck::itemColumns();
+    $symbols = \App\Models\DeviceCheckItem::symbols();
+    $counts = array_count_values(array_values($statuses));
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -38,9 +40,10 @@
         .matrix td.no { width: 30px; }
         .matrix tbody tr:nth-child(even) { background: #f7f7f7; }
 
-        .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; background: #d9d9d9; vertical-align: middle; }
-        .checkbox.checked { background: #d9d9d9; position: relative; }
-        .checkbox.checked::after { content: '✓'; position: absolute; top: -3px; left: 0.5px; font-size: 12px; font-weight: bold; }
+        .mark { display: inline-block; width: 13px; height: 13px; border: 1px solid #000; background: #fff; font-size: 11px; font-weight: bold; line-height: 11px; text-align: center; vertical-align: middle; }
+        .mark.berfungsi { background: #d9d9d9; }
+        .mark.rusak { background: #fff; }
+        .mark.tidak_ada { background: #fff; color: #888; }
 
         .notes { margin-top: 12px; font-size: 11px; }
         .notes .label { font-weight: bold; }
@@ -128,8 +131,9 @@
                     <td class="id-pc">{{ $computer->code }}</td>
                     @foreach($columns as $column)
                         @php $key = $computer->id . '.' . $column['key']; @endphp
+                        @php $status = $statuses[$key] ?? null; @endphp
                         <td>
-                            <span class="checkbox {{ !empty($checked[$key]) ? 'checked' : '' }}"></span>
+                            <span class="mark {{ $status }}" title="{{ \App\Models\DeviceCheckItem::statuses()[$status] ?? 'Belum dicek' }}">{{ $symbols[$status] ?? '' }}</span>
                         </td>
                     @endforeach
                 </tr>
@@ -143,7 +147,8 @@
 
     <div class="notes">
         <p><span class="label">Catatan:</span> {{ $check->notes ?: '-' }}</p>
-        <p style="margin-top: 4px;">Centang berarti perangkat ada dan berfungsi. Sel kosong berarti perangkat bermasalah atau tidak ada.</p>
+        <p style="margin-top: 4px;">Keterangan sel: <strong>✓ Berfungsi</strong> (perangkat ada dan normal) &middot; <strong>✗ Rusak</strong> (ada tetapi tidak berfungsi) &middot; <strong>&ndash; Tidak Ada</strong> (tidak terpasang/hilang).</p>
+        <p style="margin-top: 4px;">Ringkasan: {{ $counts[\App\Models\DeviceCheckItem::STATUS_BERFUNGSI] ?? 0 }} sel berfungsi &middot; {{ $counts[\App\Models\DeviceCheckItem::STATUS_RUSAK] ?? 0 }} sel rusak &middot; {{ $counts[\App\Models\DeviceCheckItem::STATUS_TIDAK_ADA] ?? 0 }} sel tidak ada (dari {{ count($computers) * count($columns) }} sel).</p>
     </div>
 
     <div class="signature">

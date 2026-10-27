@@ -52,13 +52,19 @@ class DeviceCheckSeeder extends Seeder
 
                 foreach ($computers as $computer) {
                     foreach ($itemKeys as $itemKey) {
+                        // ~85% berfungsi, ~10% rusak, ~5% tidak ada agar
+                        // laporan memiliki kasus yang realistis.
+                        $roll = mt_rand(1, 100);
+                        $status = $roll <= 85
+                            ? DeviceCheckItem::STATUS_BERFUNGSI
+                            : ($roll <= 95 ? DeviceCheckItem::STATUS_RUSAK : DeviceCheckItem::STATUS_TIDAK_ADA);
+
                         $rows[] = [
                             'id' => Str::uuid(),
                             'device_check_id' => $check->id,
                             'computer_id' => $computer->id,
                             'item_key' => $itemKey,
-                            // ~90% sel baik agar laporan memiliki beberapa "masalah" yang realistis.
-                            'is_checked' => mt_rand(1, 100) <= 90,
+                            'status' => $status,
                             'created_at' => $now,
                             'updated_at' => $now,
                         ];

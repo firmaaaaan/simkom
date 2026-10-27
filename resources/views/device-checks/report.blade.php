@@ -57,7 +57,7 @@
 
     @if($selectedYear)
         {{-- RINGKASAN (mengikuti baris yang dipilih) --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="bg-white rounded-xl border border-gray-200 p-4">
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Laboratorium</p>
                 <p class="mt-1 text-2xl font-bold text-gray-900">{{ $summary['labs'] }}</p>
@@ -69,14 +69,19 @@
                 <p class="text-xs text-gray-400 mt-0.5">dari {{ $selectable->count() }} pada tahun ini · {{ $summary['covered_computers'] }} komputer</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Ada &amp; Berfungsi</p>
-                <p class="mt-1 text-2xl font-bold text-green-600">{{ $summary['ok'] }}</p>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Berfungsi</p>
+                <p class="mt-1 text-2xl font-bold text-green-600">{{ $summary['berfungsi'] }}</p>
                 <p class="text-xs text-gray-400 mt-0.5">sel perangkat normal dari {{ $summary['cells'] }} sel</p>
             </div>
             <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Perlu Perhatian</p>
-                <p class="mt-1 text-2xl font-bold {{ $summary['problems'] > 0 ? 'text-red-600' : 'text-gray-900' }}">{{ $summary['problems'] }}</p>
-                <p class="text-xs text-gray-400 mt-0.5">sel perangkat bermasalah/kosong</p>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Rusak</p>
+                <p class="mt-1 text-2xl font-bold {{ $summary['rusak'] > 0 ? 'text-red-600' : 'text-gray-900' }}">{{ $summary['rusak'] }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">ada tetapi tidak berfungsi</p>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Tidak Ada</p>
+                <p class="mt-1 text-2xl font-bold {{ $summary['tidak_ada'] > 0 ? 'text-gray-900' : 'text-gray-500' }}">{{ $summary['tidak_ada'] }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">tidak terpasang/hilang</p>
             </div>
         </div>
 
@@ -131,7 +136,8 @@
                                 <th class="text-left px-4 py-3 font-medium text-gray-500">Petugas</th>
                                 <th class="text-left px-4 py-3 font-medium text-gray-500">Komputer</th>
                                 <th class="text-left px-4 py-3 font-medium text-gray-500">Berfungsi</th>
-                                <th class="text-left px-4 py-3 font-medium text-gray-500">Perlu Perhatian</th>
+                                <th class="text-left px-4 py-3 font-medium text-gray-500">Rusak</th>
+                                <th class="text-left px-4 py-3 font-medium text-gray-500">Tidak Ada</th>
                                 <th class="text-left px-4 py-3 font-medium text-gray-500">Aksi</th>
                             </tr>
                         </thead>
@@ -168,11 +174,13 @@
                                     <td data-label="Petugas" class="px-4 py-4 text-gray-600">{{ $row['check']?->officer_name ?: '—' }}</td>
                                     <td data-label="Komputer" class="px-4 py-4 text-gray-600">{{ $row['check'] ? $row['computers']->count() : '—' }}</td>
                                     @if($row['check'])
-                                        <td data-label="Berfungsi" class="px-4 py-4 text-green-600 font-medium">{{ $row['ok'] }}</td>
-                                        <td data-label="Perlu Perhatian" class="px-4 py-4 font-medium {{ $row['problems'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $row['problems'] }}</td>
+                                        <td data-label="Berfungsi" class="px-4 py-4 text-green-600 font-medium">{{ $row['berfungsi'] }}</td>
+                                        <td data-label="Rusak" class="px-4 py-4 font-medium {{ $row['rusak'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $row['rusak'] }}</td>
+                                        <td data-label="Tidak Ada" class="px-4 py-4 font-medium {{ $row['tidak_ada'] > 0 ? 'text-gray-700' : 'text-gray-400' }}">{{ $row['tidak_ada'] }}</td>
                                     @else
                                         <td data-label="Berfungsi" class="px-4 py-4 text-gray-300">&ndash;</td>
-                                        <td data-label="Perlu Perhatian" class="px-4 py-4 text-gray-300">&ndash;</td>
+                                        <td data-label="Rusak" class="px-4 py-4 text-gray-300">&ndash;</td>
+                                        <td data-label="Tidak Ada" class="px-4 py-4 text-gray-300">&ndash;</td>
                                     @endif
                                     <td data-label="Aksi" class="px-4 py-4">
                                         @if($row['check'])
@@ -190,7 +198,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-12 text-center text-gray-500 text-sm">Tidak ada laboratorium pada filter ini</td>
+                                    <td colspan="10" class="px-6 py-12 text-center text-gray-500 text-sm">Tidak ada laboratorium pada filter ini</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -212,15 +220,16 @@
                         </p>
                     </div>
                     <div class="flex gap-4 text-xs">
-                        <span class="text-green-600">Berfungsi: <strong>{{ $row['ok'] }}</strong></span>
-                        <span class="{{ $row['problems'] > 0 ? 'text-red-600' : 'text-gray-500' }}">Perlu perhatian: <strong>{{ $row['problems'] }}</strong></span>
+                        <span class="text-green-600">Berfungsi: <strong>{{ $row['berfungsi'] }}</strong></span>
+                        <span class="{{ $row['rusak'] > 0 ? 'text-red-600' : 'text-gray-500' }}">Rusak: <strong>{{ $row['rusak'] }}</strong></span>
+                        <span class="{{ $row['tidak_ada'] > 0 ? 'text-gray-700' : 'text-gray-500' }}">Tidak Ada: <strong>{{ $row['tidak_ada'] }}</strong></span>
                         @can('print-maintenance')
                         <a href="{{ route('device-checks.print', $row['check']) }}" target="_blank" class="text-green-600 hover:text-green-700 font-medium">Cetak lab ini</a>
                         @endcan
                     </div>
                 </div>
 
-                @include('device-checks.partials.matrix', ['editable' => false, 'computers' => $row['computers'], 'checked' => $row['checked']])
+                @include('device-checks.partials.matrix', ['editable' => false, 'computers' => $row['computers'], 'statuses' => $row['statuses']])
             </div>
         @empty
             <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">

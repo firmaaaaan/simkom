@@ -71,18 +71,27 @@
                         | <span class="font-semibold">{{ \App\Models\DeviceCheck::itemColumnCount() }}</span> item perangkat
                     </p>
                 </div>
-                <label class="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" id="checkAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                    <span class="text-sm font-medium text-gray-700">Centang Semua</span>
-                </label>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs text-gray-500">Tandai semua:</span>
+                    @foreach(\App\Models\DeviceCheckItem::statuses() as $statusKey => $statusLabel)
+                        <button type="button" data-bulk="{{ $statusKey }}"
+                            class="px-2.5 py-1.5 border text-xs font-medium rounded-lg transition-colors
+                                {{ $statusKey === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'border-green-200 text-green-700 hover:bg-green-50' : ($statusKey === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-gray-200 text-gray-600 hover:bg-gray-50') }}">
+                            {{ \App\Models\DeviceCheckItem::symbols()[$statusKey] }} {{ $statusLabel }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
 
             <p class="px-6 pt-4 text-xs text-gray-500">
-                Centang berarti perangkat <span class="font-semibold text-gray-700">ada dan berfungsi</span>.
-                Sel yang dibiarkan kosong menandakan perangkat bermasalah atau tidak ada.
+                Pilih status tiap sel:
+                <span class="font-semibold text-green-700">{{ \App\Models\DeviceCheckItem::symbols()[\App\Models\DeviceCheckItem::STATUS_BERFUNGSI] }} Berfungsi</span> = perangkat ada dan normal,
+                <span class="font-semibold text-red-600">{{ \App\Models\DeviceCheckItem::symbols()[\App\Models\DeviceCheckItem::STATUS_RUSAK] }} Rusak</span> = ada tetapi tidak berfungsi,
+                <span class="font-semibold text-gray-500">{{ \App\Models\DeviceCheckItem::symbols()[\App\Models\DeviceCheckItem::STATUS_TIDAK_ADA] }} Tidak Ada</span> = tidak terpasang/hilang.
+                Gunakan tombol "Tandai semua" untuk mengisi cepat, lalu ubah status sel yang berkecualian.
             </p>
 
-            @include('device-checks.partials.matrix', ['editable' => true, 'computers' => $computers, 'checked' => $checked])
+            @include('device-checks.partials.matrix', ['editable' => true, 'computers' => $computers, 'statuses' => $statuses])
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">

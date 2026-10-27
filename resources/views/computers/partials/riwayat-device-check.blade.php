@@ -53,8 +53,11 @@
 <div class="p-6 max-h-[65vh] overflow-y-auto overscroll-contain">
     @forelse($deviceChecks as $check)
         @php
-            $checkedMap = $check->items->keyBy('item_key');
-            $checkedCount = $check->items->where('is_checked', true)->count();
+            $statusMap = $check->items->keyBy('item_key');
+            $counts = $check->items->countBy('status');
+            $berfungsiCount = $counts[\App\Models\DeviceCheckItem::STATUS_BERFUNGSI] ?? 0;
+            $rusakCount = $counts[\App\Models\DeviceCheckItem::STATUS_RUSAK] ?? 0;
+            $tidakAdaCount = $counts[\App\Models\DeviceCheckItem::STATUS_TIDAK_ADA] ?? 0;
         @endphp
 
         <div class="border border-gray-200 rounded-lg mb-3 overflow-hidden">
@@ -85,7 +88,13 @@
 
             <div class="px-4 py-3 border-t border-gray-100">
                 <p class="text-xs text-gray-400 mb-2">
-                    {{ $checkedCount }} dari {{ count($itemColumns) }} item berfungsi
+                    {{ $berfungsiCount }} dari {{ count($itemColumns) }} item berfungsi
+                    @if($rusakCount > 0)
+                        <span class="text-red-500">· {{ $rusakCount }} rusak</span>
+                    @endif
+                    @if($tidakAdaCount > 0)
+                        <span class="text-gray-500">· {{ $tidakAdaCount }} tidak ada</span>
+                    @endif
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     @foreach($itemColumns as $column)
@@ -93,13 +102,19 @@
                             $label = isset($column['group'])
                                 ? $column['group'] . ' ' . $column['label']
                                 : $column['label'];
-                            $isChecked = (bool) ($checkedMap[$column['key']]->is_checked ?? false);
+                            $status = $statusMap[$column['key']]->status ?? null;
                         @endphp
-                        <div class="flex items-center gap-2 text-sm {{ $isChecked ? 'text-gray-700' : 'text-gray-400' }}">
-                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold flex-shrink-0 {{ $isChecked ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500' }}">
-                                {{ $isChecked ? '✓' : '✕' }}
+                        <div class="flex items-center gap-2 text-sm
+                            {{ $status === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'text-gray-700' : ($status === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'text-red-600' : 'text-gray-400') }}">
+                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold flex-shrink-0
+                                {{ $status === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'bg-green-100 text-green-700' : ($status === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-500') }}">
+                                {{ \App\Models\DeviceCheckItem::symbol($status) }}
                             </span>
-                            <span class="{{ $isChecked ? '' : 'line-through' }}">{{ $label }}</span>
+                            <span class="{{ $status === \App\Models\DeviceCheckItem::STATUS_TIDAK_ADA ? 'line-through' : '' }}">{{ $label }}</span>
+                            <span class="ml-auto text-[10px] uppercase tracking-wide
+                                {{ $status === \App\Models\DeviceCheckItem::STATUS_BERFUNGSI ? 'text-green-600' : ($status === \App\Models\DeviceCheckItem::STATUS_RUSAK ? 'text-red-500' : 'text-gray-400') }}">
+                                {{ \App\Models\DeviceCheckItem::statuses()[$status] ?? 'Belum dicek' }}
+                            </span>
                         </div>
                     @endforeach
                 </div>

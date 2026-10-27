@@ -98,7 +98,7 @@ class ExcelExportTempTest extends TestCase
         foreach (DeviceCheck::itemKeys() as $index => $key) {
             DeviceCheckItem::create([
                 'device_check_id' => $check->id, 'computer_id' => $computer->id, 'item_key' => $key,
-                'is_checked' => $index < 5,
+                'status' => $index < 5 ? DeviceCheckItem::STATUS_BERFUNGSI : DeviceCheckItem::STATUS_RUSAK,
             ]);
         }
 
@@ -270,13 +270,14 @@ class ExcelExportTempTest extends TestCase
         $this->assertSame(2, $maintenance[1][5]);
         $this->assertSame('Debu dibersihkan', $maintenance[1][6]);
 
-        // Pengecekan perangkat: 5 dari 8 sel berfungsi.
+        // Pengecekan perangkat: 5 berfungsi, 3 rusak, 0 tidak ada (dari 8 sel).
         $checks = $this->rows($this->actingAs($admin)->get(route('device-checks.export')));
         $this->assertSame(1, $checks[1][4]);   // jumlah komputer
         $this->assertSame(5, $checks[1][5]);   // berfungsi
-        $this->assertSame(3, $checks[1][6]);   // perlu perhatian
-        $this->assertSame(8, $checks[1][7]);   // total sel
-        $this->assertSame('62.5%', $checks[1][8]);
+        $this->assertSame(3, $checks[1][6]);   // rusak
+        $this->assertSame(0, $checks[1][7]);   // tidak ada
+        $this->assertSame(8, $checks[1][8]);   // total sel
+        $this->assertSame('62.5%', $checks[1][9]);
 
         // Peminjaman: catatan admin ikut terekspor.
         $borrowings = $this->rows($this->actingAs($admin)->get(route('borrowings.export')));

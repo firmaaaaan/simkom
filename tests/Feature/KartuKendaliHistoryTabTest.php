@@ -58,7 +58,9 @@ class KartuKendaliHistoryTabTest extends TestCase
                 'device_check_id' => $check->id,
                 'computer_id' => $computer->id,
                 'item_key' => $itemKey,
-                'is_checked' => $itemKey === 'mouse',
+                'status' => $itemKey === 'mouse'
+                    ? DeviceCheckItem::STATUS_BERFUNGSI
+                    : DeviceCheckItem::STATUS_TIDAK_ADA,
             ]);
         }
 
@@ -239,7 +241,7 @@ class KartuKendaliHistoryTabTest extends TestCase
                 'device_check_id' => $check->id,
                 'computer_id' => $computer->id,
                 'item_key' => $itemKey,
-                'is_checked' => true,
+                'status' => DeviceCheckItem::STATUS_BERFUNGSI,
             ]);
         }
 

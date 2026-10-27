@@ -103,14 +103,14 @@ class DeviceCheckImportTest extends TestCase
     }
 
     /**
-     * Peta sel "kode.item_key" => tercentang untuk sebuah pengecekan.
+     * Peta "kode.item_key" => status sebuah pengecekan.
      */
     private function matrix(DeviceCheck $check): array
     {
         $map = [];
 
         foreach ($check->items()->with('computer')->get() as $item) {
-            $map[$item->computer->code.'.'.$item->item_key] = (bool) $item->is_checked;
+            $map[$item->computer->code.'.'.$item->item_key] = $item->status;
         }
 
         return $map;
@@ -162,21 +162,49 @@ class DeviceCheckImportTest extends TestCase
         $this->assertSame(3 * count(DeviceCheck::itemKeys()), DeviceCheckItem::count());
 
         $matrix = $this->matrix($check);
-        $this->assertTrue($matrix['K1-001.mouse']);
-        $this->assertTrue($matrix['K1-001.keyboard']);
-        $this->assertFalse($matrix['K1-001.hdmi']);
-        $this->assertTrue($matrix['K1-001.power_pc']);
-        $this->assertTrue($matrix['K1-001.power_cpu']);
-        $this->assertTrue($matrix['K1-001.power_ups']);
-        $this->assertFalse($matrix['K1-001.ups']);
-        $this->assertTrue($matrix['K1-001.jaringan']);
+        $this->assertSame('berfungsi', $matrix['K1-001.mouse']);
+        $this->assertSame('berfungsi', $matrix['K1-001.keyboard']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.hdmi']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_pc']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_cpu']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_ups']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.ups']);
+        $this->assertSame('berfungsi', $matrix['K1-001.jaringan']);
 
-        $this->assertFalse($matrix['K1-002.mouse']);
-        $this->assertTrue($matrix['K1-002.keyboard']);
-        $this->assertFalse($matrix['K1-002.jaringan']);
+        $this->assertSame('tidak_ada', $matrix['K1-002.mouse']);
+        $this->assertSame('berfungsi', $matrix['K1-002.keyboard']);
+        $this->assertSame('tidak_ada', $matrix['K1-002.jaringan']);
 
-        $this->assertFalse($matrix['K1-003.mouse']);
-        $this->assertFalse($matrix['K1-003.jaringan']);
+        // Komputer tanpa baris pada file ikut ditulis sebagai tidak_ada.
+        $this->assertSame('tidak_ada', $matrix['K1-003.mouse']);
+        $this->assertSame('tidak_ada', $matrix['K1-003.jaringan']);
+    }
+
+    public function test_import_parses_rusak_and_tidak_ada_tokens(): void
+    {
+        $admin = $this->admin();
+        $lab = $this->seedLab();
+        $year = $this->seedYear();
+
+        $grid = [
+            ['No', 'Kode Komputer', 'Mouse', 'Keyboard', 'HDMI', 'Kabel Power PC', 'Kabel Power CPU', 'Kabel Power UPS', 'UPS', 'Jaringan'],
+            [1, 'K1-001', 'rusak', 'R', '–', 'tidak ada', '✓', 'TA', 'x', 'v'],
+        ];
+
+        $this->actingAs($admin)
+            ->post(route('device-checks.store-import'), $this->importPayload($lab, $year, $grid))
+            ->assertSessionHas('success', fn ($message) => str_contains($message, 'pengecekan baru'));
+
+        $matrix = $this->matrix(DeviceCheck::first());
+        $this->assertSame('rusak', $matrix['K1-001.mouse']);
+        $this->assertSame('rusak', $matrix['K1-001.keyboard']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.hdmi']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.power_pc']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_cpu']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.power_ups']);
+        // 'x' tetap dianggap tercentang (warisan format lama), 'v' berfungsi.
+        $this->assertSame('berfungsi', $matrix['K1-001.ups']);
+        $this->assertSame('berfungsi', $matrix['K1-001.jaringan']);
     }
 
     public function test_import_supports_two_row_group_header(): void
@@ -199,13 +227,13 @@ class DeviceCheckImportTest extends TestCase
             ->assertSessionHas('success', fn ($message) => str_contains($message, 'pengecekan baru'));
 
         $matrix = $this->matrix(DeviceCheck::first());
-        $this->assertTrue($matrix['K1-001.mouse']);
-        $this->assertTrue($matrix['K1-001.hdmi']);
-        $this->assertTrue($matrix['K1-001.power_pc']);
-        $this->assertFalse($matrix['K1-001.power_cpu']);
-        $this->assertTrue($matrix['K1-001.power_ups']);
-        $this->assertFalse($matrix['K1-001.ups']);
-        $this->assertTrue($matrix['K1-001.jaringan']);
+        $this->assertSame('berfungsi', $matrix['K1-001.mouse']);
+        $this->assertSame('berfungsi', $matrix['K1-001.hdmi']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_pc']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.power_cpu']);
+        $this->assertSame('berfungsi', $matrix['K1-001.power_ups']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.ups']);
+        $this->assertSame('berfungsi', $matrix['K1-001.jaringan']);
     }
 
     public function test_import_updates_instead_of_duplicating_for_same_context(): void
@@ -231,9 +259,10 @@ class DeviceCheckImportTest extends TestCase
         $this->assertSame(1, DeviceCheck::count());
         $this->assertSame(3 * count(DeviceCheck::itemKeys()), DeviceCheckItem::count());
 
+        // File kedua kosong total → semua sel menjadi tidak_ada.
         $matrix = $this->matrix(DeviceCheck::first());
-        $this->assertFalse($matrix['K1-001.mouse']);
-        $this->assertFalse($matrix['K1-001.jaringan']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.mouse']);
+        $this->assertSame('tidak_ada', $matrix['K1-001.jaringan']);
     }
 
     public function test_import_reports_bad_rows_without_aborting_the_file(): void
@@ -267,8 +296,8 @@ class DeviceCheckImportTest extends TestCase
         // Baris valid tetap tersimpan meski ada baris gagal.
         $this->assertSame(1, DeviceCheck::count());
         $matrix = $this->matrix(DeviceCheck::first());
-        $this->assertTrue($matrix['K1-001.mouse']);
-        $this->assertTrue($matrix['K1-002.keyboard']);
+        $this->assertSame('berfungsi', $matrix['K1-001.mouse']);
+        $this->assertSame('berfungsi', $matrix['K1-002.keyboard']);
     }
 
     public function test_template_headers_match_item_columns_and_reupload_is_noop(): void

@@ -67,7 +67,7 @@
                     <p class="text-sm font-medium text-blue-800">Aturan format file:</p>
                     <ul class="mt-1 text-xs text-blue-700 space-y-1">
                         <li>Baris judul dicari otomatis — blok judul di atasnya (Nama Lab, Periode) <span class="font-semibold">dilewati</span>. Header 1 baris (template) maupun 2 baris (salinan hasil cetak dengan grup "Kabel Power") didukung.</li>
-                        <li>Kolom wajib: <span class="font-semibold">Kode Komputer</span> (harus ada di laboratorium yang dipilih). Kolom item mengikuti template; sel mendukung ✓, v, TRUE, 1 — kosong berarti tidak berfungsi.</li>
+                        <li>Kolom wajib: <span class="font-semibold">Kode Komputer</span> (harus ada di laboratorium yang dipilih). Kolom item mengikuti template; tiap sel diisi <span class="font-semibold">✓/v/TRUE/1 = Berfungsi</span>, <span class="font-semibold">R/rusak = Rusak</span>, <span class="font-semibold">–/tidak ada = Tidak Ada</span> — sel kosong dianggap Tidak Ada (format file lama).</li>
                         <li>Kode komputer yang tidak ditemukan di lab atau baris kosong → baris dilewati dan dilaporkan sebagai error.</li>
                         <li>Import ulang dengan lab + tahun ajaran + tanggal yang sama <span class="font-semibold">menimpa seluruh matriks</span> — tidak menggandakan data.</li>
                         <li>Baris "Contoh" pada template otomatis dilewati.</li>

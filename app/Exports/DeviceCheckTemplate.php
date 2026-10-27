@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\DeviceCheck;
+use App\Models\DeviceCheckItem;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -33,10 +34,18 @@ class DeviceCheckTemplate implements FromCollection, WithHeadings, WithStyles
     public function collection(): Collection
     {
         $itemCount = DeviceCheck::itemColumnCount();
+        $symbols = DeviceCheckItem::symbols();
+
+        // Baris 1: semua berfungsi. Baris 2: mendemonstrasikan token rusak (R)
+        // dan tidak ada (–) supaya pengguna tahu kosong bukan satu-satunya cara.
+        $demo = array_map(
+            fn (int $index) => $index % 3 === 0 ? 'R' : ($index % 3 === 1 ? $symbols[DeviceCheckItem::STATUS_TIDAK_ADA] : $symbols[DeviceCheckItem::STATUS_BERFUNGSI]),
+            range(0, $itemCount - 1)
+        );
 
         return collect([
-            array_merge([1, 'Contoh'], array_fill(0, $itemCount, '✓')),
-            array_merge([2, 'Contoh'], array_fill(0, $itemCount, '')),
+            array_merge([1, 'Contoh'], array_fill(0, $itemCount, $symbols[DeviceCheckItem::STATUS_BERFUNGSI])),
+            array_merge([2, 'Contoh'], $demo),
         ]);
     }
 

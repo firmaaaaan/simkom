@@ -79,7 +79,7 @@ class ReportPeriodWithoutDatesTest extends TestCase
                 'device_check_id' => $check->id,
                 'computer_id' => $computer->id,
                 'item_key' => $itemKey,
-                'is_checked' => true,
+                'status' => DeviceCheckItem::STATUS_BERFUNGSI,
             ]);
         }
 
