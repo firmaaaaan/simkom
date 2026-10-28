@@ -49,6 +49,13 @@
                     Dashboard
                 </a>
 
+                <a href="{{ route('todos.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('todos.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m0 0h6.75m-6.75 0l-1-1m1 1l1-1m-1 1v-6.75m0 0h-1.5A1.5 1.5 0 018.25 10.5V4.5m7.5 15V4.5A1.5 1.5 0 0014.25 3h-4.5A1.5 1.5 0 008.25 4.5v15" />
+                    </svg>
+                    To-Do List
+                </a>
+
                 @if(auth()->user()->hasPermission('view-monitoring'))
                 <a href="{{ route('monitoring-pc.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('monitoring-pc.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

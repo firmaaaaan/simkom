@@ -32,6 +32,10 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SoftwareController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TodoColumnController;
+use App\Http\Controllers\TodoController;
+use App\Http\Controllers\TodoLabelController;
+use App\Http\Controllers\TodoTaskController;
 use App\Http\Controllers\UserController;
 use App\Models\Computer;
 use App\Models\Laboratory;
@@ -168,6 +172,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::delete('/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // To-Do List (Kanban pribadi) — semua user login, tanpa permission khusus
+    Route::get('/todos', [TodoController::class, 'index'])->name('todos.index');
+    Route::patch('/todos/columns/reorder', [TodoColumnController::class, 'reorder'])->name('todos.columns.reorder');
+    Route::post('/todos/columns', [TodoColumnController::class, 'store'])->name('todos.columns.store');
+    Route::put('/todos/columns/{id}', [TodoColumnController::class, 'update'])->name('todos.columns.update');
+    Route::delete('/todos/columns/{id}', [TodoColumnController::class, 'destroy'])->name('todos.columns.destroy');
+    Route::post('/todos/quick-add', [TodoTaskController::class, 'quickAdd'])->name('todos.quick-add');
+    Route::get('/todos/tasks/{task}/detail', [TodoTaskController::class, 'detail'])->name('todos.tasks.detail');
+    Route::put('/todos/tasks/{task}', [TodoTaskController::class, 'update'])->name('todos.tasks.update');
+    Route::delete('/todos/tasks/{task}', [TodoTaskController::class, 'destroy'])->name('todos.tasks.destroy');
+    Route::patch('/todos/tasks/{task}/move', [TodoTaskController::class, 'move'])->name('todos.tasks.move');
+    Route::patch('/todos/tasks/{task}/labels', [TodoTaskController::class, 'syncLabels'])->name('todos.tasks.labels');
+    Route::post('/todos/tasks/{task}/checklist', [TodoTaskController::class, 'storeChecklistItem'])->name('todos.tasks.checklist.store');
+    Route::patch('/todos/checklist-items/{item}', [TodoTaskController::class, 'toggleChecklistItem'])->name('todos.checklist.toggle');
+    Route::delete('/todos/checklist-items/{item}', [TodoTaskController::class, 'destroyChecklistItem'])->name('todos.checklist.destroy');
+    Route::post('/todos/tasks/{task}/attachments', [TodoTaskController::class, 'storeAttachment'])->name('todos.tasks.attachments.store');
+    Route::delete('/todos/attachments/{attachment}', [TodoTaskController::class, 'destroyAttachment'])->name('todos.attachments.destroy');
+    Route::get('/todos/attachments/{attachment}/download', [TodoTaskController::class, 'downloadAttachment'])->name('todos.attachments.download');
+    Route::post('/todos/tasks/{task}/comments', [TodoTaskController::class, 'storeComment'])->name('todos.tasks.comments.store');
+    Route::delete('/todos/comments/{comment}', [TodoTaskController::class, 'destroyComment'])->name('todos.comments.destroy');
+    Route::post('/todos/labels', [TodoLabelController::class, 'store'])->name('todos.labels.store');
+    Route::put('/todos/labels/{id}', [TodoLabelController::class, 'update'])->name('todos.labels.update');
+    Route::delete('/todos/labels/{id}', [TodoLabelController::class, 'destroy'])->name('todos.labels.destroy');
 
     // User Management — per aksi: view/create/edit/delete-users
     Route::get('users/export', [UserController::class, 'export'])
