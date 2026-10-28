@@ -188,6 +188,15 @@
                 <p class="text-sm text-gray-700 font-medium">{{ $item->laboratory?->name ?? '-' }}</p>
             </div>
 
+            <div class="mb-3">
+                <p class="text-xs text-gray-400 mb-1">Barcode Inventaris</p>
+                @if($item->barcode)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-gray-100 text-gray-700">{{ $item->barcode }}</span>
+                @else
+                    <p class="text-sm text-gray-400">-</p>
+                @endif
+            </div>
+
             @if($item->hardware->count() > 0)
                 <div class="mb-3">
                     <p class="text-xs text-gray-400 mb-1">Hardware ({{ $item->hardware->count() }})</p>
