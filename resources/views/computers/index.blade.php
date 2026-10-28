@@ -49,6 +49,14 @@
                     Label Meja
                 </a>
                 @endcan
+                @can('edit-computers')
+                <a href="{{ route('computers.barcode-scan') }}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5v15M6.75 4.5v15M9.75 4.5v15M13.5 4.5v15M17.25 4.5v15M20.25 4.5v15" />
+                    </svg>
+                    Pindai Barcode
+                </a>
+                @endcan
                 <a href="{{ route('computers.generate') }}" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
                     <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
                     Generate Komputer

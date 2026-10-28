@@ -398,6 +398,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/computers/bulk-assign', [ComputerController::class, 'bulkAssign'])->name('computers.bulk-assign');
         Route::post('/computers/bulk-assign', [ComputerController::class, 'storeBulkAssign'])->name('computers.store-bulk-assign');
         Route::post('/computers/{computer}/check', [ComputerController::class, 'storeCheck'])->name('computers.check');
+        // Pindai barcode inventaris lama: pilih komputer, pindai via kamera / scanner pistol
+        Route::get('/computers/barcode-scan', [ComputerController::class, 'barcodeScan'])->name('computers.barcode-scan');
+        Route::post('/computers/barcode-scan', [ComputerController::class, 'barcodeStore'])->name('computers.barcode-store');
         // Saklar tampil/sembunyi tombol "Lihat Software" di halaman beranda publik
         Route::patch('/settings/public-spec', [SettingController::class, 'togglePublicSpec'])->name('settings.public-spec');
         // Whitelist software yang tampil di halaman beranda publik

@@ -587,6 +587,78 @@ class ComputerController extends Controller
         return view('computers.qr-stiker', compact('laboratories', 'computers', 'selectedLab'));
     }
 
+    /**
+     * Halaman pindai barcode inventaris lama: pilih komputer, lalu pindai
+     * barcode yang ditempel di CPU lewat kamera atau ketik hasil scan dari
+     * scanner pistol/USB. Menampilkan progres pengisian per lab terpilih.
+     */
+    public function barcodeScan(Request $request)
+    {
+        $laboratories = Laboratory::orderBy('name')->get();
+        $selectedLabId = (string) $request->input('laboratory_id', 'all');
+
+        $computers = Computer::with('laboratory')
+            ->when(
+                ! in_array($selectedLabId, ['all', ''], true),
+                fn ($query) => $query->where('laboratory_id', $selectedLabId)
+            )
+            ->orderBy('code')
+            ->get();
+
+        return view('computers.barcode-scan', [
+            'laboratories' => $laboratories,
+            'selectedLabId' => $selectedLabId,
+            'computers' => $computers,
+            'filledCount' => $computers->filter(fn (Computer $computer) => $computer->barcode !== null)->count(),
+        ]);
+    }
+
+    /**
+     * Simpan barcode hasil pindai ke komputer terpilih. Balasan JSON bila
+     * diminta halaman pindai (fetch), selain itu redirect dengan pesan.
+     * Barcode ganda ditolak tanpa menyimpan apa pun.
+     */
+    public function barcodeStore(Request $request)
+    {
+        $validated = $request->validate([
+            'computer_id' => 'required|exists:computers,id',
+            'barcode' => 'required|string|max:100',
+        ]);
+
+        $barcode = trim($validated['barcode']);
+        $computer = Computer::findOrFail($validated['computer_id']);
+
+        $duplicate = Computer::where('barcode', $barcode)
+            ->where('id', '!=', $computer->id)
+            ->first();
+
+        if ($duplicate) {
+            $message = "{$barcode} sudah terpakai komputer {$duplicate->code} — periksa label yang dipindai.";
+
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => $message], 409);
+            }
+
+            return back()->withErrors(['barcode' => $message]);
+        }
+
+        $computer->barcode = $barcode;
+        $computer->save();
+
+        $message = "Barcode {$barcode} tersimpan untuk {$computer->code}.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => $message,
+                'code' => $computer->code,
+                'barcode' => $computer->barcode,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
     public function praktikumLabels(Request $request)
     {
         $laboratories = Laboratory::orderBy('name')->get();
