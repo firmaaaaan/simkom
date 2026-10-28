@@ -80,6 +80,26 @@ class PublicWelcomeSpecTest extends TestCase
             ->assertSee('Inventaris software belum pernah terkirim');
     }
 
+    public function test_lab_switch_links_stay_on_daftar_komputer(): void
+    {
+        $labA = Laboratory::create(['name' => 'Lab Alpha', 'code' => 'LA', 'location' => 'Gedung A', 'capacity' => 20]);
+        $labB = Laboratory::create(['name' => 'Lab Beta', 'code' => 'LB', 'location' => 'Gedung B', 'capacity' => 20]);
+
+        // Tombol lab harus menunjuk ke halaman daftar komputer, bukan '/'
+        // (yang di-redirect ke halaman jadwal laboratorium).
+        $this->get('/daftar-komputer')
+            ->assertOk()
+            ->assertSee(route('daftar-komputer', ['laboratory_id' => $labA->id]), false)
+            ->assertSee(route('daftar-komputer', ['laboratory_id' => $labB->id]), false)
+            ->assertDontSee('/?laboratory_id=', false);
+
+        // Memilih lab lain tetap di halaman daftar komputer dengan lab terpilih.
+        $this->get(route('daftar-komputer', ['laboratory_id' => $labB->id]))
+            ->assertOk()
+            ->assertSee('Lab Beta')
+            ->assertSee($labB->id);
+    }
+
     public function test_spec_hidden_when_public_spec_disabled(): void
     {
         $this->computer('SB-204');

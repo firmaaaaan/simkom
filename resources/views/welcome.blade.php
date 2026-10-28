@@ -89,7 +89,7 @@
             @if($laboratories->count() > 0)
                 <div class="flex flex-wrap gap-2 mb-6">
                     @foreach($laboratories as $lab)
-                        <a href="{{ url('/?laboratory_id=' . $lab->id) }}"
+                        <a href="{{ route('daftar-komputer', ['laboratory_id' => $lab->id]) }}"
                            class="legend-pill inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-colors
                                {{ $selectedLab && $selectedLab->id === $lab->id
                                     ? 'bg-green-600 border-green-600 text-white shadow-sm'
