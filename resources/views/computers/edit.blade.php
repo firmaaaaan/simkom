@@ -51,6 +51,15 @@
                 </div>
 
                 <div>
+                    <label for="barcode" class="block text-sm font-medium text-gray-700 mb-1">Barcode Inventaris</label>
+                    <input type="text" name="barcode" id="barcode" value="{{ old('barcode', $computer->barcode) }}"
+                        maxlength="100"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                        placeholder="Contoh: INV-PC-00123">
+                    <p class="text-xs text-gray-400 mt-1">Opsional — kode barcode dari sistem inventaris lama yang ditempel di CPU.</p>
+                </div>
+
+                <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
                     <select name="status" id="status" required
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">

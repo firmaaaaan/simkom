@@ -224,6 +224,7 @@ class ComputerController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:computers,code',
+            'barcode' => 'nullable|string|max:100|unique:computers,barcode',
             'laboratory_id' => 'nullable|exists:laboratories,id',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
             'description' => 'nullable|string',
@@ -283,6 +284,7 @@ class ComputerController extends Controller
     {
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:computers,code,'.$computer->id,
+            'barcode' => 'nullable|string|max:100|unique:computers,barcode,'.$computer->id,
             'laboratory_id' => 'nullable|exists:laboratories,id',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
             'description' => 'nullable|string',

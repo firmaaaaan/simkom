@@ -15,6 +15,7 @@ class Computer extends Model
 
     protected $fillable = [
         'code',
+        'barcode',
         'laboratory_id',
         'status',
         'maintenance_reason',

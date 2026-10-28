@@ -42,6 +42,10 @@
                         {{ $computer->status }}
                     </span>
                 </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Barcode Inventaris</p>
+                    <p class="text-sm font-mono text-gray-800">{{ $computer->barcode ?? '-' }}</p>
+                </div>
             </div>
 
             <div>
