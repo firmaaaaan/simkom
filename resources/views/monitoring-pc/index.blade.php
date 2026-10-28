@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <template x-if="pcs.length === 0">
+        <template x-if="groups.length === 0">
             <div class="px-6 py-12 text-center">
                 <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.41A2.25 2.25 0 012.25 5.496V5.25" />
@@ -105,11 +105,24 @@
             </div>
         </template>
 
-        <template x-if="pcs.length > 0">
-            <div class="p-3 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
-                <template x-for="pc in pcs" :key="pc.id">
-                    <div class="rounded-xl border p-3 sm:p-4 flex flex-col gap-3 sm:gap-4"
-                         :class="pc.status === 'online' ? 'border-green-200 bg-green-50/40' : 'border-gray-200 bg-white'">
+        <template x-if="groups.length > 0">
+            <div class="divide-y divide-gray-200">
+                <template x-for="group in groups" :key="group.key">
+                    <div class="p-3 sm:p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-800" x-text="group.name"></h3>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    <span x-text="group.total"></span> PC · 
+                                    <span class="text-green-600"><span x-text="group.online"></span> Online</span> · 
+                                    <span class="text-red-600"><span x-text="group.offline"></span> Offline</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
+                            <template x-for="pc in group.pcs" :key="pc.id">
+                                <div class="rounded-xl border p-3 sm:p-4 flex flex-col gap-3 sm:gap-4"
+                                     :class="pc.status === 'online' ? 'border-green-200 bg-green-50/40' : 'border-gray-200 bg-white'">
 
                         {{-- Kepala card: PC + status --}}
                         <div class="flex items-start justify-between gap-3">
@@ -282,6 +295,8 @@
                         </div>
                     </div>
                 </template>
+                    </div>
+                </template>
             </div>
         </template>
     </div>
@@ -365,7 +380,8 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('monitoringPanel', (initial) => ({
             stats: initial.stats,
-            pcs: initial.pcs,
+            groups: initial.groups || [],
+            pcs: initial.pcs || [],
             canPower: initial.can_power,
             updatedAt: initial.generated_at,
             toast: null,
@@ -394,7 +410,8 @@
                     if (!res.ok) return;
                     const data = await res.json();
                     this.stats = data.stats;
-                    this.pcs = data.pcs;
+                    this.groups = data.groups || [];
+                    this.pcs = data.pcs || [];
                     this.canPower = data.can_power;
                     this.updatedAt = data.generated_at;
                 } catch (e) {

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Computer;
 use App\Models\PcCommand;
 use App\Models\PcMonitor;
 use App\Services\SoftwareComparison;
 use App\Services\WakeOnLanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -283,31 +286,71 @@ class MonitoringPcController extends Controller
             ->get()
             ->keyBy('pc_monitor_id');
 
-        $items = $pcs->map(fn (PcMonitor $pc) => [
-            'id' => $pc->id,
-            'hostname' => $pc->hostname,
-            'ip_address' => $pc->ip_address,
-            'mac_address' => $pc->mac_address,
-            'cpu_usage' => round($pc->cpu_usage, 1),
-            'ram_usage' => round($pc->ram_usage, 1),
-            'disk_usage' => round($pc->disk_usage, 1),
-            'active_user' => $pc->active_user,
-            'status' => $pc->effectiveStatus(),
-            'last_seen_at' => $pc->last_seen_at?->toIso8601String(),
-            'seconds_since_last_seen' => $pc->secondsSinceLastSeen(),
-            'pending_command' => isset($pendingIds[$pc->id]),
-            'last_command' => $lastCommands->has($pc->id)
-                ? $this->lastCommandPayload($lastCommands->get($pc->id))
-                : null,
-            'screenshot_url' => $pc->hasScreenshot()
-                ? route('monitoring-pc.screenshot', [$pc, 't' => $pc->updated_at?->timestamp])
-                : null,
-            'software_count' => (int) ($pc->softwares_count ?? 0),
-            'software_synced_at' => $pc->software_synced_at?->toIso8601String(),
-            'processes_synced_at' => $pc->processes_synced_at?->toIso8601String(),
-        ])->values();
+        // Petakan hostname PC monitor ke komputer + laboratorium
+        $hostnames = $pcs->pluck('hostname')->map(fn ($h) => strtolower($h))->all();
+        $computers = Computer::with('laboratory')
+            ->whereIn(
+                \Illuminate\Support\Facades\DB::raw('LOWER(code)'),
+                $hostnames
+            )
+            ->get()
+            ->keyBy(fn ($c) => strtolower($c->code));
+
+        $items = $pcs->map(function (PcMonitor $pc) use ($computers, $pendingIds, $lastCommands) {
+            $computer = $computers->get(strtolower($pc->hostname));
+
+            return [
+                'id' => $pc->id,
+                'hostname' => $pc->hostname,
+                'ip_address' => $pc->ip_address,
+                'mac_address' => $pc->mac_address,
+                'cpu_usage' => round($pc->cpu_usage, 1),
+                'ram_usage' => round($pc->ram_usage, 1),
+                'disk_usage' => round($pc->disk_usage, 1),
+                'active_user' => $pc->active_user,
+                'status' => $pc->effectiveStatus(),
+                'last_seen_at' => $pc->last_seen_at?->toIso8601String(),
+                'seconds_since_last_seen' => $pc->secondsSinceLastSeen(),
+                'pending_command' => isset($pendingIds[$pc->id]),
+                'last_command' => $lastCommands->has($pc->id)
+                    ? $this->lastCommandPayload($lastCommands->get($pc->id))
+                    : null,
+                'screenshot_url' => $pc->hasScreenshot()
+                    ? route('monitoring-pc.screenshot', [$pc, 't' => $pc->updated_at?->timestamp])
+                    : null,
+                'software_count' => (int) ($pc->softwares_count ?? 0),
+                'software_synced_at' => $pc->software_synced_at?->toIso8601String(),
+                'processes_synced_at' => $pc->processes_synced_at?->toIso8601String(),
+                'laboratory_id' => $computer?->laboratory_id,
+                'laboratory_name' => $computer?->laboratory?->name,
+            ];
+        })->values();
 
         $statuses = $items->pluck('status');
+
+        // Kelompokkan berdasarkan laboratorium
+        $groups = $items
+            ->groupBy(function ($item) {
+                return $item['laboratory_id'] ?? 'unassigned';
+            })
+            ->map(function (Collection $groupItems, $key) {
+                $first = $groupItems->first();
+                $groupStatuses = $groupItems->pluck('status');
+
+                return [
+                    'key' => $key,
+                    'id' => $key === 'unassigned' ? null : $key,
+                    'name' => $key === 'unassigned' ? 'Belum Terdaftar di Laboratorium' : ($first['laboratory_name'] ?? 'Tanpa Nama'),
+                    'total' => $groupItems->count(),
+                    'online' => $groupStatuses->filter(fn ($s) => $s === PcMonitor::STATUS_ONLINE)->count(),
+                    'offline' => $groupStatuses->filter(fn ($s) => $s === PcMonitor::STATUS_OFFLINE)->count(),
+                    'pcs' => $groupItems->values()->all(),
+                ];
+            })
+            ->sortBy(function ($group) {
+                return $group['key'] === 'unassigned' ? 'zzz' : $group['name'];
+            })
+            ->values();
 
         return [
             'stats' => [
@@ -318,6 +361,7 @@ class MonitoringPcController extends Controller
                 'avg_ram' => round($pcs->avg('ram_usage') ?? 0, 1),
                 'avg_disk' => round($pcs->avg('disk_usage') ?? 0, 1),
             ],
+            'groups' => $groups,
             'pcs' => $items,
             'can_power' => (bool) $request->user()?->hasPermission('control-monitoring'),
             'generated_at' => now()->toIso8601String(),
