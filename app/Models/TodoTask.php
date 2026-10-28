@@ -73,6 +73,7 @@ class TodoTask extends Model
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'description' => $this->description,
             'column_id' => $this->todo_column_id,
             'due_date' => $this->due_date?->toDateString(),
             'priority' => $this->priority,

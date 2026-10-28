@@ -75,6 +75,8 @@
                             </div>
 
                             <p class="text-sm font-medium text-gray-900 leading-snug" x-text="task.title"></p>
+                            <p x-show="task.description" x-text="task.description"
+                               class="mt-1 text-xs text-gray-500 leading-relaxed line-clamp-2 whitespace-pre-wrap"></p>
 
                             {{-- Badges --}}
                             <div class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-gray-500"
