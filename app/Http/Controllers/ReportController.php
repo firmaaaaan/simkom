@@ -260,14 +260,15 @@ class ReportController extends Controller
     }
 
     /**
-     * Rekap satu laboratorium: hitungan RAM / storage / processor untuk tabel
-     * ringkasan, plus rincian spesifikasi tiap komputer.
+     * Rekap satu laboratorium: hitungan RAM / storage / processor / monitor
+     * untuk tabel ringkasan, plus rincian spesifikasi tiap komputer.
      */
     private function inventoryRow(Laboratory $laboratory, $computers): array
     {
         $ramCounts = [];
         $storageCounts = [];
         $processorCounts = [];
+        $monitorCounts = [];
         $details = [];
 
         foreach ($computers as $computer) {
@@ -305,11 +306,27 @@ class ReportController extends Controller
                 $processorCounts[$key]['count']++;
             }
 
+            // Monitor (layar): dihitung per jenis, sama seperti processor.
+            $monitorNames = $this->hardwareNames($computer->hardware, 'Monitor')
+                ->unique(fn ($name) => mb_strtolower($name))
+                ->values();
+
+            if ($monitorNames->isEmpty()) {
+                $monitorNames = collect(['Tidak tercatat']);
+            }
+
+            foreach ($monitorNames as $name) {
+                $key = mb_strtolower($name);
+                $monitorCounts[$key] ??= ['label' => $name, 'count' => 0];
+                $monitorCounts[$key]['count']++;
+            }
+
             $details[] = [
                 'computer' => $computer,
                 'ram' => $ramLabel,
                 'storage' => $storageLabels->implode(', '),
                 'processor' => $processorNames->implode(', '),
+                'monitor' => $monitorNames->implode(', '),
             ];
         }
 
@@ -319,6 +336,9 @@ class ReportController extends Controller
             'ram' => $this->ramRecap($ramCounts),
             'storage' => $this->storageRecap($storageCounts),
             'processors' => collect($processorCounts)
+                ->sortBy([['count', 'desc'], ['label', 'asc']])
+                ->values(),
+            'monitors' => collect($monitorCounts)
                 ->sortBy([['count', 'desc'], ['label', 'asc']])
                 ->values(),
             'details' => $details,

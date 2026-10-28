@@ -143,6 +143,27 @@
                         </tbody>
                     </table>
                 </div>
+                <div>
+                    <h3 class="section">Monitor</h3>
+                    <table class="data">
+                        <thead>
+                            <tr>
+                                <th>Jenis</th>
+                                <th class="num">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($row['monitors'] as $item)
+                                <tr>
+                                    <td class="{{ str_starts_with($item['label'], 'Tidak') ? 'muted' : '' }}">{{ $item['label'] }}</td>
+                                    <td class="num">{{ $item['count'] }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="2" class="muted">Belum ada data</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <h3 class="section">Rincian Spesifikasi per Komputer</h3>
@@ -154,6 +175,7 @@
                         <th>RAM</th>
                         <th>Storage</th>
                         <th>Processor</th>
+                        <th>Monitor</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,10 +186,11 @@
                             <td>{{ $detail['ram'] }}</td>
                             <td>{{ $detail['storage'] }}</td>
                             <td>{{ $detail['processor'] }}</td>
+                            <td>{{ $detail['monitor'] }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="muted">Belum ada komputer di laboratorium ini</td>
+                            <td colspan="6" class="muted">Belum ada komputer di laboratorium ini</td>
                         </tr>
                     @endforelse
                 </tbody>

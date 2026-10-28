@@ -35,7 +35,7 @@
             </div>
         </form>
         <p class="text-xs text-gray-500 mt-3">
-            Spesifikasi diambil dari komponen hardware yang terpasang pada tiap komputer (kategori RAM, Storage, Processor).
+            Spesifikasi diambil dari komponen hardware yang terpasang pada tiap komputer (kategori RAM, Storage, Processor, Monitor).
             Kapasitas RAM dibaca dari nama komponen, mis. "8GB DDR4" &rarr; 8 GB, "2x8GB" &rarr; 16 GB.
             Kapasitas storage juga dibaca dari namanya, mis. "SSD 512GB" &rarr; SSD 512 GB, "HDD 1TB" &rarr; HDD 1 TB.
         </p>
@@ -56,7 +56,7 @@
                 @endif
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-4">
                 <div class="border border-gray-200 rounded-lg p-4">
                     <h3 class="text-sm font-semibold text-gray-700 mb-2">RAM</h3>
                     @include('reports.partials.inventory-recap', ['items' => $row['ram'], 'total' => $row['computers_count']])
@@ -68,6 +68,10 @@
                 <div class="border border-gray-200 rounded-lg p-4">
                     <h3 class="text-sm font-semibold text-gray-700 mb-2">Processor</h3>
                     @include('reports.partials.inventory-recap', ['items' => $row['processors'], 'total' => $row['computers_count']])
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-2">Monitor</h3>
+                    @include('reports.partials.inventory-recap', ['items' => $row['monitors'], 'total' => $row['computers_count']])
                 </div>
             </div>
         </div>
@@ -87,6 +91,7 @@
                             <th class="text-left px-6 py-3 font-medium text-gray-500">RAM</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Storage</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Processor</th>
+                            <th class="text-left px-6 py-3 font-medium text-gray-500">Monitor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -97,10 +102,11 @@
                                 <td data-label="RAM" class="px-6 py-3 text-gray-600">{{ $detail['ram'] }}</td>
                                 <td data-label="Storage" class="px-6 py-3 text-gray-600">{{ $detail['storage'] }}</td>
                                 <td data-label="Processor" class="px-6 py-3 text-gray-600">{{ $detail['processor'] }}</td>
+                                <td data-label="Monitor" class="px-6 py-3 text-gray-600">{{ $detail['monitor'] }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
                                     Belum ada komputer di laboratorium ini
                                 </td>
                             </tr>

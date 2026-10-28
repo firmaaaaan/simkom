@@ -155,6 +155,35 @@ class InventoryReportTest extends TestCase
             ->assertSee('Tidak tercatat');
     }
 
+    public function test_report_includes_monitor_category_in_recap_and_details(): void
+    {
+        $user = $this->userWith('inventory-monitor-hw@uji.test', ['view-reports', 'print-reports']);
+        $lab = $this->laboratory('Lab Komputer 1', 'LK1');
+
+        $specs = ['RAM' => '8GB DDR4', 'Storage' => 'SSD 512GB', 'Processor' => 'Intel Core i5-12400'];
+
+        $this->computer($lab, 'K1-001', $specs + ['Monitor' => 'LG 24MP400']);
+        $this->computer($lab, 'K1-002', $specs + ['Monitor' => 'LG 24MP400']);
+        $this->computer($lab, 'K1-003', $specs + ['Monitor' => 'Samsung Odyssey G5']);
+        $this->computer($lab, 'K1-004', $specs);
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('Monitor')
+            ->assertSee('LG 24MP400')
+            ->assertSee('Samsung Odyssey G5')
+            // Rekap monitor urut jumlah terbanyak: LG (2) sebelum Samsung (1).
+            ->assertSeeInOrder(['LG 24MP400', 'Samsung Odyssey G5']);
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory-print', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('Monitor')
+            ->assertSee('LG 24MP400')
+            ->assertSee('Tidak tercatat');
+    }
+
     public function test_report_requires_report_permission_and_print_requires_print_permission(): void
     {
         $viewer = $this->userWith('inventory-viewer@uji.test', ['view-computers']);
