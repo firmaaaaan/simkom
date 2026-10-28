@@ -195,6 +195,19 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <div style="margin-top: 40px; width: 100%;">
+                <table style="width: 100%; border: none;">
+                    <tr>
+                        <td style="border: none; width: 60%;"></td>
+                        <td style="border: none; text-align: center;">
+                            <div>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                            <div style="margin-top: 50px;">( __________________________ )</div>
+                            <div style="margin-top: 5px;">NIP/Tanda Tangan</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     @empty
         <p class="empty">Belum ada laboratorium untuk ditampilkan.</p>
