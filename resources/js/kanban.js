@@ -210,7 +210,13 @@ document.addEventListener('alpine:init', () => {
 
         async deleteTask() {
             if (!this.currentTask) return;
-            if (!confirm('Hapus kartu ini?')) return;
+            let ok = false;
+            if (window.showConfirm) {
+                ok = await window.showConfirm({ title: 'Hapus Kartu', message: 'Hapus kartu ini?', type: 'danger' });
+            } else {
+                ok = confirm('Hapus kartu ini?');
+            }
+            if (!ok) return;
             try {
                 await this.api(`${this.base}/tasks/${this.currentTask.id}`, { method: 'DELETE' });
                 for (const col of this.columns) {
@@ -338,7 +344,13 @@ document.addEventListener('alpine:init', () => {
 
         async deleteAttachment(attachment) {
             if (!this.currentTask) return;
-            if (!confirm(`Hapus lampiran "${attachment.original_name}"?`)) return;
+            let ok = false;
+            if (window.showConfirm) {
+                ok = await window.showConfirm({ title: 'Hapus Lampiran', message: `Hapus lampiran "${attachment.original_name}"?`, type: 'danger' });
+            } else {
+                ok = confirm(`Hapus lampiran "${attachment.original_name}"?`);
+            }
+            if (!ok) return;
             try {
                 const data = await this.api(`${this.base}/attachments/${attachment.id}`, {
                     method: 'DELETE',
@@ -375,7 +387,13 @@ document.addEventListener('alpine:init', () => {
 
         async deleteComment(comment) {
             if (!this.currentTask) return;
-            if (!confirm('Hapus komentar ini?')) return;
+            let ok = false;
+            if (window.showConfirm) {
+                ok = await window.showConfirm({ title: 'Hapus Komentar', message: 'Hapus komentar ini?', type: 'danger' });
+            } else {
+                ok = confirm('Hapus komentar ini?');
+            }
+            if (!ok) return;
             try {
                 const data = await this.api(`${this.base}/comments/${comment.id}`, {
                     method: 'DELETE',
@@ -389,7 +407,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         async addColumn() {
-            const name = prompt('Nama kolom baru:');
+            let name = '';
+            if (window.showPrompt) {
+                name = await window.showPrompt({ title: 'Tambah Kolom', message: 'Nama kolom baru:' });
+            } else {
+                name = prompt('Nama kolom baru:');
+            }
             if (!name || !name.trim()) return;
             try {
                 const data = await this.api(`${this.base}/columns`, {
@@ -426,7 +449,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async deleteColumn(column) {
-            if (!confirm(`Hapus kolom "${column.name}"? Kartu di dalamnya akan dipindah ke kolom pertama.`)) return;
+            let ok = false;
+            if (window.showConfirm) {
+                ok = await window.showConfirm({ title: 'Hapus Kolom', message: `Hapus kolom "${column.name}"? Kartu di dalamnya akan dipindah ke kolom pertama.`, type: 'danger' });
+            } else {
+                ok = confirm(`Hapus kolom "${column.name}"? Kartu di dalamnya akan dipindah ke kolom pertama.`);
+            }
+            if (!ok) return;
             try {
                 const data = await this.api(`${this.base}/columns/${column.id}`, { method: 'DELETE' });
                 this.columns = this.columns.filter((c) => c.id !== column.id);
@@ -499,7 +528,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async deleteLabel(label) {
-            if (!confirm(`Hapus label "${label.name}"?`)) return;
+            let ok = false;
+            if (window.showConfirm) {
+                ok = await window.showConfirm({ title: 'Hapus Label', message: `Hapus label "${label.name}"?`, type: 'danger' });
+            } else {
+                ok = confirm(`Hapus label "${label.name}"?`);
+            }
+            if (!ok) return;
             try {
                 await this.api(`${this.base}/labels/${label.id}`, { method: 'DELETE' });
                 this.labels = this.labels.filter((l) => l.id !== label.id);
