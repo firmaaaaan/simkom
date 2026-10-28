@@ -69,18 +69,28 @@
         {{-- Section 2: Pilih Hardware --}}
         <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
             <h2 class="text-base font-semibold text-gray-800 mb-4">2. Pilih Hardware</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                @forelse($hardware as $item)
-                    <label class="flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors"
-                        :class="selectedHardware.includes('{{ $item->id }}') ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'">
-                        <input type="checkbox" name="hardware_ids[]" value="{{ $item->id }}" x-model="selectedHardware"
-                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm text-gray-700 truncate">{{ $item->name }}</span>
-                    </label>
-                @empty
-                    <p class="text-sm text-gray-400 col-span-full">Belum ada data hardware</p>
-                @endforelse
-            </div>
+            @forelse($hardwareGroups as $group)
+                <div class="mb-4 last:mb-0">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ $group['label'] }}</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                        @foreach($group['items'] as $item)
+                            <label class="flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer transition-colors"
+                                :class="selectedHardware.includes('{{ $item->id }}') ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'">
+                                <input type="checkbox" name="hardware_ids[]" value="{{ $item->id }}" x-model="selectedHardware"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <div class="min-w-0">
+                                    <span class="text-sm text-gray-700 block truncate">{{ $item->name }}</span>
+                                    @if($item->brand || $item->model)
+                                        <span class="text-xs text-gray-400 block truncate">{{ trim(($item->brand ?: '').' '.($item->model ?: '')) }}</span>
+                                    @endif
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            @empty
+                <p class="text-sm text-gray-400">Belum ada data hardware</p>
+            @endforelse
         </div>
 
         {{-- Section 3: Pilih Software --}}

@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Computer extends Model
 {
     use HasUuids;
+
     protected $fillable = [
         'code',
         'laboratory_id',
@@ -27,6 +29,16 @@ class Computer extends Model
     public function hardware(): BelongsToMany
     {
         return $this->belongsToMany(Hardware::class, 'computer_hardware')->withTimestamps();
+    }
+
+    /**
+     * Hardware komputer dikelompokkan per kategori untuk tampilan detail.
+     *
+     * @return array<int, array{label: string, category: string, items: Collection}>
+     */
+    public function hardwareGroupedByCategory(): array
+    {
+        return Hardware::groupCategories($this->hardware);
     }
 
     public function software(): BelongsToMany
@@ -52,7 +64,7 @@ class Computer extends Model
 
         if ($hasOpen && $this->status === 'Aktif') {
             $this->update(['status' => 'Maintenance', 'maintenance_reason' => 'ticket']);
-        } elseif (!$hasOpen && $this->status === 'Maintenance' && $this->maintenance_reason === 'ticket') {
+        } elseif (! $hasOpen && $this->status === 'Maintenance' && $this->maintenance_reason === 'ticket') {
             $this->update(['status' => 'Aktif', 'maintenance_reason' => null]);
         }
     }

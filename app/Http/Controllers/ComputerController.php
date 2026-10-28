@@ -332,7 +332,7 @@ class ComputerController extends Controller
     public function bulkAssign(Request $request)
     {
         $laboratories = Laboratory::orderBy('name')->get();
-        $hardware = Hardware::orderBy('name')->get();
+        $hardwareGroups = Hardware::groupCategories(Hardware::orderBy('name')->get());
         $software = Software::orderBy('name')->get();
 
         $query = Computer::with('laboratory');
@@ -344,7 +344,7 @@ class ComputerController extends Controller
         }
         $computers = $query->orderBy('code')->get();
 
-        return view('computers.bulk-assign', compact('laboratories', 'hardware', 'software', 'computers'));
+        return view('computers.bulk-assign', compact('laboratories', 'hardwareGroups', 'software', 'computers'));
     }
 
     public function storeBulkAssign(Request $request)

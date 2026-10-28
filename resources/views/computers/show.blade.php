@@ -56,16 +56,23 @@
 
             <div class="pt-4 border-t border-gray-100">
                 <p class="text-xs text-gray-400 mb-2">Hardware</p>
-                <div class="flex flex-wrap gap-2">
-                    @forelse($computer->hardware as $hw)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                            {{ $hw->name }}
-                            <span class="ml-1 text-blue-400">({{ $hw->category }})</span>
-                        </span>
-                    @empty
-                        <p class="text-sm text-gray-400">Belum ada hardware</p>
-                    @endforelse
-                </div>
+                @forelse($computer->hardwareGroupedByCategory() as $group)
+                    <div class="mb-3 last:mb-0">
+                        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ $group['label'] }}</p>
+                        <ul class="space-y-0.5">
+                            @foreach($group['items'] as $hw)
+                                <li class="text-sm text-gray-800">
+                                    {{ $hw->name }}
+                                    @if($hw->brand || $hw->model)
+                                        <span class="text-xs text-gray-400">({{ trim(($hw->brand ?: '').' '.($hw->model ?: '')) }})</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400">Belum ada hardware</p>
+                @endforelse
             </div>
 
             <div>
