@@ -361,17 +361,29 @@ class ReportController extends Controller
      */
     private function storageType(string $name): string
     {
-        $name = mb_strtolower($name);
-
-        if (str_contains($name, 'ssd') || str_contains($name, 'nvme')) {
+        if ($this->storageHasSsd($name)) {
             return 'SSD';
         }
 
-        if (str_contains($name, 'hdd') || str_contains($name, 'hard disk') || str_contains($name, 'harddisk')) {
+        if ($this->storageHasHdd($name)) {
             return 'HDD';
         }
 
         return 'Lainnya';
+    }
+
+    private function storageHasSsd(string $name): bool
+    {
+        $name = mb_strtolower($name);
+
+        return str_contains($name, 'ssd') || str_contains($name, 'nvme');
+    }
+
+    private function storageHasHdd(string $name): bool
+    {
+        $name = mb_strtolower($name);
+
+        return str_contains($name, 'hdd') || str_contains($name, 'hard disk') || str_contains($name, 'harddisk');
     }
 
     /**
@@ -398,60 +410,200 @@ class ReportController extends Controller
     /**
      * Label storage untuk rekap & rincian: "SSD 512 GB" bila tipe dan
      * kapasitas terbaca, "SSD" bila kapasitas tidak terbaca, dan "512 GB"
-     * bila tipe tidak dikenali.
+     * bila tipe tidak dikenali. Nama gabungan SSD+HDD dipecah per tipe dan
+     * kapasitas, mis. "1 TB HDD, 512 GB SSD" -> "SSD 512 GB, HDD 1 TB".
      */
-
     private function storageLabel(string $name): string
     {
+        $labels = $this->combinedStorageLabels($name);
+
+        if ($labels !== []) {
+            return $this->sortStorageLabels($labels);
+        }
+
         $type = $this->storageType($name);
         $capacity = $this->storageCapacity($name);
 
         if ($capacity === null) {
-            return $type;
+            return $this->storageHasSsd($name) && $this->storageHasHdd($name) ? 'SSD, HDD' : $type;
         }
 
-        // Check if name contains both SSD and HDD (comma-separated like "1 TB HDD, 512 GB SSD")
-        $hasSsd = mb_strpos(mb_strtolower($name), "ssd") !== false || mb_strpos(mb_strtolower($name), "nvme") !== false;
-        $hasHdd = mb_strpos(mb_strtolower($name), "hdd") !== false || mb_strpos(mb_strtolower($name), "hard disk") !== false || mb_strpos(mb_strtolower($name), "harddisk") !== false;
+        return $type === 'Lainnya' ? $capacity['label'] : $type.' '.$capacity['label'];
+    }
+
+    /**
+     * Label untuk nama dengan banyak potongan (dipisah koma/tanpa/+ dll.)
+     * atau banyak kapasitas tanpa pemisah. Kosong untuk nama sederhana
+     * berkapasitas tunggal agar jalur label tunggal dipertahankan.
+     *
+     * @return array<int, string>
+     */
+    private function combinedStorageLabels(string $name): array
+    {
+        $chunks = preg_split('/[,;+\/&]|\bdan\b|\band\b/i', $name) ?: [];
+
+        if (count($chunks) > 1) {
+            $labels = [];
+
+            foreach ($chunks as $chunk) {
+                $labels = [...$labels, ...$this->chunkStorageLabels(trim($chunk))];
+            }
+
+            return $labels;
+        }
+
+        if (count($this->capacitiesOf($name)) > 1) {
+            return $this->pairedStorageLabels($name);
+        }
+
+        return [];
+    }
+
+    /**
+     * Label dari satu potongan nama: tiap kapasitas diberi tipe pada
+     * potongan itu, mis. "1 TB HDD" -> ["HDD 1 TB"].
+     *
+     * @return array<int, string>
+     */
+    private function chunkStorageLabels(string $chunk): array
+    {
+        if ($chunk === '') {
+            return [];
+        }
+
+        $hasSsd = $this->storageHasSsd($chunk);
+        $hasHdd = $this->storageHasHdd($chunk);
 
         if ($hasSsd && $hasHdd) {
-            // Extract capacities for both types
-            $capacities = [];
-            if (preg_match("/(\d+(?:[.,]\d+)?)\s*tb/i", mb_strtolower($name), $m)) {
-                $capacities[] = ["value" => (float)str_replace(",", ".", $m[1]), "is_tb" => true];
-            }
-            if (preg_match("/(\d+(?:[.,]\d+)?)\s*gb/i", mb_strtolower($name), $m)) {
-                $capacities[] = ["value" => (float)str_replace(",", ".", $m[1]), "is_tb" => false];
-            }
-
-            // Remove duplicate values (same capacity for both types)
-            $uniqueCapacities = [];
-            foreach ($capacities as $cap) {
-                $found = false;
-                foreach ($uniqueCapacities as $uc) {
-                    if ($uc["value"] == $cap["value"] && $uc["is_tb"] == $cap["is_tb"]) {
-                        $found = true;
-                        break;
-                    }
-                }
-                if (!$found) {
-                    $uniqueCapacities[] = $cap;
-                }
-            }
-
-            // Build labels for each unique capacity
-            $labels = [];
-            foreach ($uniqueCapacities as $cap) {
-                $capLabel = rtrim(rtrim(number_format($cap["value"], 2, ".", ""), "0"), ".") . ($cap["is_tb"] ? " TB" : " GB");
-                $labels[] = "SSD " . $capLabel;
-            }
-
-            return implode(", ", $labels);
+            return $this->pairedStorageLabels($chunk);
         }
 
-        // Single type case (original logic preserved)
-        return $type === "Lainnya" ? $capacity["label"] : $type." ".$capacity["label"];
+        $type = $this->storageType($chunk);
+
+        return array_map(
+            fn ($capacity) => $type === 'Lainnya' ? $capacity['label'] : $type.' '.$capacity['label'],
+            $this->capacitiesOf($chunk)
+        );
     }
+
+    /**
+     * Pasangkan tiap kapasitas dengan kata tipe terdekat di sekitarnya
+     * bila nama tanpa pemisah, mis. "1TB HDD 128GB SSD" ->
+     * ["HDD 1 TB", "SSD 128 GB"]. Kapasitas tanpa tipe diikuti tipe
+     * tunggal nama bila hanya SSD atau hanya HDD yang disebut.
+     *
+     * @return array<int, string>
+     */
+    private function pairedStorageLabels(string $name): array
+    {
+        preg_match_all('/\d+(?:[.,]\d+)?\s*(?:tb|gb)\b/i', $name, $matches, PREG_OFFSET_CAPTURE);
+
+        $capacities = [];
+
+        foreach ($matches[0] as [$text, $offset]) {
+            $capacity = $this->storageCapacity($text);
+
+            if ($capacity !== null) {
+                $capacities[] = ['offset' => $offset, 'end' => $offset + strlen($text), 'label' => $capacity['label']];
+            }
+        }
+
+        if ($capacities === []) {
+            return [];
+        }
+
+        $segments = [];
+        $previousEnd = 0;
+
+        foreach ($capacities as $capacity) {
+            $segments[] = substr($name, $previousEnd, $capacity['offset'] - $previousEnd);
+            $previousEnd = $capacity['end'];
+        }
+        $segments[] = substr($name, $previousEnd);
+
+        // "HDD 1TB ..." -> tipe mendahului kapasitas; selain itu ("1TB HDD ...")
+        // tipe mengikuti kapasitasnya.
+        $preceding = $this->segmentStorageType($segments[0]) !== null;
+        $overallType = $this->storageHasSsd($name)
+            ? ($this->storageHasHdd($name) ? null : 'SSD')
+            : ($this->storageHasHdd($name) ? 'HDD' : null);
+
+        $labels = [];
+
+        foreach ($capacities as $index => $capacity) {
+            $type = $this->segmentStorageType($segments[$preceding ? $index : $index + 1]) ?? $overallType;
+
+            $labels[] = $type === null ? $capacity['label'] : $type.' '.$capacity['label'];
+        }
+
+        return $labels;
+    }
+
+    /**
+     * Tipe pada satu segmen teks, atau null bila tidak menyebut SSD/HDD.
+     */
+    private function segmentStorageType(string $segment): ?string
+    {
+        if ($this->storageHasSsd($segment)) {
+            return 'SSD';
+        }
+
+        if ($this->storageHasHdd($segment)) {
+            return 'HDD';
+        }
+
+        return null;
+    }
+
+    /**
+     * Semua kapasitas dalam satu string, urut kemunculan:
+     * [["label" => "1 TB", "gb" => 1024], ["label" => "512 GB", "gb" => 512]].
+     *
+     * @return array<int, array{label: string, gb: int}>
+     */
+    private function capacitiesOf(string $text): array
+    {
+        preg_match_all('/\d+(?:[.,]\d+)?\s*(?:tb|gb)\b/i', $text, $matches);
+
+        $capacities = [];
+
+        foreach ($matches[0] as $match) {
+            $capacity = $this->storageCapacity($match);
+
+            if ($capacity !== null) {
+                $capacities[] = $capacity;
+            }
+        }
+
+        return $capacities;
+    }
+
+    /**
+     * Gabung label unik: SSD dulu, lalu HDD, lalu sisanya; kapasitas
+     * terbesar di depan, konsisten dengan urutan rekap (`storageRecap`).
+     *
+     * @param  array<int, string>  $labels
+     */
+    private function sortStorageLabels(array $labels): string
+    {
+        return collect($labels)
+            ->unique()
+            ->sort(function ($a, $b) {
+                $order = $this->storageTypeOrder($a) <=> $this->storageTypeOrder($b);
+
+                if ($order !== 0) {
+                    return $order;
+                }
+
+                $capacityA = $this->storageCapacity($a)['gb'] ?? 0;
+                $capacityB = $this->storageCapacity($b)['gb'] ?? 0;
+
+                return ($capacityB <=> $capacityA) ?: strcmp($a, $b);
+            })
+            ->values()
+            ->implode(', ');
+    }
+
     private function ramRecap(array $counts)
     {
         return collect($counts)

@@ -122,6 +122,26 @@ class InventoryReportTest extends TestCase
             ->assertSee('K2-001');
     }
 
+    public function test_report_labels_combined_storage_names_by_their_own_types(): void
+    {
+        $admin = $this->userWith('inventory-combined@uji.test', ['view-reports']);
+        $lab = $this->laboratory('Lab Komputer 1', 'LK1');
+
+        $this->computer($lab, 'K1-001', ['RAM' => '8GB DDR4', 'Storage' => '1 TB HDD, 512 GB SSD', 'Processor' => 'Intel Core i5-12400']);
+        $this->computer($lab, 'K1-002', ['RAM' => '8GB DDR4', 'Storage' => 'SSD 256GB; HDD 1TB', 'Processor' => 'Intel Core i5-12400']);
+        $this->computer($lab, 'K1-003', ['RAM' => '8GB DDR4', 'Storage' => '1TB HDD 128GB SSD', 'Processor' => 'Intel Core i5-12400']);
+
+        $this->actingAs($admin)
+            ->get(route('reports.inventory', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('SSD 512 GB')
+            ->assertSee('SSD 256 GB')
+            ->assertSee('SSD 128 GB')
+            ->assertSee('HDD 1 TB')
+            ->assertSeeInOrder(['SSD 512 GB', 'HDD 1 TB'])
+            ->assertDontSee('SSD 1 TB');
+    }
+
     public function test_report_marks_missing_specs_as_not_recorded(): void
     {
         $admin = $this->userWith('inventory-empty@uji.test', ['view-reports']);
