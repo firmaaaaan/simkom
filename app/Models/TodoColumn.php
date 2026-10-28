@@ -11,6 +11,12 @@ class TodoColumn extends Model
 {
     use HasUuids;
 
+    /**
+     * Nama kolom (huruf kecil, tanpa spasi tepi) yang menandai task sudah
+     * selesai — task di kolom ini tidak ikut pengingat Telegram H-1/overdue.
+     */
+    public const DONE_NAMES = ['done', 'selesai'];
+
     protected $fillable = [
         'user_id',
         'name',

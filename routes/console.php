@@ -18,3 +18,9 @@ Schedule::command('backup:run')
 Schedule::command('monitoring:check-offline')
     ->everyMinute()
     ->withoutOverlapping();
+
+// Pengingat To-Do List via Telegram: jatuh tempo H-1, hari ini, & terlewat.
+Schedule::command('todo:remind-due')
+    ->dailyAt('08:00')
+    ->timezone('Asia/Jakarta')
+    ->withoutOverlapping();
