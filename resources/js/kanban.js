@@ -1,5 +1,3 @@
-import Sortable from 'sortablejs';
-
 document.addEventListener('alpine:init', () => {
     Alpine.data('kanban', (initialBoard, initialLabels, base) => ({
         base,
@@ -28,9 +26,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         initSortables() {
+            if (!window.Sortable) return;
             document.querySelectorAll('.kanban-sortable:not([data-sortable-init])').forEach((el) => {
                 el.setAttribute('data-sortable-init', '1');
-                Sortable.create(el, {
+                window.Sortable.create(el, {
                     group: 'todos',
                     animation: 150,
                     draggable: '.kanban-card',
