@@ -109,11 +109,31 @@ class MonitoringPcController extends Controller
 
     /**
      * Matikan semua PC online sekaligus: antrekan perintah shutdown ke
-     * tiap agent. PC offline & PC yang sudah punya perintah pending dilewati.
+     * tiap agent. Bisa difilter berdasarkan laboratorium.
+     * PC offline & PC yang sudah punya perintah pending dilewati.
      */
     public function shutdownAll(Request $request): JsonResponse
     {
-        $pcs = PcMonitor::all();
+        $query = PcMonitor::query();
+
+        if ($request->filled('laboratory_id')) {
+            $labId = $request->input('laboratory_id');
+            $hostnames = Computer::where('laboratory_id', $labId)
+                ->pluck('code')
+                ->map(fn ($c) => strtolower($c))
+                ->all();
+
+            if (empty($hostnames)) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Tidak ada komputer terdaftar di laboratorium ini.',
+                ], 409);
+            }
+
+            $query->whereIn(DB::raw('LOWER(hostname)'), $hostnames);
+        }
+
+        $pcs = $query->get();
 
         $online = $pcs->filter(fn ($pc) => $pc->effectiveStatus() === PcMonitor::STATUS_ONLINE);
         $offlineCount = $pcs->count() - $online->count();
@@ -137,10 +157,20 @@ class MonitoringPcController extends Controller
             $sent++;
         }
 
+        $labName = null;
+        if ($request->filled('laboratory_id')) {
+            $lab = Computer::where('laboratory_id', $request->input('laboratory_id'))
+                ->with('laboratory')
+                ->first()?->laboratory;
+            $labName = $lab?->name;
+        }
+
         if ($sent === 0) {
-            $message = $offlineCount === 0 && $skippedPending === 0
-                ? 'Tidak ada PC untuk dimatikan.'
-                : "Tidak ada perintah terkirim — {$skippedPending} PC menunggu perintah lain";
+            $message = $labName
+                ? "Tidak ada PC untuk dimatikan di {$labName}."
+                : ($offlineCount === 0 && $skippedPending === 0
+                    ? 'Tidak ada PC untuk dimatikan.'
+                    : "Tidak ada perintah terkirim — {$skippedPending} PC menunggu perintah lain");
 
             if ($offlineCount > 0) {
                 $message .= ", {$offlineCount} PC offline";
@@ -149,7 +179,8 @@ class MonitoringPcController extends Controller
             return response()->json(['ok' => false, 'message' => $message.'.'], 409);
         }
 
-        $parts = ["perintah matikan dikirim ke {$sent} PC"];
+        $target = $labName ? "di {$labName}" : 'semua';
+        $parts = ["perintah matikan dikirim ke {$sent} PC {$target}"];
         if ($offlineCount > 0) {
             $parts[] = "{$offlineCount} PC offline dilewati";
         }
@@ -352,6 +383,16 @@ class MonitoringPcController extends Controller
             })
             ->values();
 
+        $laboratories = Computer::with('laboratory')
+            ->whereNotNull('laboratory_id')
+            ->get()
+            ->pluck('laboratory')
+            ->filter()
+            ->unique('id')
+            ->sortBy('name')
+            ->values()
+            ->map(fn ($lab) => ['id' => $lab->id, 'name' => $lab->name]);
+
         return [
             'stats' => [
                 'total' => $items->count(),
@@ -363,6 +404,7 @@ class MonitoringPcController extends Controller
             ],
             'groups' => $groups,
             'pcs' => $items,
+            'laboratories' => $laboratories,
             'can_power' => (bool) $request->user()?->hasPermission('control-monitoring'),
             'generated_at' => now()->toIso8601String(),
         ];

@@ -73,27 +73,32 @@
     </div>
 
     {{-- DAFTAR PC --}}
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-            <div>
-                <h2 class="text-sm font-semibold text-gray-800">Status PC Lab</h2>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Diperbarui otomatis tiap 5 detik &middot; <span x-text="relTime(secondsSince(updatedAt))"></span>
-                </p>
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">            <div class="px-5 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-sm font-semibold text-gray-800">Status PC Lab</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                        Diperbarui otomatis tiap 5 detik &middot; <span x-text="relTime(secondsSince(updatedAt))"></span>
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <select x-model="selectedLab" @change="applyFilter()" class="text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent py-1.5 px-2">
+                        <option value="all">Semua Lab</option>
+                        <template x-for="lab in laboratories" :key="lab.id">
+                            <option :value="lab.id" x-text="lab.name"></option>
+                        </template>
+                    </select>
+                    <button x-show="canPower" x-cloak type="button" @click="shutdownAll()" :disabled="busy"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+                        </svg>
+                        <span x-text="selectedLab === 'all' ? 'Matikan Semua' : 'Matikan Lab Ini'"></span>
+                    </button>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
+                    </span>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button x-show="canPower" x-cloak type="button" @click="shutdownAll()" :disabled="busy"
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
-                    </svg>
-                    Matikan Semua
-                </button>
-                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
-                </span>
-            </div>
-        </div>
 
         <template x-if="groups.length === 0">
             <div class="px-6 py-12 text-center">
@@ -380,8 +385,12 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('monitoringPanel', (initial) => ({
             stats: initial.stats,
+            allGroups: initial.groups || [],
             groups: initial.groups || [],
+            allPcs: initial.pcs || [],
             pcs: initial.pcs || [],
+            laboratories: initial.laboratories || [],
+            selectedLab: 'all',
             canPower: initial.can_power,
             updatedAt: initial.generated_at,
             toast: null,
@@ -394,8 +403,20 @@
             barClass: { green: 'bg-green-500', yellow: 'bg-amber-400', red: 'bg-red-500' },
 
             init() {
+                this.allGroups = this.groups;
+                this.allPcs = this.pcs;
                 this.poll();
                 setInterval(() => this.poll(), 5000);
+            },
+
+            applyFilter() {
+                if (this.selectedLab === 'all') {
+                    this.groups = this.allGroups;
+                    this.pcs = this.allPcs;
+                    return;
+                }
+                this.groups = this.allGroups.filter(g => g.id === this.selectedLab);
+                this.pcs = this.allPcs.filter(p => p.laboratory_id === this.selectedLab);
             },
 
             async poll() {
@@ -410,10 +431,12 @@
                     if (!res.ok) return;
                     const data = await res.json();
                     this.stats = data.stats;
-                    this.groups = data.groups || [];
-                    this.pcs = data.pcs || [];
+                    this.allGroups = data.groups || [];
+                    this.allPcs = data.pcs || [];
+                    this.laboratories = data.laboratories || [];
                     this.canPower = data.can_power;
                     this.updatedAt = data.generated_at;
+                    this.applyFilter();
                 } catch (e) {
                     // server sementara tidak terjangkau — polling berikutnya mencoba lagi.
                 } finally {
@@ -453,10 +476,17 @@
 
             async shutdownAll() {
                 if (this.busy) return;
-                if (! confirm('Yakin ingin mematikan SEMUA PC yang online? Perintah akan dieksekusi agent dalam ~10 detik.')) return;
+                const msg = this.selectedLab === 'all'
+                    ? 'Yakin ingin mematikan SEMUA PC yang online? Perintah akan dieksekusi agent dalam ~10 detik.'
+                    : 'Yakin ingin mematikan SEMUA PC yang online di laboratorium ini? Perintah akan dieksekusi agent dalam ~10 detik.';
+                if (! confirm(msg)) return;
                 this.busy = 'all';
                 try {
-                    const res = await fetch('{{ route('monitoring-pc.shutdown-all') }}', {
+                    const url = new URL('{{ route('monitoring-pc.shutdown-all') }}', window.location.origin);
+                    if (this.selectedLab !== 'all') {
+                        url.searchParams.set('laboratory_id', this.selectedLab);
+                    }
+                    const res = await fetch(url.toString(), {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
