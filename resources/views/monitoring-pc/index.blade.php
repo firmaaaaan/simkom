@@ -479,7 +479,8 @@
                 const msg = this.selectedLab === 'all'
                     ? 'Yakin ingin mematikan SEMUA PC yang online? Perintah akan dieksekusi agent dalam ~10 detik.'
                     : 'Yakin ingin mematikan SEMUA PC yang online di laboratorium ini? Perintah akan dieksekusi agent dalam ~10 detik.';
-                if (! confirm(msg)) return;
+                const ok = await window.showConfirm({title: 'Matikan PC', message: msg, type: 'danger'});
+                if (! ok) return;
                 this.busy = 'all';
                 try {
                     const url = new URL('{{ route('monitoring-pc.shutdown-all') }}', window.location.origin);

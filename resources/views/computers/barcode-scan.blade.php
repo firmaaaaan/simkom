@@ -12,7 +12,7 @@
             </svg>
             Kembali ke Daftar Komputer
         </a>
-        <a href="{{ route('computers.edit', $computers->first() ?? '#') }}" class="text-sm text-gray-500 hover:text-green-600" onclick="event.preventDefault(); alert('Pilih komputer terlebih dahulu untuk mengedit secara manual.');">
+        <a href="{{ route('computers.edit', $computers->first() ?? '#') }}" class="text-sm text-gray-500 hover:text-green-600" onclick="event.preventDefault(); if(window.showAlert){ window.showAlert({title:'Informasi', message:'Pilih komputer terlebih dahulu untuk mengedit secara manual.'}); } else { alert('Pilih komputer terlebih dahulu untuk mengedit secara manual.'); }">
             Edit Manual
         </a>
     </div>
