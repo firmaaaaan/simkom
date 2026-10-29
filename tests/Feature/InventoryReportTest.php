@@ -198,4 +198,48 @@ class InventoryReportTest extends TestCase
             ->assertOk()
             ->assertSee('<title>Inventaris-Semua Laboratorium</title>', false);
     }
+
+    public function test_print_hides_specification_details_when_details_is_zero(): void
+    {
+        $user = $this->userWith('inventory-no-details@uji.test', ['print-reports']);
+        $lab = $this->laboratory('Lab Komputer 1', 'LK1');
+        $this->computer($lab, 'K1-001', ['RAM' => '8GB DDR4', 'Storage' => 'SSD 512GB', 'Processor' => 'Intel Core i5-12400']);
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory-print', ['laboratory_id' => $lab->id, 'details' => '0']))
+            ->assertOk()
+            ->assertDontSee('Rincian Spesifikasi per Komputer')
+            ->assertDontSee('K1-001');
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory-print', ['laboratory_id' => $lab->id, 'details' => '1']))
+            ->assertOk()
+            ->assertSee('Rincian Spesifikasi per Komputer')
+            ->assertSee('K1-001');
+    }
+
+    public function test_print_shows_specification_details_by_default(): void
+    {
+        $user = $this->userWith('inventory-default-details@uji.test', ['print-reports']);
+        $lab = $this->laboratory('Lab Komputer 1', 'LK1');
+        $this->computer($lab, 'K1-001', ['RAM' => '8GB DDR4', 'Storage' => 'SSD 512GB', 'Processor' => 'Intel Core i5-12400']);
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory-print', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('Rincian Spesifikasi per Komputer')
+            ->assertSee('K1-001');
+    }
+
+    public function test_list_page_shows_details_checkbox(): void
+    {
+        $user = $this->userWith('inventory-checkbox@uji.test', ['view-reports', 'print-reports']);
+        $lab = $this->laboratory('Lab Komputer 1', 'LK1');
+
+        $this->actingAs($user)
+            ->get(route('reports.inventory', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('Sertakan rincian spesifikasi')
+            ->assertSee('name="details"', false);
+    }
 }

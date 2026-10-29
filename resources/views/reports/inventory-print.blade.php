@@ -166,6 +166,7 @@
                 </div>
             </div>
 
+            @if($includeDetails)
             <h3 class="section">Rincian Spesifikasi per Komputer</h3>
             <table class="data">
                 <thead>
@@ -195,6 +196,7 @@
                     @endforelse
                 </tbody>
             </table>
+            @endif
 
             <div style="margin-top: 40px; width: 100%;">
                 <table style="width: 100%; border: none;">

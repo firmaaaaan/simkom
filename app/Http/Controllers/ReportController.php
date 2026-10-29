@@ -234,6 +234,7 @@ class ReportController extends Controller
     {
         $laboratories = Laboratory::orderBy('name')->get();
         $selectedLabId = (string) $request->input('laboratory_id', 'all');
+        $includeDetails = $request->input('details', '1') === '1';
 
         $labs = $selectedLabId === 'all'
             ? $laboratories
@@ -252,6 +253,7 @@ class ReportController extends Controller
         return [
             'laboratories' => $laboratories,
             'selectedLabId' => $selectedLabId,
+            'includeDetails' => $includeDetails,
             'rows' => $rows,
             'title' => 'Inventaris-'.($rows->count() === 1
                 ? $rows->first()['laboratory']->name
