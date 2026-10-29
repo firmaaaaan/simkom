@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\TodoColumn;
 use App\Models\TodoTask;
 use App\Models\User;
@@ -16,10 +18,19 @@ class TodoKanbanTest extends TestCase
 
     private function user(string $email): User
     {
-        return User::firstOrCreate(
+        $role = Role::firstOrCreate(['name' => 'role-'.md5($email)], ['label' => 'Role Uji Todo']);
+        foreach (['view-todos', 'create-todos', 'edit-todos', 'delete-todos'] as $name) {
+            $permission = Permission::firstOrCreate(['name' => $name], ['label' => $name]);
+            $role->permissions()->syncWithoutDetaching([$permission->id]);
+        }
+
+        $user = User::firstOrCreate(
             ['email' => $email],
             ['name' => 'User Todo', 'password' => 'rahasia123']
         );
+        $user->roles()->syncWithoutDetaching([$role->id]);
+
+        return $user;
     }
 
     private function column(User $user, string $name = 'To Do', int $position = 0): TodoColumn

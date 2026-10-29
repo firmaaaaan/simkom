@@ -15,6 +15,7 @@
         'Pengaturan' => ['users', 'roles', 'backups'],
         'Data Master' => ['laboratories', 'hardware', 'software', 'computers', 'components'],
         'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports', 'pengadaan'],
+        'Produktivitas' => ['todos'],
     ];
 
     // Kelompokkan permission per modul: name = <aksi>-<modul>.

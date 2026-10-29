@@ -26,6 +26,7 @@ class RoleSeeder extends Seeder
         'backups' => ['Backup', ['view', 'edit', 'delete']],
         'reports' => ['Laporan', ['view', 'print']],
         'monitoring' => ['Monitoring PC', ['view', 'control']],
+        'todos' => ['To-Do List', ['view', 'create', 'edit', 'delete']],
     ];
 
     private const ACTION_LABELS = [
@@ -43,7 +44,7 @@ class RoleSeeder extends Seeder
     private const LABORAN_MODULES = [
         'hardware', 'software', 'components', 'computers',
         'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
-        'monitoring', 'pengadaan',
+        'monitoring', 'pengadaan', 'todos',
     ];
 
     public function run(): void
