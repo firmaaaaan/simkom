@@ -86,7 +86,7 @@
     @else
         @include('partials.kop', [
             'kopTitle' => 'Laporan Pengecekan Perangkat Laboratorium Komputer',
-            'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+            'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
         ])
 
         <div class="info">
@@ -178,7 +178,7 @@
             <div class="page-break">
                 @include('partials.kop', [
                     'kopTitle' => 'Kontrol Pengecekan Perangkat',
-                    'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+                    'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
                 ])
 
                 <div class="lab-header">

@@ -59,7 +59,7 @@
         <div class="sheet">
             @include('partials.kop', [
                 'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
-                'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+                'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
             ])
 
             <div class="info">
