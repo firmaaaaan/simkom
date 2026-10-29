@@ -54,8 +54,8 @@
 
         @media print {
             .print-btn { display: none !important; }
-            body { padding: 0; }
-            @page { size: portrait; margin: 10mm; }
+            body { padding: 10mm; }
+            @page { size: portrait; margin: 0; }
         }
     </style>
 </head>

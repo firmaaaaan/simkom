@@ -36,7 +36,7 @@
             .page { padding: 10mm; }
             .checkbox.checked::after { color: #000; }
         }
-        @page { size: A4 portrait; margin: 10mm; }
+        @page { size: A4 portrait; margin: 0; }
     </style>
 </head>
 <body>

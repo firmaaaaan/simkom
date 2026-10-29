@@ -24,8 +24,8 @@
         .signature { margin-top: 40px; text-align: right; font-size: 11px; }
         .signature-block { display: inline-block; width: 220px; text-align: left; }
         .signature-block .line { border-top: 1px solid #000; margin-top: 60px; margin-bottom: 4px; }
-        @media print { .page { padding: 0; } }
-        @page { size: A4 portrait; margin: 10mm; }
+        @media print { .page { padding: 10mm; } }
+        @page { size: A4 portrait; margin: 0; }
     </style>
 </head>
 <body>
