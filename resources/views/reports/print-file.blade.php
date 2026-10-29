@@ -30,11 +30,10 @@
 </head>
 <body>
     <div class="page">
-        <div class="header">
-            <h1>Laporan {{ $jenisTitle }}</h1>
-            <h2>UPT LABORATORIUM TERPADU</h2>
-            <h2>Universitas 'Aisyiyah Yogyakarta</h2>
-        </div>
+        @include('partials.kop', [
+            'kopTitle' => 'Laporan '.$jenisTitle,
+            'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+        ])
 
         <div class="info">
             <table>

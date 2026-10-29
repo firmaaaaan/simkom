@@ -43,11 +43,10 @@
     <button class="btn-print" onclick="window.print()">Cetak</button>
 
     <div class="page">
-        <div class="header">
-            <h1>Kartu Kendali Komputer</h1>
-            <h2>UPT LABORATORIUM TERPADU</h2>
-            <h2>Universitas 'Aisyiyah Yogyakarta</h2>
-        </div>
+        @include('partials.kop', [
+            'kopTitle' => 'Kartu Kendali Komputer',
+            'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+        ])
 
         <div class="info">
             <table>

@@ -57,10 +57,10 @@
 
     @forelse($rows as $row)
         <div class="sheet">
-            <div class="header">
-                <h1>Laporan Inventaris Laboratorium Komputer</h1>
-                <h2>Universitas 'Aisyiyah Yogyakarta</h2>
-            </div>
+            @include('partials.kop', [
+                'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
+                'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+            ])
 
             <div class="info">
                 <table>

@@ -228,7 +228,8 @@ class InventoryReportTest extends TestCase
             ->get(route('reports.inventory-print', ['laboratory_id' => $lab->id]))
             ->assertOk()
             ->assertSee('Rincian Spesifikasi per Komputer')
-            ->assertSee('K1-001');
+            ->assertSee('K1-001')
+            ->assertSee('kop/cropped-logo-unisa-crop.png', false);
     }
 
     public function test_list_page_shows_details_checkbox(): void

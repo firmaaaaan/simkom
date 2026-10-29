@@ -67,11 +67,10 @@
         Cetak
     </button>
 
-    <div class="kop">
-        <h1>PENGECEKAN PERANGKAT LABORATORIUM KOMPUTER</h1>
-        <h2>UPT LABORATORIUM TERPADU</h2>
-        <h2>UNIVERSITAS 'AISYIYAH YOGYAKARTA</h2>
-    </div>
+    @include('partials.kop', [
+        'kopTitle' => 'PENGECEKAN PERANGKAT LABORATORIUM KOMPUTER',
+        'kopLines' => ['UPT LABORATORIUM TERPADU', "UNIVERSITAS 'AISYIYAH YOGYAKARTA"],
+    ])
 
     <div class="info">
         <table>

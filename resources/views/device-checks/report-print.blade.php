@@ -84,10 +84,10 @@
     @elseif($printRows->isEmpty())
         <p>Tidak ada baris rekap yang dipilih. Centang baris yang ingin dicetak pada halaman laporan, lalu klik "Cetak yang Dipilih".</p>
     @else
-        <div class="header">
-            <h1>Laporan Pengecekan Perangkat Laboratorium Komputer</h1>
-            <h2>Universitas 'Aisyiyah Yogyakarta</h2>
-        </div>
+        @include('partials.kop', [
+            'kopTitle' => 'Laporan Pengecekan Perangkat Laboratorium Komputer',
+            'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+        ])
 
         <div class="info">
             <table>
@@ -176,10 +176,10 @@
         {{-- SATU HALAMAN PER BARIS YANG DIPILIH --}}
         @foreach($printRows as $row)
             <div class="page-break">
-                <div class="header">
-                    <h1>Kontrol Pengecekan Perangkat</h1>
-                    <h2>Universitas 'Aisyiyah Yogyakarta</h2>
-                </div>
+                @include('partials.kop', [
+                    'kopTitle' => 'Kontrol Pengecekan Perangkat',
+                    'kopLines' => ["Universitas 'Aisyiyah Yogyakarta"],
+                ])
 
                 <div class="lab-header">
                     <table>
