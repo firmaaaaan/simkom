@@ -209,7 +209,7 @@
                     <tr>
                         <td style="border: none; width: 60%; vertical-align: bottom;">
                             {{-- QR menuju langsung ke bagian lab yang sedang dicetak. --}}
-                            <div class="qr-block" data-qr-url="{{ route('public.spec') }}#lab-{{ $row['laboratory']->id }}">
+                            <div class="qr-block" data-qr-url="{{ route('public.spec', $row['laboratory']->id) }}">
                                 <div class="qr-code"></div>
                                 <p>Pindai untuk melihat rincian spesifikasi komputer</p>
                             </div>

@@ -148,8 +148,8 @@ Route::get('/jadwal', [AkademikJadwalController::class, 'publik'])->name('jadwal
 // Public Routes (Kartu Kendali - tanpa login, read-only riwayat pengecekan)
 Route::get('/kartu/{computer}', [PublicComputerCardController::class, 'show'])->name('kartu.show');
 
-// Public Routes (Rincian Spesifikasi Komputer - tanpa login, read-only)
-Route::get('/spesifikasi', [PublicSpecController::class, 'index'])->name('public.spec');
+// Public Routes (Rincian Spesifikasi per Laboratorium - tanpa login, read-only)
+Route::get('/spesifikasi/{laboratory}', [PublicSpecController::class, 'show'])->name('public.spec');
 
 // Link lama /computers/{computer}/card (QR stiker yang sudah beredar).
 // Tamu & user tanpa izin dialihkan ke halaman publik oleh ComputerController@card,

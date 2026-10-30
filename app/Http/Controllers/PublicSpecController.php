@@ -7,17 +7,14 @@ use App\Models\Laboratory;
 class PublicSpecController extends Controller
 {
     /**
-     * Rincian spesifikasi komputer versi publik (tanpa login).
-     * Satu halaman berisi seluruh laboratorium beserta hardware tiap
-     * komputer, dikelompokkan per kategori. Dipakai sebagai tujuan QR
-     * pada cetak laporan inventaris.
+     * Rincian spesifikasi komputer satu laboratorium (tanpa login).
+     * Halaman khusus per lab — dibuka lewat QR pada cetak laporan
+     * inventaris, tanpa filter apa pun di dalamnya.
      */
-    public function index()
+    public function show(Laboratory $laboratory)
     {
-        $laboratories = Laboratory::with(['computers' => fn ($query) => $query->orderBy('code')->with('hardware')])
-            ->orderBy('name')
-            ->get();
+        $laboratory->load(['computers' => fn ($query) => $query->orderBy('code')->with('hardware')]);
 
-        return view('public.spesifikasi', compact('laboratories'));
+        return view('public.spesifikasi', compact('laboratory'));
     }
 }
