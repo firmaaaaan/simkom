@@ -8,7 +8,7 @@
         'defaultName' => 'Firmansyah, S.Kom',    // wajib: nama default
         'variant'     => 'block',                // block | line | print-file | inline
         'officerName' => $check->officer_name,   // opsional: fallback nama (blok per-lab)
-        'nameStyle'   => 'width: 180px;',        // opsional: style tambahan utk nama (block)
+        'nameStyle'   => 'width: 180px;',        // opsional: style tambahan utk nama (block, hanya tanpa gambar)
     ])
 --}}
 @php
@@ -40,7 +40,7 @@
         <p>{{ $role }}</p>
         @if($img)
             <p style="text-align: center; margin-top: 8px;">{!! $imgTag !!}</p>
-            <p style="margin-top: 6px;">{{ $name }}</p>
+            <p style="margin-top: 6px; text-align: center;">{{ $name }}</p>
         @else
             <p style="margin-top: 50px;">{{ $name }}</p>
         @endif
@@ -52,8 +52,10 @@
         <p>{{ $role }}</p>
         @if($img)
             <p style="text-align: center; margin-top: 8px;">{!! $imgTag !!}</p>
+            <p style="margin-top: 6px; text-align: center;">{{ $name }}</p>
+        @else
+            <p style="margin-top: 50px;">{{ $name }}</p>
         @endif
-        <p style="margin-top: {{ $img ? '6px' : '50px' }};">{{ $name }}</p>
         @break
 
     @default
@@ -61,8 +63,9 @@
         <p>{{ $city }}</p>
         <p>{{ $role }}</p>
         @if($img)
+            {{-- nama ikut di-center agar TTD tepat di atas tengah nama (nameStyle dilepas agar tidak offset) --}}
             <p style="text-align: center; margin-top: 8px;">{!! $imgTag !!}</p>
-            <p style="margin-top: 6px; padding-top: 4px; {{ $nameStyle ?? '' }}">{{ $name }}</p>
+            <p style="margin-top: 6px; padding-top: 4px; text-align: center;">{{ $name }}</p>
         @else
             <p style="margin-top: 50px; padding-top: 4px; {{ $nameStyle ?? '' }}">{{ $name }}</p>
         @endif
