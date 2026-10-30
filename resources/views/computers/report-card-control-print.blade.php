@@ -27,7 +27,6 @@
         .checkbox.checked::after { content: '✓'; position: absolute; top: -2px; left: 1px; font-size: 12px; font-weight: bold; }
         .signature { margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px; }
         .signature-block { width: 220px; }
-        .signature-block .line { border-top: 1px solid #000; margin-top: 60px; margin-bottom: 4px; }
         .btn-print { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #16a34a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .btn-print:hover { background: #15803d; }
         @media print {

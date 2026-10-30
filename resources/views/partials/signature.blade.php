@@ -35,28 +35,25 @@
         @break
 
     @case('line')
-        {{-- signature-block dengan garis nama: <p class="line"> --}}
+        {{-- signature-block tanpa garis, jeda 50px utk tanda tangan basah --}}
         <p>{{ $city }}</p>
         <p>{{ $role }}</p>
         @if($img)
             <p style="text-align: center; margin-top: 8px;">{!! $imgTag !!}</p>
-            <p class="line" style="margin-top: 12px;">{{ $name }}</p>
+            <p style="margin-top: 6px;">{{ $name }}</p>
         @else
-            <p class="line">{{ $name }}</p>
+            <p style="margin-top: 50px;">{{ $name }}</p>
         @endif
         @break
 
     @case('print-file')
-        {{-- signature-block dengan <div class="line"></div> terpisah (DomPDF) --}}
+        {{-- signature-block DomPDF tanpa garis, jeda 50px utk tanda tangan basah --}}
         <p>{{ $city }}</p>
         <p>{{ $role }}</p>
         @if($img)
             <p style="text-align: center; margin-top: 8px;">{!! $imgTag !!}</p>
-            <div class="line" style="margin-top: 12px;"></div>
-        @else
-            <div class="line"></div>
         @endif
-        <p>{{ $name }}</p>
+        <p style="margin-top: {{ $img ? '6px' : '50px' }};">{{ $name }}</p>
         @break
 
     @default

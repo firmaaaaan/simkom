@@ -62,7 +62,6 @@
         .legend { margin-top: 8px; font-size: 10px; }
         .signature { margin-top: 30px; display: flex; justify-content: flex-end; font-size: 11px; }
         .signature-block { width: 220px; }
-        .signature-block .line { border-top: 1px solid #000; margin-top: 55px; margin-bottom: 4px; }
 
         @media print {
             .print-btn { display: none !important; }

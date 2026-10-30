@@ -23,7 +23,6 @@
         .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; vertical-align: middle; text-align: center; line-height: 12px; font-size: 11px; font-weight: bold; font-family: 'DejaVu Sans', sans-serif; }
         .signature { margin-top: 40px; text-align: right; font-size: 11px; }
         .signature-block { display: inline-block; width: 220px; text-align: left; }
-        .signature-block .line { border-top: 1px solid #000; margin-top: 60px; margin-bottom: 4px; }
         @media print { .page { padding: 10mm; } }
         @page { size: A4 portrait; margin: 0; }
     </style>
