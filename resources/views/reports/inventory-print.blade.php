@@ -30,6 +30,11 @@
         .info td { padding: 2px 8px 2px 0; font-size: 11px; vertical-align: top; }
         .info td:first-child { font-weight: bold; white-space: nowrap; width: 110px; }
 
+        .info-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+        .info-row .info { margin-bottom: 0; }
+        .qr-block { flex-shrink: 0; width: 96px; text-align: center; }
+        .qr-block p { font-size: 9px; color: #555; margin-top: 4px; line-height: 1.35; }
+
         h3.section { font-size: 11px; margin: 12px 0 5px; text-transform: uppercase; }
 
         table.data { width: 100%; border-collapse: collapse; }
@@ -97,21 +102,29 @@
                 ])
             </div>
 
-            <div class="info">
-                <table>
-                    <tr>
-                        <td>Laboratorium</td>
-                        <td>: {{ $row['laboratory']->name }}{{ $row['laboratory']->code ? ' ('.$row['laboratory']->code.')' : '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Jumlah Komputer</td>
-                        <td>: {{ $row['computers_count'] }}</td>
-                    </tr>
-                    <tr>
-                        <td>Dicetak</td>
-                        <td>: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }} WIB</td>
-                    </tr>
-                </table>
+            <div class="info-row">
+                <div class="info">
+                    <table>
+                        <tr>
+                            <td>Laboratorium</td>
+                            <td>: {{ $row['laboratory']->name }}{{ $row['laboratory']->code ? ' ('.$row['laboratory']->code.')' : '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Jumlah Komputer</td>
+                            <td>: {{ $row['computers_count'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Dicetak</td>
+                            <td>: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }} WIB</td>
+                        </tr>
+                    </table>
+                </div>
+                @if($loop->first)
+                <div class="qr-block">
+                    <div id="qr-spec"></div>
+                    <p>Pindai untuk melihat rincian spesifikasi komputer</p>
+                </div>
+                @endif
             </div>
 
             <div class="recap">
@@ -290,5 +303,22 @@
     @empty
         <p class="empty">Belum ada laboratorium untuk ditampilkan.</p>
     @endforelse
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var el = document.getElementById('qr-spec');
+            if (!el || typeof QRCode === 'undefined') return;
+
+            new QRCode(el, {
+                text: "{{ route('public.spec') }}",
+                width: 88,
+                height: 88,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    </script>
 </body>
 </html>
