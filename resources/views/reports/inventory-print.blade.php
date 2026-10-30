@@ -19,6 +19,7 @@
         .empty { font-size: 12px; }
         .sheet + .sheet { page-break-before: always; }
         .page-break { page-break-before: always; break-before: page; }
+        .kop-running { display: none; }
 
         .header { text-align: center; margin-bottom: 12px; }
         .header h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
@@ -43,8 +44,31 @@
 
         @media print {
             .print-btn { display: none !important; }
-            body { padding: 10mm; }
+
+            /* Margin 0 dipertahankan agar header/footer otomatis Chrome tidak muncul;
+               jarak cetak diatur lewat padding body. */
             @page { size: portrait; margin: 0; }
+            body {
+                padding: 27mm 15mm 15mm;
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+            }
+
+            /* Kop otomatis di setiap halaman hasil cetak. */
+            .kop-running {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #fff;
+                z-index: 100;
+                padding: 6mm 15mm 3mm;
+            }
+            .kop-running > div { margin-bottom: 0 !important; }
+
+            /* Kop manual per sheet digantikan kop tetap di atas. */
+            .kop-inline { display: none; }
         }
     </style>
 </head>
@@ -56,12 +80,22 @@
         Cetak
     </button>
 
+    {{-- Kop tetap: otomatis muncul di setiap halaman saat dicetak (CSS position: fixed). --}}
+    <div class="kop-running">
+        @include('partials.kop', [
+            'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
+            'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+        ])
+    </div>
+
     @forelse($rows as $row)
         <div class="sheet">
-            @include('partials.kop', [
-                'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
-                'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
-            ])
+            <div class="kop-inline">
+                @include('partials.kop', [
+                    'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
+                    'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+                ])
+            </div>
 
             <div class="info">
                 <table>
@@ -182,10 +216,12 @@
 
             @if($includeDetails)
             <div class="page-break">
-                @include('partials.kop', [
-                    'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
-                    'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
-                ])
+                <div class="kop-inline">
+                    @include('partials.kop', [
+                        'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
+                        'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+                    ])
+                </div>
 
                 <div class="info">
                     <table>
