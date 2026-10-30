@@ -176,9 +176,13 @@
 
             <div style="margin-top: 40px; display: flex; justify-content: flex-end; font-size: 11px;">
                 <div style="width: 220px;">
-                    <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                    <p>Penanggung jawab</p>
-                    <p style="margin-top: 50px; padding-top: 4px; width: 180px;">Firmansyah, S.Kom</p>
+                    @include('partials.signature', [
+                        'reportKey' => 'maintenance-print',
+                        'variant' => 'block',
+                        'defaultRole' => 'Penanggung jawab',
+                        'defaultName' => 'Firmansyah, S.Kom',
+                        'nameStyle' => 'width: 180px;',
+                    ])
                 </div>
             </div>
         </div>

@@ -152,9 +152,13 @@
 
     <div class="signature">
         <div class="signature-block">
-            <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-            <p>Penanggung jawab</p>
-            <p class="line">{{ $check->officer_name ?: 'Firmansyah, S.Kom' }}</p>
+            @include('partials.signature', [
+                'reportKey' => 'device-check-print',
+                'variant' => 'line',
+                'defaultRole' => 'Penanggung jawab',
+                'defaultName' => 'Firmansyah, S.Kom',
+                'officerName' => $check->officer_name,
+            ])
         </div>
     </div>
 </body>

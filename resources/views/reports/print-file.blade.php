@@ -197,10 +197,12 @@
 
         <div class="signature">
             <div class="signature-block">
-                <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                <p>Penanggung jawab</p>
-                <div class="line"></div>
-                <p>Firmansyah, S.Kom</p>
+                @include('partials.signature', [
+                    'reportKey' => 'laporan',
+                    'variant' => 'print-file',
+                    'defaultRole' => 'Penanggung jawab',
+                    'defaultName' => 'Firmansyah, S.Kom',
+                ])
             </div>
         </div>
     </div>

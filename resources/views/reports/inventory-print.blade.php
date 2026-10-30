@@ -215,9 +215,12 @@
                             </div>
                         </td>
                         <td style="border: none; text-align: center;">
-                            <div>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
-                            <div style="margin-top: 5px;">Kepala UPT Laboratorium Terpadu</div>
-                            <div style="margin-top: 50px;"><strong>Dr. Dhesi Ari Astuti, S.SiT., M.Kes</strong></div>
+                            @include('partials.signature', [
+                                'reportKey' => 'inventory-print',
+                                'variant' => 'inline',
+                                'defaultRole' => 'Kepala UPT Laboratorium Terpadu',
+                                'defaultName' => 'Dr. Dhesi Ari Astuti, S.SiT., M.Kes',
+                            ])
                         </td>
                     </tr>
                 </table>
@@ -286,9 +289,12 @@
                         <tr>
                             <td style="border: none; width: 60%;"></td>
                             <td style="border: none; text-align: center;">
-                                <div>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
-                                <div style="margin-top: 5px;">Kepala UPT Laboratorium Terpadu</div>
-                                <div style="margin-top: 50px;"><strong>Dr. Dhesi Ari Astuti, S.SiT., M.Kes</strong></div>
+                                @include('partials.signature', [
+                                    'reportKey' => 'inventory-print',
+                                    'variant' => 'inline',
+                                    'defaultRole' => 'Kepala UPT Laboratorium Terpadu',
+                                    'defaultName' => 'Dr. Dhesi Ari Astuti, S.SiT., M.Kes',
+                                ])
                             </td>
                         </tr>
                     </table>

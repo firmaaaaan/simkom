@@ -167,9 +167,12 @@
 
         <div class="signature">
             <div class="signature-block">
-                <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                <p>Penanggung jawab</p>
-                <p class="line">Firmansyah, S.Kom</p>
+                @include('partials.signature', [
+                    'reportKey' => 'device-check-report-print',
+                    'variant' => 'line',
+                    'defaultRole' => 'Penanggung jawab',
+                    'defaultName' => 'Firmansyah, S.Kom',
+                ])
             </div>
         </div>
 
@@ -260,9 +263,13 @@
 
                 <div class="signature">
                     <div class="signature-block">
-                        <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-                        <p>Penanggung jawab</p>
-                        <p class="line">{{ $row['check']->officer_name ?: 'Firmansyah, S.Kom' }}</p>
+                        @include('partials.signature', [
+                            'reportKey' => 'device-check-report-print',
+                            'variant' => 'line',
+                            'defaultRole' => 'Penanggung jawab',
+                            'defaultName' => 'Firmansyah, S.Kom',
+                            'officerName' => $row['check']->officer_name,
+                        ])
                     </div>
                 </div>
             </div>

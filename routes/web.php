@@ -31,6 +31,7 @@ use App\Http\Controllers\PublicTrackerController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SoftwareController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TodoColumnController;
@@ -418,6 +419,15 @@ Route::middleware('auth')->group(function () {
         // Whitelist software yang tampil di halaman beranda publik
         Route::get('/settings/public-software', [SettingController::class, 'editPublicSoftware'])->name('settings.public-software.edit');
         Route::put('/settings/public-software', [SettingController::class, 'updatePublicSoftware'])->name('settings.public-software.update');
+    });
+    // Pengaturan TTD laporan — izin laporan karena mengubah tampilan cetak laporan.
+    Route::middleware('permission:view-reports|print-reports')->group(function () {
+        Route::get('/settings/signatures', [SignatureController::class, 'index'])->name('settings.signatures.index');
+        Route::get('/settings/signatures/create', [SignatureController::class, 'create'])->name('settings.signatures.create');
+        Route::post('/settings/signatures', [SignatureController::class, 'store'])->name('settings.signatures.store');
+        Route::get('/settings/signatures/{signature}/edit', [SignatureController::class, 'edit'])->name('settings.signatures.edit');
+        Route::put('/settings/signatures/{signature}', [SignatureController::class, 'update'])->name('settings.signatures.update');
+        Route::delete('/settings/signatures/{signature}', [SignatureController::class, 'destroy'])->name('settings.signatures.destroy');
     });
     Route::middleware('permission:import-computers')->group(function () {
         // Import spesifikasi mengubah data komputer (izin import terpisah dari edit)

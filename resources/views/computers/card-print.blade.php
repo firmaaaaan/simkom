@@ -102,9 +102,12 @@
 
     <div class="footer">
         <div class="sign">
-            <p>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
-            <p>Penanggung jawab</p>
-            <p style="margin-top: 50px; padding-top: 4px;">Firmansyah, S.Kom</p>
+            @include('partials.signature', [
+                'reportKey' => 'card-print',
+                'variant' => 'block',
+                'defaultRole' => 'Penanggung jawab',
+                'defaultName' => 'Firmansyah, S.Kom',
+            ])
         </div>
     </div>
 </body>
