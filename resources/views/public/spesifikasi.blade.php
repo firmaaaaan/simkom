@@ -55,9 +55,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 @foreach($laboratory->computers as $computer)
                     <div class="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
-                        <h3 class="text-base font-bold text-gray-900 mb-3 pb-3 border-b border-gray-100">
-                            {{ $computer->code }}
-                        </h3>
+                        <div class="flex items-center justify-between gap-3 mb-3 pb-3 border-b border-gray-100">
+                            <h3 class="text-base font-bold text-gray-900">{{ $computer->code }}</h3>
+                            <div class="text-right shrink-0">
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wide">Kode Inventaris</p>
+                                <p class="text-xs font-mono text-gray-700">{{ $computer->barcode ?? '-' }}</p>
+                            </div>
+                        </div>
 
                         @forelse($computer->hardwareGroupedByCategory() as $group)
                             <div class="mb-3 last:mb-0">
