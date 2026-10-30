@@ -18,6 +18,7 @@
 
         .empty { font-size: 12px; }
         .sheet + .sheet { page-break-before: always; }
+        .page-break { page-break-before: always; break-before: page; }
 
         .header { text-align: center; margin-bottom: 12px; }
         .header h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
@@ -166,38 +167,6 @@
                 </div>
             </div>
 
-            @if($includeDetails)
-            <h3 class="section">Rincian Spesifikasi per Komputer</h3>
-            <table class="data">
-                <thead>
-                    <tr>
-                        <th class="num">No</th>
-                        <th>Kode Komputer</th>
-                        <th>RAM</th>
-                        <th>Storage</th>
-                        <th>Processor</th>
-                        <th>Monitor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($row['details'] as $index => $detail)
-                        <tr>
-                            <td class="num">{{ $index + 1 }}</td>
-                            <td>{{ $detail['computer']->code }}</td>
-                            <td>{{ $detail['ram'] }}</td>
-                            <td>{{ $detail['storage'] }}</td>
-                            <td>{{ $detail['processor'] }}</td>
-                            <td>{{ $detail['monitor'] }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="muted">Belum ada komputer di laboratorium ini</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-            @endif
-
             <div style="margin-top: 40px; width: 100%;">
                 <table style="width: 100%; border: none;">
                     <tr>
@@ -210,6 +179,75 @@
                     </tr>
                 </table>
             </div>
+
+            @if($includeDetails)
+            <div class="page-break">
+                @include('partials.kop', [
+                    'kopTitle' => 'Laporan Inventaris Laboratorium Komputer',
+                    'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+                ])
+
+                <div class="info">
+                    <table>
+                        <tr>
+                            <td>Laboratorium</td>
+                            <td>: {{ $row['laboratory']->name }}{{ $row['laboratory']->code ? ' ('.$row['laboratory']->code.')' : '' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Jumlah Komputer</td>
+                            <td>: {{ $row['computers_count'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>Dicetak</td>
+                            <td>: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }} WIB</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3 class="section">Rincian Spesifikasi per Komputer</h3>
+                <table class="data">
+                    <thead>
+                        <tr>
+                            <th class="num">No</th>
+                            <th>Kode Komputer</th>
+                            <th>RAM</th>
+                            <th>Storage</th>
+                            <th>Processor</th>
+                            <th>Monitor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($row['details'] as $index => $detail)
+                            <tr>
+                                <td class="num">{{ $index + 1 }}</td>
+                                <td>{{ $detail['computer']->code }}</td>
+                                <td>{{ $detail['ram'] }}</td>
+                                <td>{{ $detail['storage'] }}</td>
+                                <td>{{ $detail['processor'] }}</td>
+                                <td>{{ $detail['monitor'] }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="muted">Belum ada komputer di laboratorium ini</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 40px; width: 100%;">
+                    <table style="width: 100%; border: none;">
+                        <tr>
+                            <td style="border: none; width: 60%;"></td>
+                            <td style="border: none; text-align: center;">
+                                <div>Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                                <div style="margin-top: 5px;">Kepala UPT Laboratorium Terpadu</div>
+                                <div style="margin-top: 50px;"><strong>Dr. Dhesi Ari Astuti, S.SiT., M.Kes</strong></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            @endif
         </div>
     @empty
         <p class="empty">Belum ada laboratorium untuk ditampilkan.</p>
