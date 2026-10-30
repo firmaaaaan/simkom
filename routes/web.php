@@ -420,9 +420,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings/public-software', [SettingController::class, 'editPublicSoftware'])->name('settings.public-software.edit');
         Route::put('/settings/public-software', [SettingController::class, 'updatePublicSoftware'])->name('settings.public-software.update');
     });
-    // Pengaturan TTD laporan — izin laporan karena mengubah tampilan cetak laporan.
-    Route::middleware('permission:view-reports|print-reports')->group(function () {
+    // Pengaturan TTD laporan — izin Laporan.
+    Route::middleware('permission:view-reports|print-reports|edit-reports')->group(function () {
         Route::get('/settings/signatures', [SignatureController::class, 'index'])->name('settings.signatures.index');
+    });
+    Route::middleware('permission:edit-reports')->group(function () {
         Route::get('/settings/signatures/create', [SignatureController::class, 'create'])->name('settings.signatures.create');
         Route::post('/settings/signatures', [SignatureController::class, 'store'])->name('settings.signatures.store');
         Route::get('/settings/signatures/{signature}/edit', [SignatureController::class, 'edit'])->name('settings.signatures.edit');
