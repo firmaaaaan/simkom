@@ -25,7 +25,7 @@
 @switch($variant)
     @case('inline')
         {{-- Sel tabel (Laporan Inventaris): memakai <div> & <strong> --}}
-        <div>{{ $city }}</div>
+        <div style="text-align: center;">{{ $city }}</div>
         <div style="margin-top: 5px; text-align: center;">{{ $role }}</div>
         <div style="{{ $signatureArea }}">{!! $img ? $imgTag : '' !!}</div>
         <div style="{{ $nameLine }}"><strong>{{ $name }}</strong></div>
@@ -33,7 +33,7 @@
 
     @case('line')
         {{-- signature-block tanpa garis, area TTD bertinggi tetap --}}
-        <p>{{ $city }}</p>
+        <p style="text-align: center;">{{ $city }}</p>
         <p style="text-align: center;">{{ $role }}</p>
         <div style="{{ $signatureArea }}">{!! $img ? $imgTag : '' !!}</div>
         <p style="{{ $nameLine }}">{{ $name }}</p>
@@ -41,7 +41,7 @@
 
     @case('print-file')
         {{-- signature-block DomPDF tanpa garis, area TTD bertinggi tetap --}}
-        <p>{{ $city }}</p>
+        <p style="text-align: center;">{{ $city }}</p>
         <p style="text-align: center;">{{ $role }}</p>
         <div style="{{ $signatureArea }}">{!! $img ? $imgTag : '' !!}</div>
         <p style="{{ $nameLine }}">{{ $name }}</p>
@@ -49,7 +49,7 @@
 
     @default
         {{-- block: signature-block tanpa garis, area TTD bertinggi tetap --}}
-        <p>{{ $city }}</p>
+        <p style="text-align: center;">{{ $city }}</p>
         <p style="text-align: center;">{{ $role }}</p>
         <div style="{{ $signatureArea }}">{!! $img ? $imgTag : '' !!}</div>
         <p style="{{ $nameLine }} padding-top: 4px;">{{ $name }}</p>
