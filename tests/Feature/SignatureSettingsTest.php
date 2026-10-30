@@ -70,35 +70,29 @@ class SignatureSettingsTest extends TestCase
     public function test_settings_memerlukan_izin_laporan(): void
     {
         $tanpaIzin = $this->userWith('ttd-none@uji.test', ['view-dashboard']);
-        $lihatLaporan = $this->userWith('ttd-view@uji.test', ['view-reports']);
-        $cetakLaporan = $this->userWith('ttd-print@uji.test', ['print-reports']);
-        $ubahLaporan = $this->userWith('ttd-edit@uji.test', ['view-reports', 'edit-reports']);
+        $lihatTtd = $this->userWith('ttd-view@uji.test', ['view-signatures']);
+        $kelolaTtd = $this->userWith('ttd-manage@uji.test', ['view-signatures', 'create-signatures', 'edit-signatures']);
 
         $this->actingAs($tanpaIzin)->get(route('settings.signatures.index'))->assertForbidden();
         $this->actingAs($tanpaIzin)->get(route('settings.signatures.create'))->assertForbidden();
 
-        $this->actingAs($lihatLaporan)
+        $this->actingAs($lihatTtd)
             ->get(route('settings.signatures.index'))
             ->assertOk()
             ->assertDontSee('Tambah TTD');
-        $this->actingAs($lihatLaporan)->get(route('settings.signatures.create'))->assertForbidden();
+        $this->actingAs($lihatTtd)->get(route('settings.signatures.create'))->assertForbidden();
 
-        $this->actingAs($cetakLaporan)
-            ->get(route('settings.signatures.index'))
-            ->assertOk();
-        $this->actingAs($cetakLaporan)->get(route('settings.signatures.create'))->assertForbidden();
-
-        $this->actingAs($ubahLaporan)
+        $this->actingAs($kelolaTtd)
             ->get(route('settings.signatures.index'))
             ->assertOk()
             ->assertSee('Tambah TTD');
-        $this->actingAs($ubahLaporan)->get(route('settings.signatures.create'))->assertOk();
+        $this->actingAs($kelolaTtd)->get(route('settings.signatures.create'))->assertOk();
     }
 
     public function test_crud_ttd_dengan_gambar_dan_penugasan_laporan(): void
     {
         Storage::fake('public');
-        $admin = $this->userWith('ttd-crud@uji.test', ['view-reports', 'print-reports', 'edit-reports']);
+        $admin = $this->userWith('ttd-crud@uji.test', ['view-signatures', 'create-signatures', 'edit-signatures', 'delete-signatures']);
 
         $this->actingAs($admin)
             ->post(route('settings.signatures.store'), [

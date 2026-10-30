@@ -12,7 +12,7 @@
     $actionOrder = ['view', 'create', 'edit', 'delete', 'export', 'import', 'print'];
 
     $categories = [
-        'Pengaturan' => ['users', 'roles', 'backups'],
+        'Pengaturan' => ['users', 'roles', 'signatures', 'backups'],
         'Data Master' => ['laboratories', 'hardware', 'software', 'computers', 'components'],
         'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports', 'pengadaan'],
         'Produktivitas' => ['todos'],

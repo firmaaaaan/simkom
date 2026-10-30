@@ -24,7 +24,8 @@ class RoleSeeder extends Seeder
         'pengadaan' => ['Pengadaan', ['view', 'create', 'edit', 'delete']],
         'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
-        'reports' => ['Laporan', ['view', 'print', 'edit']],
+        'reports' => ['Laporan', ['view', 'print']],
+        'signatures' => ['Tanda Tangan Laporan', ['view', 'create', 'edit', 'delete']],
         'monitoring' => ['Monitoring PC', ['view', 'control']],
         'todos' => ['To-Do List', ['view', 'create', 'edit', 'delete']],
     ];

@@ -420,15 +420,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings/public-software', [SettingController::class, 'editPublicSoftware'])->name('settings.public-software.edit');
         Route::put('/settings/public-software', [SettingController::class, 'updatePublicSoftware'])->name('settings.public-software.update');
     });
-    // Pengaturan TTD laporan — izin Laporan.
-    Route::middleware('permission:view-reports|print-reports|edit-reports')->group(function () {
+    // Pengaturan TTD laporan
+    Route::middleware('permission:view-signatures|create-signatures|edit-signatures|delete-signatures')->group(function () {
         Route::get('/settings/signatures', [SignatureController::class, 'index'])->name('settings.signatures.index');
     });
-    Route::middleware('permission:edit-reports')->group(function () {
+    Route::middleware('permission:create-signatures|edit-signatures')->group(function () {
         Route::get('/settings/signatures/create', [SignatureController::class, 'create'])->name('settings.signatures.create');
         Route::post('/settings/signatures', [SignatureController::class, 'store'])->name('settings.signatures.store');
+    });
+    Route::middleware('permission:edit-signatures')->group(function () {
         Route::get('/settings/signatures/{signature}/edit', [SignatureController::class, 'edit'])->name('settings.signatures.edit');
         Route::put('/settings/signatures/{signature}', [SignatureController::class, 'update'])->name('settings.signatures.update');
+    });
+    Route::middleware('permission:delete-signatures|edit-signatures')->group(function () {
         Route::delete('/settings/signatures/{signature}', [SignatureController::class, 'destroy'])->name('settings.signatures.destroy');
     });
     Route::middleware('permission:import-computers')->group(function () {
