@@ -246,6 +246,7 @@
                         <tr>
                             <th class="num">No</th>
                             <th>Kode Komputer</th>
+                            <th>Kode Inventaris</th>
                             <th>RAM</th>
                             <th>Storage</th>
                             <th>Processor</th>
@@ -257,6 +258,7 @@
                             <tr>
                                 <td class="num">{{ $index + 1 }}</td>
                                 <td>{{ $detail['computer']->code }}</td>
+                                <td>{{ $detail['computer']->barcode ?? '-' }}</td>
                                 <td>{{ $detail['ram'] }}</td>
                                 <td>{{ $detail['storage'] }}</td>
                                 <td>{{ $detail['processor'] }}</td>
@@ -264,7 +266,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="muted">Belum ada komputer di laboratorium ini</td>
+                                <td colspan="7" class="muted">Belum ada komputer di laboratorium ini</td>
                             </tr>
                         @endforelse
                     </tbody>

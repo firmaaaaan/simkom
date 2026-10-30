@@ -96,6 +96,7 @@
                         <tr class="border-b border-gray-100">
                             <th class="text-left px-6 py-3 font-medium text-gray-500 w-10">No</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Kode Komputer</th>
+                            <th class="text-left px-6 py-3 font-medium text-gray-500">Kode Inventaris</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">RAM</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Storage</th>
                             <th class="text-left px-6 py-3 font-medium text-gray-500">Processor</th>
@@ -107,6 +108,7 @@
                             <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                                 <td data-label="No" class="px-6 py-3 text-gray-500">{{ $index + 1 }}</td>
                                 <td data-label="Kode Komputer" class="px-6 py-3 font-medium text-gray-800">{{ $detail['computer']->code }}</td>
+                                <td data-label="Kode Inventaris" class="px-6 py-3 text-gray-600">{{ $detail['computer']->barcode ?? '-' }}</td>
                                 <td data-label="RAM" class="px-6 py-3 text-gray-600">{{ $detail['ram'] }}</td>
                                 <td data-label="Storage" class="px-6 py-3 text-gray-600">{{ $detail['storage'] }}</td>
                                 <td data-label="Processor" class="px-6 py-3 text-gray-600">{{ $detail['processor'] }}</td>
@@ -114,7 +116,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">
                                     Belum ada komputer di laboratorium ini
                                 </td>
                             </tr>
