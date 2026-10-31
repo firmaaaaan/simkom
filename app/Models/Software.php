@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Software extends Model
 {
@@ -17,6 +18,8 @@ class Software extends Model
         'category',
         'status',
         'description',
+        'pic_name',
+        'pic_email',
     ];
 
     public static function generateCode(): string
@@ -36,5 +39,15 @@ class Software extends Model
     public function computers(): BelongsToMany
     {
         return $this->belongsToMany(Computer::class, 'computer_software')->withTimestamps();
+    }
+
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(SoftwareLicense::class);
+    }
+
+    public function getAssignedLicensesCountAttribute(): int
+    {
+        return $this->licenses->whereNotNull('assigned_computer_id')->count();
     }
 }

@@ -292,6 +292,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('software/bulk-destroy', [SoftwareController::class, 'bulkDestroy'])
         ->middleware('permission:delete-software')
         ->name('software.bulk-destroy');
+    Route::get('software/{software}/licenses/{license}/key', [SoftwareController::class, 'revealLicenseKey'])
+        ->middleware('permission:view-license-key')
+        ->name('software.license-key');
     Route::resource('software', SoftwareController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-software')
         ->middlewareFor(['create', 'store'], 'permission:create-software')

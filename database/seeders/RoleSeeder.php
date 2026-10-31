@@ -16,6 +16,7 @@ class RoleSeeder extends Seeder
         'academic-years' => ['Tahun Ajaran', ['view', 'create', 'edit', 'delete', 'export']],
         'hardware' => ['Hardware', ['view', 'create', 'edit', 'delete', 'export', 'import']],
         'software' => ['Software', ['view', 'create', 'edit', 'delete', 'export', 'import']],
+        'license-key' => ['Product Key Lisensi', ['view']],
         'components' => ['Komponen', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
         'computers' => ['Komputer', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
         'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],

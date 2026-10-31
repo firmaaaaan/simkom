@@ -2,61 +2,38 @@
 
 namespace App\Imports;
 
-use App\Models\Software;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
+use App\Services\SoftwareLicenseSync;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class SoftwareImport implements ToModel, WithHeadingRow, WithValidation
+class SoftwareImport implements WithMultipleSheets
 {
-    protected int $importedCount = 0;
-    protected array $errors = [];
+    private SoftwareImportContext $context;
 
-    public function model(array $row)
+    public function __construct()
     {
-        try {
-            $code = !empty($row['kode']) ? $row['kode'] : Software::generateCode();
-
-            $result = Software::updateOrCreate(
-                ['code' => $code],
-                [
-                    'name' => $row['nama'],
-                    'version' => $row['versi'] ?? null,
-                    'category' => $row['kategori'],
-                    'license_type' => $row['jenis_lisensi'] ?? null,
-                    'status' => $row['status'] ?? 'Aktif',
-                    'description' => $row['keterangan'] ?? null,
-                ]
-            );
-
-            $this->importedCount++;
-            return $result;
-        } catch (\Exception $e) {
-            $this->errors[] = 'Baris ' . ($this->importedCount + count($this->errors) + 1) . ': ' . $e->getMessage();
-            return null;
-        }
+        $this->context = new SoftwareImportContext();
     }
 
-    public function rules(): array
+    public function sheets(): array
     {
         return [
-            'kode' => 'nullable|string|max:50',
-            'nama' => 'required|string|max:255',
-            'versi' => 'nullable|string|max:50',
-            'kategori' => 'required|string|max:255',
-            'jenis_lisensi' => 'nullable|string|max:100',
-            'status' => 'nullable|string|in:Aktif,Expired,Trial,Non Aktif',
-            'keterangan' => 'nullable|string',
+            'Software' => new SoftwareSheetImport($this->context),
+            'Lisensi' => new SoftwareLicenseSheetImport($this->context, app(SoftwareLicenseSync::class)),
         ];
     }
 
     public function getImportedCount(): int
     {
-        return $this->importedCount;
+        return $this->context->softwareCount;
+    }
+
+    public function getImportedLicenseCount(): int
+    {
+        return $this->context->licenseCount;
     }
 
     public function getErrors(): array
     {
-        return $this->errors;
+        return $this->context->errors;
     }
 }

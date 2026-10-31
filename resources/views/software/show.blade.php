@@ -65,6 +65,18 @@
                     <p class="text-xs text-gray-400 mb-1">Jenis Lisensi</p>
                     <p class="text-sm text-gray-800">{{ $software->license_type ?? '-' }}</p>
                 </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Penanggung Jawab</p>
+                    <p class="text-sm text-gray-800">{{ $software->pic_name ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Email PJ</p>
+                    @if($software->pic_email)
+                        <a href="mailto:{{ $software->pic_email }}" class="text-sm text-green-700 hover:underline">{{ $software->pic_email }}</a>
+                    @else
+                        <p class="text-sm text-gray-800">-</p>
+                    @endif
+                </div>
             </div>
 
             @if($software->description)
@@ -73,7 +85,128 @@
                     <p class="text-sm text-gray-800">{{ $software->description }}</p>
                 </div>
             @endif
+
+            <div class="pt-4 border-t border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Daftar Lisensi</p>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            Total {{ $software->licenses->count() }} ·
+                            Terpakai {{ $software->assigned_licenses_count }} ·
+                            Tersedia {{ $software->licenses->count() - $software->assigned_licenses_count }}
+                        </p>
+                    </div>
+                    @can('edit-software')
+                        <a href="{{ route('software.edit', $software) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            Kelola Lisensi
+                        </a>
+                    @endcan
+                </div>
+
+                @if($software->licenses->isEmpty())
+                    <p class="px-4 py-6 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-lg">
+                        Belum ada lisensi untuk software ini.
+                    </p>
+                @else
+                    <div class="overflow-x-auto border border-gray-100 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-100 bg-gray-50/60">
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">No</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Label</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Product Key</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">PC Terpasang</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Beli</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Expired</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($software->licenses as $index => $license)
+                                    <tr class="border-b border-gray-50 last:border-0">
+                                        <td class="px-4 py-3 text-gray-500">{{ $index + 1 }}</td>
+                                        <td class="px-4 py-3 text-gray-800">{{ $license->label ?? '-' }}</td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-mono text-xs text-gray-700" data-license-key
+                                                    data-masked="{{ $license->maskedKey() }}"
+                                                    data-url="{{ route('software.license-key', [$software, $license]) }}"
+                                                    data-revealed="0">{{ $license->maskedKey() }}</span>
+                                                @if($canRevealKey && $license->license_key)
+                                                    <button type="button" onclick="toggleLicenseKey(this)"
+                                                        class="text-gray-400 hover:text-green-600 transition-colors" title="Lihat / sembunyikan key">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600">
+                                            @if($license->computer)
+                                                {{ $license->computer->code }}
+                                                @if($license->computer->laboratory)
+                                                    <span class="text-xs text-gray-400">· {{ $license->computer->laboratory->name }}</span>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-400">Belum dipasang</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600">{{ $license->purchase_date?->format('d/m/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-3 text-gray-600">{{ $license->expiry_date?->format('d/m/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-3">
+                                            @php $licenseStatus = $license->statusLabel(); @endphp
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                {{ $licenseStatus === 'Expired' ? 'bg-red-100 text-red-700' : ($licenseStatus === 'Aktif' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600') }}">
+                                                {{ $licenseStatus }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    async function toggleLicenseKey(button) {
+        const span = button.parentElement.querySelector('[data-license-key]');
+        if (!span) return;
+
+        if (span.dataset.revealed === '1') {
+            span.textContent = span.dataset.masked;
+            span.dataset.revealed = '0';
+            return;
+        }
+
+        try {
+            const res = await fetch(span.dataset.url, {
+                headers: { 'Accept': 'application/json' },
+            });
+
+            if (!res.ok) {
+                alert('Tidak berhak melihat product key.');
+                return;
+            }
+
+            const data = await res.json();
+            if (!data.key) {
+                alert('Product key kosong.');
+                return;
+            }
+
+            span.textContent = data.key;
+            span.dataset.revealed = '1';
+        } catch (e) {
+            alert('Gagal memuat product key.');
+        }
+    }
+</script>
+@endpush

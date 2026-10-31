@@ -4,6 +4,17 @@
 @section('header', 'Edit Software')
 
 @section('content')
+@php
+    $initialLicenses = old('licenses', $software->licenses->map(fn ($license) => [
+        'id' => $license->id,
+        'label' => $license->label,
+        'license_key' => $license->license_key,
+        'assigned_computer_id' => $license->assigned_computer_id,
+        'purchase_date' => $license->purchase_date?->format('Y-m-d'),
+        'expiry_date' => $license->expiry_date?->format('Y-m-d'),
+        'notes' => $license->notes,
+    ])->values()->all());
+@endphp
 <div class="max-w-2xl">
     <div class="mb-6">
         <a href="{{ route('software.index') }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
@@ -101,12 +112,32 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="pic_name" class="block text-sm font-medium text-gray-700 mb-1">Penanggung Jawab</label>
+                        <input type="text" name="pic_name" id="pic_name" value="{{ old('pic_name', $software->pic_name) }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="Nama penanggung jawab lisensi">
+                    </div>
+                    <div>
+                        <label for="pic_email" class="block text-sm font-medium text-gray-700 mb-1">Email PJ</label>
+                        <input type="email" name="pic_email" id="pic_email" value="{{ old('pic_email', $software->pic_email) }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="nama@instansi.ac.id">
+                    </div>
+                </div>
+
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea name="description" id="description" rows="3"
                         class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400 resize-none"
                         placeholder="Deskripsi software (contoh: Paket lengkap Office untuk perkantoran)...">{{ old('description', $software->description) }}</textarea>
                 </div>
+
+                @include('software.partials.licenses', [
+                    'initialLicenses' => $initialLicenses,
+                    'computerOptions' => $computerOptions,
+                ])
             </div>
 
             <div class="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">

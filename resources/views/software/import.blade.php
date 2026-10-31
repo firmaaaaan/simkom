@@ -16,7 +16,7 @@
 
     <div class="bg-white rounded-xl border border-gray-200 p-6">
         <h2 class="text-lg font-bold text-gray-800 mb-2">Import Software dari Excel</h2>
-        <p class="text-sm text-gray-500 mb-6">Upload file Excel (.xlsx, .xls, .csv) untuk mengimport data software secara batch.</p>
+        <p class="text-sm text-gray-500 mb-6">Upload file Excel (.xlsx, .xls) untuk mengimport data software dan lisensi secara batch.</p>
 
         @if(session('import_error'))
             <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -63,10 +63,13 @@
                 <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                 </svg>
-                <div>
-                    <p class="text-sm font-medium text-blue-800">Format kolom yang diperlukan:</p>
-                    <p class="text-xs text-blue-700 mt-1">Kode, Nama, Versi, Kategori, Jenis Lisensi, Jumlah Lisensi, Status, Keterangan</p>
-                    <p class="text-xs text-blue-700 mt-1">Kode bersifat opsional. Jika kosong, kode akan di-generate otomatis (SW-001, SW-002, ...).</p>
+                <div class="space-y-1">
+                    <p class="text-sm font-medium text-blue-800">Format file: 2 sheet</p>
+                    <p class="text-xs text-blue-700"><span class="font-semibold">Sheet "Software":</span> Kode, Nama, Versi, Kategori, Jenis Lisensi, Penanggung Jawab, Email PJ, Status, Keterangan</p>
+                    <p class="text-xs text-blue-700"><span class="font-semibold">Sheet "Lisensi":</span> Kode Software, Label, Product Key, PC, Tanggal Beli, Tanggal Expired, Catatan, Status</p>
+                    <p class="text-xs text-blue-700">Nama sheet harus tepat "Software" dan "Lisensi". Sheet "Lisensi" boleh kosong.</p>
+                    <p class="text-xs text-blue-700">Kode software opsional. Jika kosong, kode di-generate otomatis (SW-001, SW-002, ...).</p>
+                    <p class="text-xs text-blue-700">Product key pada file export hanya tampil penuh jika Anda punya izin "Lihat Product Key Lisensi". Key yang disamarkan tidak akan menimpa key asli saat import.</p>
                 </div>
             </div>
         </div>
@@ -91,9 +94,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                             </svg>
                             <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Klik untuk upload</span></p>
-                            <p class="text-xs text-gray-400">XLSX, XLS, atau CSV (maks. 10MB)</p>
+                            <p class="text-xs text-gray-400">XLSX atau XLS (maks. 10MB)</p>
                         </div>
-                        <input id="file" name="file" type="file" class="hidden" accept=".xlsx,.xls,.csv" required>
+                        <input id="file" name="file" type="file" class="hidden" accept=".xlsx,.xls" required>
                     </label>
                 </div>
                 <p id="file-name" class="mt-2 text-sm text-gray-500"></p>

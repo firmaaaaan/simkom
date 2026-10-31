@@ -47,6 +47,11 @@ class Computer extends Model
         return $this->belongsToMany(Software::class, 'computer_software')->withTimestamps();
     }
 
+    public function softwareLicenses(): HasMany
+    {
+        return $this->hasMany(SoftwareLicense::class, 'assigned_computer_id');
+    }
+
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);

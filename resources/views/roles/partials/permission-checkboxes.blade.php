@@ -13,7 +13,7 @@
 
     $categories = [
         'Pengaturan' => ['users', 'roles', 'signatures', 'backups'],
-        'Data Master' => ['laboratories', 'hardware', 'software', 'computers', 'components'],
+        'Data Master' => ['laboratories', 'hardware', 'software', 'license-key', 'computers', 'components'],
         'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports', 'pengadaan'],
         'Produktivitas' => ['todos'],
     ];

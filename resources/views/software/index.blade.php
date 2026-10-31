@@ -49,6 +49,17 @@
     </div>
 @endif
 
+@if(session('import_errors') && count(session('import_errors')) > 0)
+    <div class="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm">
+        <p class="font-semibold mb-1">{{ count(session('import_errors')) }} baris saat import bermasalah:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach(session('import_errors') as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 class="text-base font-semibold text-gray-800">Daftar Software</h2>
@@ -72,6 +83,7 @@
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Nama</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Versi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Kategori</th>
+                    <th class="text-left px-6 py-3 font-medium text-gray-500">Lisensi</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Status</th>
                     <th class="text-left px-6 py-3 font-medium text-gray-500">Aksi</th>
                 </tr>
@@ -92,7 +104,7 @@
                             </span>
                         </td>
                         <td data-label="Nama" class="px-6 py-4 font-medium text-gray-900">
-                            {{ $item->name }}
+                            <a href="{{ route('software.show', $item->id) }}" class="hover:text-green-600 transition-colors">{{ $item->name }}</a>
                         </td>
                         <td data-label="Versi" class="px-6 py-4 text-gray-600">
                             {{ $item->version }}
@@ -101,6 +113,9 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                 {{ $item->category }}
                             </span>
+                        </td>
+                        <td data-label="Lisensi" class="px-6 py-4 text-gray-600">
+                            {{ $item->licenses_count }} lisensi
                         </td>
                         <td data-label="Status" class="px-6 py-4">
                             @if($item->status === 'Aktif')
@@ -127,6 +142,9 @@
                         </td>
                         <td data-label="Aksi" class="px-6 py-4">
                             <div class="flex items-center gap-2">
+                                <a href="{{ route('software.show', $item->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    Detail
+                                </a>
                                 <a href="{{ route('software.edit', $item->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -149,7 +167,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center">
+                        <td colspan="9" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0-2.25l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
