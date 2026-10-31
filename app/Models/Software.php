@@ -15,6 +15,8 @@ class Software extends Model
         'code',
         'version',
         'license_type',
+        'provider',
+        'download_link',
         'category',
         'status',
         'description',

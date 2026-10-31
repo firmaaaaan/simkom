@@ -124,6 +124,22 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="provider" class="block text-sm font-medium text-gray-700 mb-1">Penyedia</label>
+                        <input type="text" name="provider" id="provider" value="{{ old('provider') }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="Contoh: PT Distribusi Software Nusantara">
+                    </div>
+                    <div>
+                        <label for="download_link" class="block text-sm font-medium text-gray-700 mb-1">Link Download</label>
+                        <input type="url" name="download_link" id="download_link" value="{{ old('download_link') }}"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                            placeholder="https://...">
+                        <p class="mt-1 text-xs text-gray-400">Opsional</p>
+                    </div>
+                </div>
+
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                     <textarea name="description" id="description" rows="3"

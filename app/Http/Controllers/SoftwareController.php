@@ -218,6 +218,8 @@ class SoftwareController extends Controller
             'code' => 'nullable|string|max:50|unique:software,code'.($software ? ','.$software->id : ''),
             'version' => 'nullable|string|max:50',
             'license_type' => 'nullable|string|max:100',
+            'provider' => 'nullable|string|max:255',
+            'download_link' => 'nullable|url|max:255',
             'category' => 'required|string|max:255',
             'status' => 'required|in:Aktif,Expired,Trial,Non Aktif',
             'description' => 'nullable|string',

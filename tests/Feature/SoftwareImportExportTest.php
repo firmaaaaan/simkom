@@ -22,6 +22,7 @@ class SoftwareImportExportTest extends TestCase
     private const SOFTWARE_HEADINGS = [
         'Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi',
         'Penanggung Jawab', 'Email PJ', 'Status', 'Keterangan',
+        'Penyedia', 'Link Download',
     ];
 
     private const LICENSE_HEADINGS = [
@@ -65,6 +66,8 @@ class SoftwareImportExportTest extends TestCase
             'version' => '2021',
             'category' => 'Office Suite',
             'license_type' => 'Volume License',
+            'provider' => 'PT Distribusi Software Nusantara',
+            'download_link' => 'https://contoh.ac.id/download/office',
             'pic_name' => 'Budi',
             'pic_email' => 'budi@kampus.ac.id',
             'status' => 'Aktif',
@@ -135,6 +138,11 @@ class SoftwareImportExportTest extends TestCase
         $this->assertSame(self::SOFTWARE_HEADINGS, $sheets['software'][0]);
         $this->assertSame(self::LICENSE_HEADINGS, $sheets['licenses'][0]);
 
+        $softwareRow = $sheets['software'][1];
+        $this->assertSame('SW-001', $softwareRow[0]);
+        $this->assertSame('PT Distribusi Software Nusantara', $softwareRow[9]);
+        $this->assertSame('https://contoh.ac.id/download/office', $softwareRow[10]);
+
         $licenseRow = $sheets['licenses'][1];
         $this->assertSame('SW-001', $licenseRow[0]);
         $this->assertSame('AAAA-BBBB-CCCC', $licenseRow[2]);
@@ -175,7 +183,7 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-100', 'AutoCAD', '2024', 'Design', 'Subscription', 'Sari', 'sari@kampus.ac.id', 'Aktif', 'Lisensi pendidikan'],
+                ['SW-100', 'AutoCAD', '2024', 'Design', 'Subscription', 'Sari', 'sari@kampus.ac.id', 'Aktif', 'Lisensi pendidikan', 'PT Media Kreatif', 'https://contoh.ac.id/download/autocad'],
             ],
             [
                 ['SW-100', 'Lisensi 1', 'KEY1-KEY1-KEY1', 'PC-01', '2025-02-01', '2027-02-01', 'Catatan', 'Aktif'],
@@ -191,6 +199,8 @@ class SoftwareImportExportTest extends TestCase
         $this->assertSame('AutoCAD', $software->name);
         $this->assertSame('Sari', $software->pic_name);
         $this->assertSame('sari@kampus.ac.id', $software->pic_email);
+        $this->assertSame('PT Media Kreatif', $software->provider);
+        $this->assertSame('https://contoh.ac.id/download/autocad', $software->download_link);
         $this->assertCount(2, $software->licenses);
         $this->assertDatabaseHas('software_licenses', ['software_id' => $software->id, 'license_key' => 'KEY1-KEY1-KEY1']);
         $this->assertDatabaseHas('computer_software', ['computer_id' => $computer->id, 'software_id' => $software->id]);
@@ -205,7 +215,7 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', ''],
+                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', ''],
             ],
             [
                 ['SW-001', 'Lisensi 1', 'NEW-AAA-BBB', 'PC-01', '2025-01-01', '2027-01-01', '', ''],
@@ -227,7 +237,7 @@ class SoftwareImportExportTest extends TestCase
     {
         $file = $this->uploadableWorkbook(
             [
-                ['SW-200', 'Matlab', '2024', 'Utilities', 'Subscription', '', '', 'Aktif', ''],
+                ['SW-200', 'Matlab', '2024', 'Utilities', 'Subscription', '', '', 'Aktif', '', '', ''],
             ],
             [
                 ['SW-200', 'Lisensi 1', 'KEY-KEY-KEY', 'PC-TIDAK-ADA', '', '', '', ''],
@@ -257,7 +267,7 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', ''],
+                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', ''],
             ],
             [
                 ['SW-001', 'Lisensi 1', 'AAAA••••CCCC', 'PC-01', '', '', '', ''],

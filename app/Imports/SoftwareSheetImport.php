@@ -29,6 +29,8 @@ class SoftwareSheetImport implements ToModel, WithHeadingRow, WithValidation
                     'pic_email' => $row['email_pj'] ?? null,
                     'status' => $row['status'] ?? 'Aktif',
                     'description' => $row['keterangan'] ?? null,
+                    'provider' => $row['penyedia'] ?? null,
+                    'download_link' => $row['link_download'] ?? null,
                 ]
             );
 
@@ -55,7 +57,15 @@ class SoftwareSheetImport implements ToModel, WithHeadingRow, WithValidation
             }
 
             $value = trim((string) $value);
-            $row[$key] = $value === '' ? null : $value;
+            $value = $value === '' ? null : $value;
+
+            // Link tanpa skema (mis. drive.google.com/...) dilengkapi https://
+            // supaya lolos rule url dan tetap bisa diklik saat ditampilkan.
+            if ($key === 'link_download' && $value !== null && ! preg_match('#^https?://#i', $value)) {
+                $value = 'https://' . $value;
+            }
+
+            $row[$key] = $value;
         }
 
         return $row;
@@ -73,6 +83,8 @@ class SoftwareSheetImport implements ToModel, WithHeadingRow, WithValidation
             'email_pj' => 'nullable|email|max:255',
             'status' => 'nullable|string|in:Aktif,Expired,Trial,Non Aktif',
             'keterangan' => 'nullable|string',
+            'penyedia' => 'nullable|string|max:255',
+            'link_download' => 'nullable|url|max:255',
         ];
     }
 }

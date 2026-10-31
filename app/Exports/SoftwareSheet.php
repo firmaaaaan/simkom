@@ -31,6 +31,7 @@ class SoftwareSheet implements FromCollection, WithHeadings, WithMapping, WithSt
         return [
             'Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi',
             'Penanggung Jawab', 'Email PJ', 'Status', 'Keterangan',
+            'Penyedia', 'Link Download',
         ];
     }
 
@@ -46,6 +47,8 @@ class SoftwareSheet implements FromCollection, WithHeadings, WithMapping, WithSt
             $software->pic_email,
             $software->status,
             $software->description,
+            $software->provider,
+            $software->download_link,
         ];
     }
 

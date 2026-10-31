@@ -77,6 +77,19 @@
                         <p class="text-sm text-gray-800">-</p>
                     @endif
                 </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Penyedia</p>
+                    <p class="text-sm text-gray-800">{{ $software->provider ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Link Download</p>
+                    @if($software->download_link)
+                        <a href="{{ $software->download_link }}" target="_blank" rel="noopener noreferrer"
+                            class="text-sm text-green-700 hover:underline break-all">{{ $software->download_link }}</a>
+                    @else
+                        <p class="text-sm text-gray-800">-</p>
+                    @endif
+                </div>
             </div>
 
             @if($software->description)
