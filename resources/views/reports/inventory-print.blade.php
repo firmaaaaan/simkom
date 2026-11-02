@@ -48,30 +48,16 @@
         @media print {
             .print-btn { display: none !important; }
 
-            /* Margin 0 dipertahankan agar header/footer otomatis Chrome tidak muncul;
-               jarak cetak diatur lewat padding body. */
-            @page { size: portrait; margin: 0; }
-            body {
-                padding: 27mm 15mm 15mm;
-                box-decoration-break: clone;
-                -webkit-box-decoration-break: clone;
-            }
+            /* Margin halaman diatur @page, bukan padding body: padding body
+               hanya berlaku di halaman pertama sehingga halaman lanjutan
+               tercetak mepet tepi kertas. */
+            @page { size: portrait; margin: 15mm; }
+            body { padding: 0; }
 
-            /* Kop otomatis di setiap halaman hasil cetak. */
-            .kop-running {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: #fff;
-                z-index: 100;
-                padding: 6mm 15mm 3mm;
-            }
-            .kop-running > div { margin-bottom: 0 !important; }
-
-            /* Kop manual per sheet digantikan kop tetap di atas. */
-            .kop-inline { display: none; }
+            /* Kop ikut alur tiap sheet/lembar agar tetap berada di dalam
+               margin halaman, tidak lagi dipasang fixed di atas konten. */
+            .kop-running { display: none !important; }
+            .kop-inline { display: block; }
         }
     </style>
 </head>

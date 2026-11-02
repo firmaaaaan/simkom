@@ -65,8 +65,11 @@
 
         @media print {
             .print-btn { display: none !important; }
-            body { padding: 10mm; }
-            @page { size: portrait; margin: 0; }
+            /* Margin halaman diatur @page, bukan padding body: padding body
+               hanya berlaku di halaman pertama sehingga halaman lanjutan
+               tercetak mepet tepi kertas. */
+            body { padding: 0; }
+            @page { size: portrait; margin: 10mm; }
         }
     </style>
 </head>

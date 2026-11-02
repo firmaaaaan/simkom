@@ -10,7 +10,7 @@
 
         @page { 
             size: A4 portrait !important; 
-            margin: 0; 
+            margin: 10mm; 
         }
 
         .print-btn {
@@ -40,7 +40,7 @@
 
         @media print {
             .print-btn { display: none !important; }
-            body { padding: 10mm; width: 100%; }
+            body { padding: 0; width: 100%; }
         }
     </style>
 </head>

@@ -23,8 +23,10 @@
         .checkbox { display: inline-block; width: 14px; height: 14px; border: 1.5px solid #000; vertical-align: middle; text-align: center; line-height: 12px; font-size: 11px; font-weight: bold; font-family: 'DejaVu Sans', sans-serif; }
         .signature { margin-top: 40px; text-align: right; font-size: 11px; }
         .signature-block { display: inline-block; width: 220px; text-align: left; }
-        @media print { .page { padding: 10mm; } }
-        @page { size: A4 portrait; margin: 0; }
+        /* Margin halaman diatur @page supaya halaman kedua dan seterusnya
+           sama dengan halaman pertama (padding .page hanya kena halaman awal). */
+        @media print { .page { padding: 0; } }
+        @page { size: A4 portrait; margin: 10mm; }
     </style>
 </head>
 <body>

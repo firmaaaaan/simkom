@@ -32,10 +32,11 @@
         @media print {
             .btn-print { display: none !important; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .page { padding: 10mm; }
+            .page { padding: 0; }
             .checkbox.checked::after { color: #000; }
         }
-        @page { size: A4 portrait; margin: 0; }
+        /* Margin halaman diatur @page agar halaman kedua dan seterusnya sama. */
+        @page { size: A4 portrait; margin: 10mm; }
     </style>
 </head>
 <body>
