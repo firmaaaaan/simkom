@@ -20,8 +20,9 @@
         table.data td.num, table.data th.num { text-align: center; width: 40px; }
         @media print {
             .print-btn { display: none !important; }
+            .header { position: fixed; top: 0; left: 0; right: 0; background: #fff; padding-bottom: 8px; }
             @page { size: landscape; margin: 15mm; }
-            body { padding: 0; }
+            body { padding: 0; margin-top: 90px; }
         }
     </style>
 </head>
