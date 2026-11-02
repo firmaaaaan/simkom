@@ -18,8 +18,8 @@
         table.data td.num, table.data th.num { text-align: center; width: 40px; }
         @media print {
             .print-btn { display: none !important; }
-            @page { size: landscape; margin: 15mm; }
-            body { padding: 0; }
+            @page { size: landscape; margin: 0; }
+            body { padding: 15mm; }
         }
     </style>
 </head>
