@@ -295,6 +295,10 @@ Route::middleware('auth')->group(function () {
     Route::get('software/{software}/licenses/{license}/key', [SoftwareController::class, 'revealLicenseKey'])
         ->middleware('permission:view-license-key')
         ->name('software.license-key');
+    Route::get('software/print', [SoftwareController::class, 'print'])
+        ->middleware('permission:view-software')
+        ->name('software.print');
+
     Route::resource('software', SoftwareController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-software')
         ->middlewareFor(['create', 'store'], 'permission:create-software')

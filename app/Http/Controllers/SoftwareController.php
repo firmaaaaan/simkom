@@ -175,6 +175,20 @@ class SoftwareController extends Controller
         return response()->json(['key' => $license->license_key]);
     }
 
+    public function print(Request $request)
+    {
+        $query = Software::withCount('licenses')->latest();
+
+        if ($request->filled('ids')) {
+            $ids = is_array($request->ids) ? $request->ids : explode(',', $request->ids);
+            $query->whereIn('id', $ids);
+        }
+
+        $software = $query->get();
+
+        return view('software.print', compact('software'));
+    }
+
     public function export()
     {
         $includeKeys = auth()->user()?->hasPermission('view-license-key') ?? false;
