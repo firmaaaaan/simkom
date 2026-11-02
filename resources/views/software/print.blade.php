@@ -7,7 +7,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #000; padding: 15px; }
         .print-btn { display: inline-flex; padding: 8px 20px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
-        .header { text-align: center; margin-bottom: 12px; }
+        .header { text-align: left; margin-bottom: 12px; }
         .header h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
         .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .info { margin-bottom: 10px; }
