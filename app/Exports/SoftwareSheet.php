@@ -23,7 +23,7 @@ class SoftwareSheet implements FromCollection, WithHeadings, WithMapping, WithSt
             return collect();
         }
 
-        return Software::orderBy('code')->get();
+        return Software::with('licenses')->orderBy('code')->get();
     }
 
     public function headings(): array
@@ -31,7 +31,7 @@ class SoftwareSheet implements FromCollection, WithHeadings, WithMapping, WithSt
         return [
             'Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi',
             'Penanggung Jawab', 'Email PJ', 'Status', 'Keterangan',
-            'Penyedia', 'Link Download',
+            'Catatan Lisensi', 'Penyedia', 'Link Download',
         ];
     }
 
@@ -47,6 +47,13 @@ class SoftwareSheet implements FromCollection, WithHeadings, WithMapping, WithSt
             $software->pic_email,
             $software->status,
             $software->description,
+            // Gabungan catatan tiap lisensi agar ikut terbaca di sheet Software.
+            $software->licenses
+                ->pluck('notes')
+                ->map(fn ($notes) => trim((string) $notes))
+                ->filter()
+                ->unique()
+                ->implode('; '),
             $software->provider,
             $software->download_link,
         ];

@@ -72,7 +72,15 @@ class SoftwareController extends Controller
 
         $canRevealKey = auth()->user()?->hasPermission('view-license-key') ?? false;
 
-        return view('software.show', compact('software', 'canRevealKey'));
+        // Lisensi yang akan habis dalam 30 hari ke depan (yang sudah expired
+        // tidak dihitung, karena sudah tercermin di kolom status).
+        $expiringSoon = $software->licenses
+            ->filter(fn ($license) => $license->expiry_date !== null
+                && ! $license->isExpired()
+                && $license->expiry_date->lte(now()->addDays(30)))
+            ->sortBy('expiry_date');
+
+        return view('software.show', compact('software', 'canRevealKey', 'expiringSoon'));
     }
 
     public function edit(Software $software)

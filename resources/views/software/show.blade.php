@@ -116,6 +116,27 @@
                     @endcan
                 </div>
 
+                @if($expiringSoon->isNotEmpty())
+                    <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <p class="text-sm font-semibold text-amber-800">Lisensi hampir expired (≤ 30 hari)</p>
+                        <ul class="mt-2 space-y-1">
+                            @foreach($expiringSoon as $license)
+                                @php
+                                    $daysLeft = max(0, (int) now()->startOfDay()->diffInDays($license->expiry_date->copy()->startOfDay()));
+                                @endphp
+                                <li class="text-xs text-amber-800">
+                                    <span class="font-medium">{{ $license->label ?? '-' }}</span>
+                                    @if($license->computer)
+                                        · {{ $license->computer->code }}
+                                    @endif
+                                    · expired {{ $license->expiry_date->format('d/m/Y') }}
+                                    ({{ $daysLeft === 0 ? 'hari ini' : $daysLeft.' hari lagi' }})
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 @if($software->licenses->isEmpty())
                     <p class="px-4 py-6 text-center text-sm text-gray-400 border border-dashed border-gray-200 rounded-lg">
                         Belum ada lisensi untuk software ini.
@@ -131,6 +152,7 @@
                                     <th class="text-left px-4 py-2.5 font-medium text-gray-500">PC Terpasang</th>
                                     <th class="text-left px-4 py-2.5 font-medium text-gray-500">Beli</th>
                                     <th class="text-left px-4 py-2.5 font-medium text-gray-500">Expired</th>
+                                    <th class="text-left px-4 py-2.5 font-medium text-gray-500">Catatan</th>
                                     <th class="text-left px-4 py-2.5 font-medium text-gray-500">Status</th>
                                 </tr>
                             </thead>
@@ -168,6 +190,7 @@
                                         </td>
                                         <td class="px-4 py-3 text-gray-600">{{ $license->purchase_date?->format('d/m/Y') ?? '-' }}</td>
                                         <td class="px-4 py-3 text-gray-600">{{ $license->expiry_date?->format('d/m/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-3 text-gray-600 max-w-[16rem] break-words">{{ $license->notes ?: '-' }}</td>
                                         <td class="px-4 py-3">
                                             @php $licenseStatus = $license->statusLabel(); @endphp
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
