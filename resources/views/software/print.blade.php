@@ -8,8 +8,6 @@
         body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #000; padding: 15px; }
         .print-btn { display: inline-flex; padding: 8px 20px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
         .header { text-align: left; margin-bottom: 12px; }
-        .header h1 { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-        .header h2 { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .info { margin-bottom: 10px; }
         .info table { border-collapse: collapse; }
         .info td { padding: 2px 8px 2px 0; font-size: 11px; vertical-align: top; }
@@ -20,20 +18,13 @@
         table.data td.num, table.data th.num { text-align: center; width: 40px; }
         @media print {
             .print-btn { display: none !important; }
-            .header { position: fixed; top: 0; left: 0; right: 0; background: #fff; padding-bottom: 8px; }
             @page { size: landscape; margin: 15mm; }
-            body { padding: 0; margin-top: 90px; }
+            body { padding: 0; }
         }
     </style>
 </head>
 <body>
     <button class="print-btn" onclick="window.print()">Cetak</button>
-    <div class="header">
-        @include('partials.kop', [
-            'kopTitle' => 'Daftar Software',
-            'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
-        ])
-    </div>
     <div class="info">
         <table>
             <tr><td>Dicetak</td><td>: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i') }} WIB</td></tr>
@@ -42,6 +33,14 @@
     </div>
     <table class="data">
         <thead>
+            <tr>
+                <th colspan="7" style="border: none; padding: 0 0 8px 0; background: #fff;">
+                    @include('partials.kop', [
+                        'kopTitle' => 'Daftar Software',
+                        'kopLines' => ['UPT LABORATORIUM TERPADU', "Universitas 'Aisyiyah Yogyakarta"],
+                    ])
+                </th>
+            </tr>
             <tr>
                 <th class="num">No</th>
                 <th>Kode</th>
