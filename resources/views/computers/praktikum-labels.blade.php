@@ -93,12 +93,12 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="{ previewUrl: null }">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="mb-6 no-print">
+    <div class="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:mb-4 no-print">
             <a href="{{ route('computers.index') }}" class="text-green-600 hover:text-green-700 font-medium">&larr; Kembali</a>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 no-print">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 no-print">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">Label Praktikum</h1>
                 <p class="text-sm text-gray-500 mt-1">Cetak label nomor meja dengan QR Code lapor kendala (3 kolom, A3)</p>
@@ -131,7 +131,7 @@
         </div>
 
         @if($selectedLab && $computers->count() > 0)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 no-print mb-4">
+            <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 no-print">
                 <p class="text-sm text-gray-600">
                     Menampilkan <span class="font-semibold">{{ $computers->count() }}</span> label meja
                     untuk <span class="font-semibold">{{ $selectedLab->name }}</span>
@@ -140,9 +140,9 @@
         @endif
 
         @if($computers->count() > 0)
-            <div class="stiker-grid">
+            <div class="stiker-grid px-1">
                 @foreach($computers as $computer)
-                    <div class="stiker-item">
+                    <div class="stiker-item px-2 py-1">
                         <div class="number-section">
                             <div class="meja-label">MEJA</div>
                             <div class="meja-number">{{ str_pad($computer->nomor_meja, 2, '0', STR_PAD_LEFT) }}</div>
@@ -159,7 +159,7 @@
             </div>
 
         @elseif($selectedLab)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <div class="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 text-center">
                 <p class="text-gray-500">Tidak ada komputer di laboratorium ini.</p>
             </div>
         @endif

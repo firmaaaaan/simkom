@@ -5,7 +5,7 @@
     @click="specOpen = false"
     @keydown.escape.window="specOpen = false">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" @click.stop>
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-b border-gray-200">
             <div>
                 <h3 class="font-bold text-gray-800">Spesifikasi Komputer</h3>
                 <p class="text-sm text-gray-500 mt-0.5">{{ $computer->code }}</p>
@@ -17,13 +17,13 @@
             </button>
         </div>
 
-        <div class="flex-1 overflow-auto p-6">
+        <div class="flex-1 overflow-auto p-4 sm:p-6">
             <p class="text-sm font-semibold text-gray-800 mb-2">
                 Hardware <span class="font-normal text-gray-400">({{ $computer->hardware->count() }})</span>
             </p>
             @if($computer->hardware->isNotEmpty())
                 <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                    <table class="w-full text-sm text-left">
+                    <table class="w-full text-sm text-left min-w-[600px]">
                         <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                             <tr>
                                 <th class="px-3 py-2 font-medium">Nama</th>

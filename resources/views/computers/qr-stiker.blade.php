@@ -55,12 +55,12 @@
     spec: null,
     specs: @js($specMap)
 }">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="mb-6 no-print">
+    <div class="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:mb-4 no-print">
             <a href="{{ route('computers.index') }}" class="text-green-600 hover:text-green-700 font-medium">&larr; Kembali</a>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 no-print">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 no-print">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">QR Stiker</h1>
                 <p class="text-sm text-gray-500 mt-1">Cetak stiker QR Code untuk komputer</p>
@@ -93,7 +93,7 @@
         </div>
 
         @if($selectedLab && $computers->count() > 0)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 no-print mb-4">
+            <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 no-print">
                 <p class="text-sm text-gray-600">
                     Menampilkan <span class="font-semibold">{{ $computers->count() }}</span> stiker QR Code
                     untuk <span class="font-semibold">{{ $selectedLab->name }}</span>
@@ -102,9 +102,9 @@
         @endif
 
         @if($computers->count() > 0)
-            <div class="stiker-grid">
+            <div class="stiker-grid px-1">
                 @foreach($computers as $computer)
-                    <div class="stiker-item">
+                    <div class="stiker-item px-2 py-1">
                         <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('kartu.show', $computer->id) }}'">
                             <div id="qr-{{ $computer->id }}"></div>
                         </div>
@@ -125,7 +125,7 @@
             </div>
 
         @elseif($selectedLab)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <div class="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 text-center">
                 <p class="text-gray-500">Tidak ada komputer di laboratorium ini.</p>
             </div>
         @endif
@@ -136,7 +136,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-print"
         @click="previewUrl = null"
         @keydown.escape.window="previewUrl = null">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col mx-4" @click.stop>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] max-w-[95vw] flex flex-col mx-0" @click.stop>
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="font-bold text-gray-800">Preview Kartu Kendali (tampilan publik)</h3>
                 <button @click="previewUrl = null" class="text-gray-400 hover:text-gray-600">
@@ -156,7 +156,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-print p-4"
         @click="spec = null"
         @keydown.escape.window="spec = null">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" @click.stop>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] max-w-[95vw] flex flex-col mx-0" @click.stop>
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <h3 class="font-bold text-gray-800">Spesifikasi Komputer</h3>

@@ -4,7 +4,7 @@
 @section('header', 'Data Komputer')
 
 @section('content')
-<div x-data="{ selected: [] }">    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<div x-data="{ selected: [] }">    <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <p class="text-sm text-gray-500">Kelola seluruh data komputer laboratorium</p>
         <div class="flex flex-wrap items-center justify-end gap-2">
             <button x-show="selected.length > 0" x-cloak @click="async () => { const ok = await window.showConfirm({title: 'Hapus Komputer Terpilih', message: 'Yakin ingin menghapus ' + selected.length + ' komputer?', type: 'danger'}); if(ok) $refs.bulkForm.submit(); }()"
@@ -160,7 +160,7 @@
     </form>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
     @forelse($computers as $item)
         <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
             <div class="flex items-start justify-between mb-4">

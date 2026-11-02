@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="max-w-4xl" x-data="{ specOpen: false, activeTab: '{{ in_array(request('tab'), ['riwayat', 'perangkat', 'pemeliharaan']) ? request('tab') : 'riwayat' }}' }">
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <a href="{{ route('computers.show', $computer) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -39,7 +39,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-xl border border-gray-200 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 mb-4">
         <div class="bg-green-600 text-white px-6 py-4 rounded-t-xl">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -91,7 +91,7 @@
     </div>
 
     {{-- Form Pengecekan --}}
-    <div class="bg-white rounded-xl border border-gray-200 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 mb-4">
         <div class="px-6 py-4 border-b border-gray-100">
             <h2 class="text-base font-semibold text-gray-800">Form Pengecekan Baru</h2>
             <p class="text-xs text-gray-500 mt-1">Centang status setiap komponen lalu simpan.</p>
@@ -114,8 +114,8 @@
 
         <form action="{{ route('computers.check', $computer) }}" method="POST" class="p-6">
             @csrf
-            <div class="mb-6">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <span class="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
                         <svg class="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
@@ -172,7 +172,7 @@
                 @endforelse
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status Keseluruhan <span class="text-red-500">*</span></label>
                     <select name="overall_status" required class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">

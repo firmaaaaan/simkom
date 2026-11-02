@@ -40,12 +40,12 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="{ previewUrl: null }">
-    <div class="max-w-5xl mx-auto px-4 py-8">
-        <div class="mb-6 no-print">
+    <div class="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:mb-4 no-print">
             <a href="{{ route('lab-usages.index') }}" class="text-green-600 hover:text-green-700 font-medium">&larr; Kembali</a>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 no-print">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 mb-6 no-print">
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">QR Stiker Penggunaan Lab</h1>
@@ -57,8 +57,8 @@
             </div>
         </div>
 
-        <div class="stiker-grid">
-            <div class="stiker-item stiker-item-umum">
+        <div class="stiker-grid px-1">
+            <div class="stiker-item stiker-item-umum px-2 py-1">
                 <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('lab-scan.pick') }}'">
                     <div id="qr-general"></div>
                 </div>
@@ -71,7 +71,7 @@
                 </button>
             </div>
             @foreach($laboratories as $lab)
-                <div class="stiker-item">
+                <div class="stiker-item px-2 py-1">
                     <div class="qr-container cursor-pointer" @click="previewUrl = '{{ route('lab-scan.scan', $lab->code) }}'">
                         <div id="qr-{{ $lab->id }}"></div>
                     </div>
@@ -87,7 +87,7 @@
         </div>
 
         @if($laboratories->count() === 0)
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center mt-4">
+            <div class="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 text-center">
                 <p class="text-gray-500">Belum ada laboratorium.</p>
             </div>
         @endif
@@ -98,7 +98,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-print"
         @click="previewUrl = null"
         @keydown.escape.window="previewUrl = null">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col mx-4" @click.stop>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] max-w-[95vw] flex flex-col mx-0" @click.stop>
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="font-bold text-gray-800">Preview Halaman Check-in (tampilan publik)</h3>
                 <button @click="previewUrl = null" class="text-gray-400 hover:text-gray-600">
