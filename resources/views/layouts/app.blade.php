@@ -38,7 +38,6 @@
                     </svg>
                 </div>
                 <span class="text-lg font-bold tracking-tight">SimKom</span>
-                <span class="ml-2 text-[10px] font-semibold bg-green-600 px-2 py-0.5 rounded">K3 Laboratorium</span>
             </div>
 
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -120,6 +119,8 @@
                 </a>
                 @endif
                 @endif
+
+                <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">K3 Laboratorium</p>
 
                 @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages') || auth()->user()->hasPermission('view-pengadaan'))
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
