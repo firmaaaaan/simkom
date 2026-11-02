@@ -38,6 +38,7 @@
                     </svg>
                 </div>
                 <span class="text-lg font-bold tracking-tight">SimKom</span>
+                <span class="ml-2 text-[10px] font-semibold bg-green-600 px-2 py-0.5 rounded">K3 Laboratorium</span>
             </div>
 
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
