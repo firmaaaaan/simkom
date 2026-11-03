@@ -17,6 +17,7 @@ use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceCheckController;
 use App\Http\Controllers\HardwareController;
+use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
@@ -112,6 +113,12 @@ Route::prefix('lapor-kendala')->name('lapor-kendala.')->group(function () {
     Route::get('/track', fn () => redirect()->route('track.index'))->name('track-form');
     Route::get('/track/{tracking_code}', fn ($tracking_code) => redirect()->route('track.search', ['tracking_code' => $tracking_code]))->name('track');
 });
+
+// Public Routes (Lapor Insiden K3 - tanpa login, akses via scan QR)
+Route::get('/lapor-insiden', [IncidentReportController::class, 'publicCreate'])->name('incident-reports.public');
+Route::post('/lapor-insiden', [IncidentReportController::class, 'publicStore'])
+    ->middleware('throttle:10,1')
+    ->name('incident-reports.public-store');
 
 // Public Routes (Pinjam Komputer - tanpa login)
 Route::prefix('pinjam-komputer')->name('pinjam-komputer.')->group(function () {
@@ -521,6 +528,17 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-tickets')
         ->middlewareFor(['edit', 'update'], 'permission:edit-tickets')
         ->middlewareFor(['destroy'], 'permission:delete-tickets');
+
+    // Laporan Insiden K3 (Admin + Laboran)
+    Route::middleware('permission:delete-incident-reports')->group(function () {
+        Route::delete('incident-reports/bulk-destroy', [IncidentReportController::class, 'bulkDestroy'])->name('incident-reports.bulk-destroy');
+    });
+    Route::resource('incident-reports', IncidentReportController::class)
+        ->parameters(['incident-reports' => 'incidentReport'])
+        ->middlewareFor(['index', 'show'], 'permission:view-incident-reports')
+        ->middlewareFor(['create', 'store'], 'permission:create-incident-reports')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-incident-reports')
+        ->middlewareFor(['destroy'], 'permission:delete-incident-reports');
 
     // Pengadaan (Admin + Laboran)
     Route::middleware('permission:edit-pengadaan')->group(function () {
