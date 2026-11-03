@@ -169,6 +169,8 @@ class IncidentReportController extends Controller
             'riwayat' => 'nullable|string',
             'saksi' => 'nullable|string',
             'akibat' => 'nullable|string',
+            'likelihood' => 'required|integer|in:1,2,3,4,5',
+            'impact' => 'required|integer|in:1,2,3,4,5',
             'pelapor' => 'required|string|max:255',
             'images' => 'nullable|array|max:'.self::MAX_IMAGES,
             'images.*' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120',
@@ -176,6 +178,10 @@ class IncidentReportController extends Controller
         ], [
             'telah_terjadi.required' => 'Pilih jenis kejadian pada field "Telah terjadi".',
             'telah_terjadi.in' => 'Jenis kejadian tidak valid.',
+            'likelihood.required' => 'Pilih Kemungkinan (Likelihood) pada penilaian risiko.',
+            'likelihood.in' => 'Nilai Kemungkinan tidak valid.',
+            'impact.required' => 'Pilih Dampak (Impact) pada penilaian risiko.',
+            'impact.in' => 'Nilai Dampak tidak valid.',
             'images.*.mimes' => 'Bukti dokumentasi harus berupa gambar (JPG, PNG, atau WEBP).',
             'images.*.max' => 'Ukuran setiap bukti dokumentasi maksimal 5 MB.',
         ]);

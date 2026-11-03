@@ -87,6 +87,31 @@
                 <dt class="text-gray-500">Dicatat Sistem Oleh</dt>
                 <dd class="mt-1 font-medium text-gray-900">{{ $incidentReport->creator->name ?? '-' }}</dd>
             </div>
+            <div>
+                <dt class="text-gray-500">Kemungkinan (Likelihood)</dt>
+                <dd class="mt-1 font-medium text-gray-900">
+                    {{ \App\Models\IncidentReport::LIKELIHOODS[$incidentReport->likelihood] ?? '-' }}
+                    @if($incidentReport->likelihood)<span class="text-gray-500 font-normal">({{ $incidentReport->likelihood }})</span>@endif
+                </dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Dampak (Impact)</dt>
+                <dd class="mt-1 font-medium text-gray-900">
+                    {{ \App\Models\IncidentReport::IMPACTS[$incidentReport->impact] ?? '-' }}
+                    @if($incidentReport->impact)<span class="text-gray-500 font-normal">({{ $incidentReport->impact }})</span>@endif
+                </dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Risk Score</dt>
+                <dd class="mt-1">
+                    <span class="text-lg font-bold text-gray-900">{{ $incidentReport->risk_score ?? '-' }}</span>
+                    @if($incidentReport->risk_level)
+                        <span class="ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ \App\Models\IncidentReport::riskLevelColor($incidentReport->risk_level) }}">
+                            {{ $incidentReport->risk_level }}
+                        </span>
+                    @endif
+                </dd>
+            </div>
             <div class="sm:col-span-2">
                 <dt class="text-gray-500">Sebab-sebab Kecelakaan</dt>
                 <dd class="mt-1 text-gray-900 whitespace-pre-line">{{ $incidentReport->sebab ?: '-' }}</dd>

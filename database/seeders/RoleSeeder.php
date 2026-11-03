@@ -8,59 +8,45 @@ use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
-    /** modul => [label, aksi yang tersedia]. */
+    /**
+     * Modul => aksi yang tersedia.
+     *
+     * Seeder ini TIDAK membuat permission. Daftar permission dibuat oleh
+     * migrasi 2026_11_03_000004_seed_module_permissions; di sini hanya
+     * menyusun role dan memberikan permission yang sudah ada.
+     */
     private const MODULES = [
-        'users' => ['User', ['view', 'create', 'edit', 'delete', 'export']],
-        'roles' => ['Role', ['view', 'create', 'edit', 'delete', 'export']],
-        'laboratories' => ['Laboratorium', ['view', 'create', 'edit', 'delete', 'export']],
-        'academic-years' => ['Tahun Ajaran', ['view', 'create', 'edit', 'delete', 'export']],
-        'hardware' => ['Hardware', ['view', 'create', 'edit', 'delete', 'export', 'import']],
-        'software' => ['Software', ['view', 'create', 'edit', 'delete', 'export', 'import']],
-        'license-key' => ['Product Key Lisensi', ['view']],
-        'components' => ['Komponen', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
-        'computers' => ['Komputer', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
-        'maintenance' => ['Pemeliharaan', ['view', 'create', 'edit', 'delete', 'export', 'import', 'print']],
-        'tickets' => ['Kendala Praktikum', ['view', 'create', 'edit', 'delete', 'export']],
-        'borrowings' => ['Peminjaman', ['view', 'edit', 'export']],
-        'pengadaan' => ['Pengadaan', ['view', 'create', 'edit', 'delete']],
-        'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
-        'backups' => ['Backup', ['view', 'edit', 'delete']],
-        'reports' => ['Laporan', ['view', 'print']],
-        'signatures' => ['Tanda Tangan Laporan', ['view', 'create', 'edit', 'delete']],
-        'monitoring' => ['Monitoring PC', ['view', 'control']],
-        'todos' => ['To-Do List', ['view', 'create', 'edit', 'delete']],
-    ];
-
-    private const ACTION_LABELS = [
-        'view' => 'Lihat',
-        'create' => 'Tambah',
-        'edit' => 'Ubah',
-        'delete' => 'Hapus',
-        'export' => 'Export',
-        'import' => 'Import',
-        'print' => 'Cetak',
-        'control' => 'Kendalikan',
+        'users' => ['view', 'create', 'edit', 'delete', 'export'],
+        'roles' => ['view', 'create', 'edit', 'delete', 'export'],
+        'laboratories' => ['view', 'create', 'edit', 'delete', 'export'],
+        'academic-years' => ['view', 'create', 'edit', 'delete', 'export'],
+        'hardware' => ['view', 'create', 'edit', 'delete', 'export', 'import'],
+        'software' => ['view', 'create', 'edit', 'delete', 'export', 'import'],
+        'license-key' => ['view'],
+        'components' => ['view', 'create', 'edit', 'delete', 'export', 'import', 'print'],
+        'computers' => ['view', 'create', 'edit', 'delete', 'export', 'import', 'print'],
+        'maintenance' => ['view', 'create', 'edit', 'delete', 'export', 'import', 'print'],
+        'tickets' => ['view', 'create', 'edit', 'delete', 'export'],
+        'borrowings' => ['view', 'edit', 'export'],
+        'pengadaan' => ['view', 'create', 'edit', 'delete'],
+        'incident-reports' => ['view', 'create', 'edit', 'delete'],
+        'lab-usages' => ['view', 'create', 'edit', 'delete', 'export', 'print'],
+        'backups' => ['view', 'edit', 'delete'],
+        'reports' => ['view', 'print'],
+        'signatures' => ['view', 'create', 'edit', 'delete'],
+        'monitoring' => ['view', 'control'],
+        'todos' => ['view', 'create', 'edit', 'delete'],
     ];
 
     /** Modul yang diberikan ke laboran (sinkron dengan daftar lama). */
     private const LABORAN_MODULES = [
         'hardware', 'software', 'components', 'computers',
         'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
-        'monitoring', 'pengadaan', 'todos',
+        'monitoring', 'pengadaan', 'incident-reports', 'todos',
     ];
 
     public function run(): void
     {
-        // Create Permissions (firstOrCreate: aman bila sudah dibuat migration)
-        foreach (self::MODULES as $module => [$label, $actions]) {
-            foreach ($actions as $action) {
-                Permission::firstOrCreate(
-                    ['name' => "{$action}-{$module}"],
-                    ['label' => self::ACTION_LABELS[$action].' '.$label]
-                );
-            }
-        }
-
         // Create Roles
         $adminRole = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
         $laboranRole = Role::firstOrCreate(['name' => 'laboran'], ['label' => 'Laboran']);
@@ -71,7 +57,7 @@ class RoleSeeder extends Seeder
         // Laboran permissions
         $laboranNames = [];
         foreach (self::LABORAN_MODULES as $module) {
-            foreach (self::MODULES[$module][1] as $action) {
+            foreach (self::MODULES[$module] as $action) {
                 $laboranNames[] = "{$action}-{$module}";
             }
         }

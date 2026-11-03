@@ -100,7 +100,7 @@
                             <input type="checkbox" class="rounded border-gray-300 text-green-600 focus:ring-green-500" @change="selected = $event.target.checked ? @js($reports->pluck('id')->toArray()) : []" :checked="selected.length === @js($reports->count()) && selected.length > 0">
                         </th>
                         @endif
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">No</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-600">Score</th>
                         <th class="px-4 py-3 text-left font-medium text-gray-600">Kode</th>
                         <th class="px-4 py-3 text-left font-medium text-gray-600">Telah Terjadi</th>
                         <th class="px-4 py-3 text-left font-medium text-gray-600">Hari, Tanggal</th>
@@ -121,7 +121,16 @@
                                 <input type="checkbox" class="rounded border-gray-300 text-green-600 focus:ring-green-500" value="{{ $report->id }}" x-model="selected">
                             </td>
                             @endif
-                            <td data-label="No" class="px-4 py-3 text-gray-500">{{ $reports->firstItem() + $loop->index }}</td>
+                            <td data-label="Score" class="px-4 py-3 whitespace-nowrap">
+                                @if($report->risk_score)
+                                    <span class="font-semibold text-gray-900">{{ $report->risk_score }}</span>
+                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ \App\Models\IncidentReport::riskLevelColor($report->risk_level) }}">
+                                        {{ $report->risk_level }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-400">-</span>
+                                @endif
+                            </td>
                             <td data-label="Kode" class="px-4 py-3">
                                 <a href="{{ route('incident-reports.show', $report) }}" class="font-medium text-gray-900 hover:text-green-600">{{ $report->kode }}</a>
                             </td>
