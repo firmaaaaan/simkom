@@ -29,10 +29,6 @@ class RoleSeeder extends Seeder
         'signatures' => ['Tanda Tangan Laporan', ['view', 'create', 'edit', 'delete']],
         'monitoring' => ['Monitoring PC', ['view', 'control']],
         'todos' => ['To-Do List', ['view', 'create', 'edit', 'delete']],
-        'k3-hazard' => ['Identifikasi Bahaya K3', ['view', 'create', 'edit', 'delete']],
-        'k3-b3' => ['Limbah B3', ['view', 'create', 'edit', 'delete']],
-        'k3-incident' => ['Laporan Insiden K3', ['view', 'create', 'edit', 'delete']],
-        'k3-emergency' => ['Tanggap Darurat K3', ['view', 'create', 'edit', 'delete']],
     ];
 
     private const ACTION_LABELS = [
@@ -50,8 +46,7 @@ class RoleSeeder extends Seeder
     private const LABORAN_MODULES = [
         'hardware', 'software', 'components', 'computers',
         'maintenance', 'tickets', 'borrowings', 'backups', 'reports',
-        'monitoring', 'pengadaan', 'todos', 'k3-hazard', 'k3-b3',
-        'k3-incident', 'k3-emergency',
+        'monitoring', 'pengadaan', 'todos',
     ];
 
     public function run(): void
