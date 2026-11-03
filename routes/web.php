@@ -305,6 +305,35 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['edit', 'update'], 'permission:edit-software')
         ->middlewareFor(['destroy'], 'permission:delete-software');
 
+    Route::resource('k3/hazard', \App\Http\Controllers\HazardIdentificationController::class)
+        ->names('k3.hazard')
+        ->parameters(['hazard' => 'hazard'])
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-hazard')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-hazard')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-hazard')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-hazard');
+    Route::resource('k3/b3', \App\Http\Controllers\B3WasteController::class)
+        ->names('k3.b3')
+        ->parameters(['b3' => 'b3Waste'])
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-b3')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-b3')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-b3')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-b3');
+    Route::resource('k3/incident', \App\Http\Controllers\IncidentReportController::class)
+        ->names('k3.incident')
+        ->parameters(['incident' => 'incident'])
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-incident')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-incident')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-incident')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-incident');
+    Route::resource('k3/emergency', \App\Http\Controllers\EmergencyResponseController::class)
+        ->names('k3.emergency')
+        ->parameters(['emergency' => 'emergency'])
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-emergency')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-emergency')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-emergency')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-emergency');
+
     // Components (Admin + Laboran)
     Route::middleware('permission:import-components')->group(function () {
         Route::get('components/import', [ComponentController::class, 'import'])->name('components.import');

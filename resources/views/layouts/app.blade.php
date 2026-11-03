@@ -121,6 +121,18 @@
                 @endif
 
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">K3 Laboratorium</p>
+                @if(auth()->user()->hasPermission('view-k3-hazard'))
+                <a href="{{ route('k3.hazard.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('k3.hazard.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">Identifikasi Bahaya</a>
+                @endif
+                @if(auth()->user()->hasPermission('view-k3-b3'))
+                <a href="{{ route('k3.b3.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('k3.b3.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">Limbah B3</a>
+                @endif
+                @if(auth()->user()->hasPermission('view-k3-incident'))
+                <a href="{{ route('k3.incident.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('k3.incident.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">Laporan Insiden</a>
+                @endif
+                @if(auth()->user()->hasPermission('view-k3-emergency'))
+                <a href="{{ route('k3.emergency.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('k3.emergency.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">Tanggap Darurat</a>
+                @endif
 
                 @if(auth()->user()->hasPermission('view-academic-years') || auth()->user()->hasPermission('view-maintenance') || auth()->user()->hasPermission('view-tickets') || auth()->user()->hasPermission('view-borrowings') || auth()->user()->hasPermission('view-lab-usages') || auth()->user()->hasPermission('view-pengadaan'))
                 <p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>
