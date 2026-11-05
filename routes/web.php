@@ -20,8 +20,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceCheckController;
 use App\Http\Controllers\HardwareController;
 use App\Http\Controllers\HseInspectionController;
+use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\K3DocumentController;
 use App\Http\Controllers\K3InspectionReportController;
+use App\Http\Controllers\OccupationalDiseaseInvestigationController;
 use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\JobSafetyAnalysisController;
 use App\Http\Controllers\LaboratoryController;
@@ -600,6 +602,30 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-k3-documents')
         ->middlewareFor(['edit', 'update'], 'permission:edit-k3-documents')
         ->middlewareFor(['destroy'], 'permission:delete-k3-documents');
+
+    // Laporan Kerusakan/Kehilangan/Pencurian (Form 007)
+    Route::middleware('permission:delete-damage-reports')->group(function () {
+        Route::delete('damage-reports/bulk-destroy', [DamageReportController::class, 'bulkDestroy'])->name('damage-reports.bulk-destroy');
+    });
+    Route::get('damage-reports/{damageReport}/print', [DamageReportController::class, 'print'])
+        ->middleware('permission:view-damage-reports')
+        ->name('damage-reports.print');
+    Route::resource('damage-reports', DamageReportController::class)
+        ->middlewareFor(['index', 'show'], 'permission:view-damage-reports')
+        ->middlewareFor(['create', 'store'], 'permission:create-damage-reports')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-damage-reports')
+        ->middlewareFor(['destroy'], 'permission:delete-damage-reports');
+
+    // Penyelidikan Penyakit Akibat Kerja (Form 008)
+    Route::get('occupational-disease-investigations/{occupationalDiseaseInvestigation}/print', [OccupationalDiseaseInvestigationController::class, 'print'])
+        ->middleware('permission:view-occupational-disease-investigations')
+        ->name('occupational-disease-investigations.print');
+    Route::resource('occupational-disease-investigations', OccupationalDiseaseInvestigationController::class)
+        ->parameters(['occupational-disease-investigations' => 'occupationalDiseaseInvestigation'])
+        ->middlewareFor(['index', 'show'], 'permission:view-occupational-disease-investigations')
+        ->middlewareFor(['create', 'store'], 'permission:create-occupational-disease-investigations')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-occupational-disease-investigations')
+        ->middlewareFor(['destroy'], 'permission:delete-occupational-disease-investigations');
 
     // Berita Acara Kecelakaan Kerja (Admin + Laboran)
     Route::middleware('permission:delete-accident-reports')->group(function () {
