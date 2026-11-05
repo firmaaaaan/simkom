@@ -35,8 +35,8 @@ class LabPermissionMigrationTest extends TestCase
         // Simulasi server lama: roles sudah ada, permission belum pernah dibuat.
         DB::table('permissions')->whereIn('name', ['manage-lab-usages'])->delete();
 
-        $admin = Role::create(['name' => 'admin', 'label' => 'Admin']);
-        $laboran = Role::create(['name' => 'laboran', 'label' => 'Laboran']);
+        $admin = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
+        $laboran = Role::firstOrCreate(['name' => 'laboran'], ['label' => 'Laboran']);
 
         $this->runLabPermissionMigration();
 

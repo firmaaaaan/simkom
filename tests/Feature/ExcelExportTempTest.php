@@ -43,7 +43,7 @@ class ExcelExportTempTest extends TestCase
 
     private function admin(): User
     {
-        $role = Role::create(['name' => 'admin', 'label' => 'Admin']);
+        $role = Role::firstOrCreate(['name' => 'admin'], ['label' => 'Admin']);
 
         foreach (
             [

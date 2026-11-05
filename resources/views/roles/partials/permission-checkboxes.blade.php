@@ -15,6 +15,7 @@
         'Pengaturan' => ['users', 'roles', 'signatures', 'backups'],
         'Data Master' => ['laboratories', 'hardware', 'software', 'license-key', 'computers', 'components'],
         'Transaksi & Laporan' => ['academic-years', 'maintenance', 'tickets', 'borrowings', 'lab-usages', 'reports', 'pengadaan'],
+        'K3' => ['incident-reports', 'apar-inspections', 'accident-reports', 'jsa'],
         'Produktivitas' => ['todos'],
     ];
 

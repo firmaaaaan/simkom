@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use App\Http\Controllers\AkademikJadwalController;
+use App\Http\Controllers\AparInspectionController;
+use App\Http\Controllers\AccidentReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BorrowController;
@@ -17,7 +19,11 @@ use App\Http\Controllers\ComputerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceCheckController;
 use App\Http\Controllers\HardwareController;
+use App\Http\Controllers\HseInspectionController;
+use App\Http\Controllers\K3DocumentController;
+use App\Http\Controllers\K3InspectionReportController;
 use App\Http\Controllers\IncidentReportController;
+use App\Http\Controllers\JobSafetyAnalysisController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
 use App\Http\Controllers\MaintenanceController;
@@ -539,6 +545,89 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-incident-reports')
         ->middlewareFor(['edit', 'update'], 'permission:edit-incident-reports')
         ->middlewareFor(['destroy'], 'permission:delete-incident-reports');
+
+    // Lembar Periksa APAR (Admin + Laboran)
+    Route::middleware('permission:delete-apar-inspections')->group(function () {
+        Route::delete('apar-inspections/bulk-destroy', [AparInspectionController::class, 'bulkDestroy'])->name('apar-inspections.bulk-destroy');
+    });
+    Route::get('apar-inspections/{aparInspection}/print', [AparInspectionController::class, 'print'])
+        ->middleware('permission:view-apar-inspections')
+        ->name('apar-inspections.print');
+    Route::resource('apar-inspections', AparInspectionController::class)
+        ->parameters(['apar-inspections' => 'aparInspection'])
+        ->middlewareFor(['index', 'show'], 'permission:view-apar-inspections')
+        ->middlewareFor(['create', 'store'], 'permission:create-apar-inspections')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-apar-inspections')
+        ->middlewareFor(['destroy'], 'permission:delete-apar-inspections');
+
+    // Inspeksi HSE (Admin + Laboran)
+    Route::middleware('permission:delete-hse-inspections')->group(function () {
+        Route::delete('hse-inspections/bulk-destroy', [HseInspectionController::class, 'bulkDestroy'])->name('hse-inspections.bulk-destroy');
+    });
+    Route::get('hse-inspections/{hseInspection}/print', [HseInspectionController::class, 'print'])
+        ->middleware('permission:view-hse-inspections')
+        ->name('hse-inspections.print');
+    Route::resource('hse-inspections', HseInspectionController::class)
+        ->parameters(['hse-inspections' => 'hseInspection'])
+        ->middlewareFor(['index', 'show'], 'permission:view-hse-inspections')
+        ->middlewareFor(['create', 'store'], 'permission:create-hse-inspections')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-hse-inspections')
+        ->middlewareFor(['destroy'], 'permission:delete-hse-inspections');
+
+    // Laporan Inspeksi K3 - Form 005 (Admin + Laboran)
+    Route::middleware('permission:delete-k3-inspection-reports')->group(function () {
+        Route::delete('k3-inspection-reports/bulk-destroy', [K3InspectionReportController::class, 'bulkDestroy'])->name('k3-inspection-reports.bulk-destroy');
+    });
+    Route::get('k3-inspection-reports/{k3InspectionReport}/print', [K3InspectionReportController::class, 'print'])
+        ->middleware('permission:view-k3-inspection-reports')
+        ->name('k3-inspection-reports.print');
+    Route::resource('k3-inspection-reports', K3InspectionReportController::class)
+        ->parameters(['k3-inspection-reports' => 'k3InspectionReport'])
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-inspection-reports')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-inspection-reports')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-inspection-reports')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-inspection-reports');
+
+    // Dokumen K3 Laboratorium
+    Route::middleware('permission:delete-k3-documents')->group(function () {
+        Route::delete('k3-documents/bulk-destroy', [K3DocumentController::class, 'bulkDestroy'])->name('k3-documents.bulk-destroy');
+    });
+    Route::get('k3-documents/{k3Document}/download', [K3DocumentController::class, 'download'])
+        ->middleware('permission:view-k3-documents')
+        ->name('k3-documents.download');
+    Route::resource('k3-documents', K3DocumentController::class)
+        ->middlewareFor(['index', 'show'], 'permission:view-k3-documents')
+        ->middlewareFor(['create', 'store'], 'permission:create-k3-documents')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-k3-documents')
+        ->middlewareFor(['destroy'], 'permission:delete-k3-documents');
+
+    // Berita Acara Kecelakaan Kerja (Admin + Laboran)
+    Route::middleware('permission:delete-accident-reports')->group(function () {
+        Route::delete('berita-acara-kecelakaan/bulk-destroy', [AccidentReportController::class, 'bulkDestroy'])->name('berita-acara-kecelakaan.bulk-destroy');
+    });
+    Route::get('berita-acara-kecelakaan/{accidentReport}/print', [AccidentReportController::class, 'print'])
+        ->middleware('permission:view-accident-reports')
+        ->name('berita-acara-kecelakaan.print');
+    Route::resource('berita-acara-kecelakaan', AccidentReportController::class)
+        ->parameters(['berita-acara-kecelakaan' => 'accidentReport'])
+        ->middlewareFor(['index', 'show'], 'permission:view-accident-reports')
+        ->middlewareFor(['create', 'store'], 'permission:create-accident-reports')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-accident-reports')
+        ->middlewareFor(['destroy'], 'permission:delete-accident-reports');
+
+    // Analisis Keselamatan Pekerjaan / JSA (Admin + Laboran)
+    Route::middleware('permission:delete-jsa')->group(function () {
+        Route::delete('analisis-keselamatan-pekerjaan/bulk-destroy', [JobSafetyAnalysisController::class, 'bulkDestroy'])->name('analisis-keselamatan-pekerjaan.bulk-destroy');
+    });
+    Route::get('analisis-keselamatan-pekerjaan/{jobSafetyAnalysis}/print', [JobSafetyAnalysisController::class, 'print'])
+        ->middleware('permission:view-jsa')
+        ->name('analisis-keselamatan-pekerjaan.print');
+    Route::resource('analisis-keselamatan-pekerjaan', JobSafetyAnalysisController::class)
+        ->parameters(['analisis-keselamatan-pekerjaan' => 'jobSafetyAnalysis'])
+        ->middlewareFor(['index', 'show'], 'permission:view-jsa')
+        ->middlewareFor(['create', 'store'], 'permission:create-jsa')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-jsa')
+        ->middlewareFor(['destroy'], 'permission:delete-jsa');
 
     // Pengadaan (Admin + Laboran)
     Route::middleware('permission:edit-pengadaan')->group(function () {

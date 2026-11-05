@@ -32,6 +32,8 @@ return new class extends Migration
         'borrowings' => ['Peminjaman', ['view', 'edit', 'export']],
         'pengadaan' => ['Pengadaan', ['view', 'create', 'edit', 'delete']],
         'incident-reports' => ['Laporan Insiden', ['view', 'create', 'edit', 'delete']],
+        'accident-reports' => ['Berita Acara Kecelakaan', ['view', 'create', 'edit', 'delete']],
+        'jsa' => ['Analisis Keselamatan Pekerjaan (JSA)', ['view', 'create', 'edit', 'delete']],
         'lab-usages' => ['Penggunaan Lab', ['view', 'create', 'edit', 'delete', 'export', 'print']],
         'backups' => ['Backup', ['view', 'edit', 'delete']],
         'reports' => ['Laporan', ['view', 'print']],
