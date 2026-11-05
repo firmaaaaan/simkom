@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\JsaTemplate;
+use App\Imports\JsaImport;
+use App\Imports\K3ImportContext;
 use App\Models\JobSafetyAnalysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JobSafetyAnalysisController extends Controller
 {
@@ -113,6 +117,43 @@ class JobSafetyAnalysisController extends Controller
     public function print(JobSafetyAnalysis $jobSafetyAnalysis)
     {
         return view('analisis-keselamatan-pekerjaan.print', ['jsa' => $jobSafetyAnalysis]);
+    }
+
+    public function template()
+    {
+        return Excel::download(new JsaTemplate, 'template_analisis_keselamatan_pekerjaan.xlsx');
+    }
+
+    public function import()
+    {
+        return view('analisis-keselamatan-pekerjaan.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new JsaImport(new K3ImportContext());
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('analisis-keselamatan-pekerjaan.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} formulir JSA";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('analisis-keselamatan-pekerjaan.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateJsa(Request $request): array

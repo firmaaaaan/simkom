@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AccidentReportTemplate;
+use App\Imports\AccidentReportImport;
 use App\Models\AccidentReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AccidentReportController extends Controller
 {
@@ -113,6 +116,43 @@ class AccidentReportController extends Controller
     public function print(AccidentReport $accidentReport)
     {
         return view('berita-acara-kecelakaan.print', ['report' => $accidentReport]);
+    }
+
+    public function template()
+    {
+        return Excel::download(new AccidentReportTemplate, 'template_berita_acara_kecelakaan.xlsx');
+    }
+
+    public function import()
+    {
+        return view('berita-acara-kecelakaan.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new AccidentReportImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('berita-acara-kecelakaan.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} berita acara kecelakaan";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('berita-acara-kecelakaan.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateReport(Request $request): array

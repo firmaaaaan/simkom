@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DamageReportTemplate;
+use App\Imports\DamageReportImport;
+use App\Imports\K3ImportContext;
 use App\Models\DamageReport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DamageReportController extends Controller
 {
@@ -111,6 +115,43 @@ class DamageReportController extends Controller
     public function print(DamageReport $damageReport)
     {
         return view('damage-reports.print', compact('damageReport'));
+    }
+
+    public function template()
+    {
+        return Excel::download(new DamageReportTemplate, 'template_laporan_kerusakan.xlsx');
+    }
+
+    public function import()
+    {
+        return view('damage-reports.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new DamageReportImport(new K3ImportContext());
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('damage-reports.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} laporan kerusakan";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('damage-reports.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateReport(Request $request): array

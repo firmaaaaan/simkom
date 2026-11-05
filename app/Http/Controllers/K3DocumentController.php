@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\K3DocumentTemplate;
+use App\Imports\K3DocumentImport;
 use App\Models\K3Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class K3DocumentController extends Controller
 {
@@ -83,7 +86,7 @@ class K3DocumentController extends Controller
 
     public function download(K3Document $k3Document)
     {
-        if (! Storage::disk('public')->exists($k3Document->file_path)) {
+        if (! $k3Document->file_path || ! Storage::disk('public')->exists($k3Document->file_path)) {
             abort(404, 'File tidak ditemukan.');
         }
 
@@ -117,7 +120,7 @@ class K3DocumentController extends Controller
 
     public function destroy(K3Document $k3Document)
     {
-        if (Storage::disk('public')->exists($k3Document->file_path)) {
+        if ($k3Document->file_path && Storage::disk('public')->exists($k3Document->file_path)) {
             Storage::disk('public')->delete($k3Document->file_path);
         }
 
@@ -137,7 +140,7 @@ class K3DocumentController extends Controller
         $documents = K3Document::whereIn('id', $request->ids)->get();
 
         foreach ($documents as $document) {
-            if (Storage::disk('public')->exists($document->file_path)) {
+            if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
                 Storage::disk('public')->delete($document->file_path);
             }
             $document->delete();
@@ -145,5 +148,42 @@ class K3DocumentController extends Controller
 
         return redirect()->route('k3-documents.index')
             ->with('success', count($documents).' dokumen K3 berhasil dihapus.');
+    }
+
+    public function template()
+    {
+        return Excel::download(new K3DocumentTemplate, 'template_dokumen_k3.xlsx');
+    }
+
+    public function import()
+    {
+        return view('k3-documents.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new K3DocumentImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('k3-documents.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} dokumen K3";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('k3-documents.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 }

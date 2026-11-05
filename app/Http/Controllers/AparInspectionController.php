@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AparInspectionTemplate;
+use App\Imports\AparInspectionImport;
 use App\Models\AparInspection;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AparInspectionController extends Controller
 {
@@ -111,6 +114,43 @@ class AparInspectionController extends Controller
     public function print(AparInspection $aparInspection)
     {
         return view('apar-inspections.print', compact('aparInspection'));
+    }
+
+    public function template()
+    {
+        return Excel::download(new AparInspectionTemplate, 'template_lembar_periksa_apar.xlsx');
+    }
+
+    public function import()
+    {
+        return view('apar-inspections.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new AparInspectionImport();
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('apar-inspections.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} lembar periksa APAR";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('apar-inspections.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateInspection(Request $request): array

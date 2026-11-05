@@ -16,6 +16,14 @@
             Buat Laporan Insiden
         </a>
         @endif
+        @if(auth()->user()->hasPermission('import-incident-reports'))
+        <a href="{{ route('incident-reports.import') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            Import
+        </a>
+        @endif
     </div>
 
     {{-- Success Message --}}
@@ -23,6 +31,17 @@
         <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
             {{ session('success') }}
         </div>
+    @endif
+
+    @if(session('import_errors') && count(session('import_errors')) > 0)
+    <div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+        <p class="font-semibold mb-1">{{ count(session('import_errors')) }} baris saat import bermasalah:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach(session('import_errors') as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     {{-- Bulk Delete --}}

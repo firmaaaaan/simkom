@@ -541,6 +541,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:delete-incident-reports')->group(function () {
         Route::delete('incident-reports/bulk-destroy', [IncidentReportController::class, 'bulkDestroy'])->name('incident-reports.bulk-destroy');
     });
+    Route::middleware('permission:import-incident-reports')->group(function () {
+        Route::get('incident-reports/import', [IncidentReportController::class, 'import'])->name('incident-reports.import');
+        Route::post('incident-reports/import', [IncidentReportController::class, 'storeImport'])->name('incident-reports.store-import');
+        Route::get('incident-reports/template', [IncidentReportController::class, 'template'])->name('incident-reports.template');
+    });
     Route::resource('incident-reports', IncidentReportController::class)
         ->parameters(['incident-reports' => 'incidentReport'])
         ->middlewareFor(['index', 'show'], 'permission:view-incident-reports')
@@ -555,6 +560,11 @@ Route::middleware('auth')->group(function () {
     Route::get('apar-inspections/{aparInspection}/print', [AparInspectionController::class, 'print'])
         ->middleware('permission:view-apar-inspections')
         ->name('apar-inspections.print');
+    Route::middleware('permission:import-apar-inspections')->group(function () {
+        Route::get('apar-inspections/import', [AparInspectionController::class, 'import'])->name('apar-inspections.import');
+        Route::post('apar-inspections/import', [AparInspectionController::class, 'storeImport'])->name('apar-inspections.store-import');
+        Route::get('apar-inspections/template', [AparInspectionController::class, 'template'])->name('apar-inspections.template');
+    });
     Route::resource('apar-inspections', AparInspectionController::class)
         ->parameters(['apar-inspections' => 'aparInspection'])
         ->middlewareFor(['index', 'show'], 'permission:view-apar-inspections')
@@ -569,6 +579,11 @@ Route::middleware('auth')->group(function () {
     Route::get('hse-inspections/{hseInspection}/print', [HseInspectionController::class, 'print'])
         ->middleware('permission:view-hse-inspections')
         ->name('hse-inspections.print');
+    Route::middleware('permission:import-hse-inspections')->group(function () {
+        Route::get('hse-inspections/import', [HseInspectionController::class, 'import'])->name('hse-inspections.import');
+        Route::post('hse-inspections/import', [HseInspectionController::class, 'storeImport'])->name('hse-inspections.store-import');
+        Route::get('hse-inspections/template', [HseInspectionController::class, 'template'])->name('hse-inspections.template');
+    });
     Route::resource('hse-inspections', HseInspectionController::class)
         ->parameters(['hse-inspections' => 'hseInspection'])
         ->middlewareFor(['index', 'show'], 'permission:view-hse-inspections')
@@ -583,6 +598,11 @@ Route::middleware('auth')->group(function () {
     Route::get('k3-inspection-reports/{k3InspectionReport}/print', [K3InspectionReportController::class, 'print'])
         ->middleware('permission:view-k3-inspection-reports')
         ->name('k3-inspection-reports.print');
+    Route::middleware('permission:import-k3-inspection-reports')->group(function () {
+        Route::get('k3-inspection-reports/import', [K3InspectionReportController::class, 'import'])->name('k3-inspection-reports.import');
+        Route::post('k3-inspection-reports/import', [K3InspectionReportController::class, 'storeImport'])->name('k3-inspection-reports.store-import');
+        Route::get('k3-inspection-reports/template', [K3InspectionReportController::class, 'template'])->name('k3-inspection-reports.template');
+    });
     Route::resource('k3-inspection-reports', K3InspectionReportController::class)
         ->parameters(['k3-inspection-reports' => 'k3InspectionReport'])
         ->middlewareFor(['index', 'show'], 'permission:view-k3-inspection-reports')
@@ -597,6 +617,11 @@ Route::middleware('auth')->group(function () {
     Route::get('k3-documents/{k3Document}/download', [K3DocumentController::class, 'download'])
         ->middleware('permission:view-k3-documents')
         ->name('k3-documents.download');
+    Route::middleware('permission:import-k3-documents')->group(function () {
+        Route::get('k3-documents/import', [K3DocumentController::class, 'import'])->name('k3-documents.import');
+        Route::post('k3-documents/import', [K3DocumentController::class, 'storeImport'])->name('k3-documents.store-import');
+        Route::get('k3-documents/template', [K3DocumentController::class, 'template'])->name('k3-documents.template');
+    });
     Route::resource('k3-documents', K3DocumentController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-k3-documents')
         ->middlewareFor(['create', 'store'], 'permission:create-k3-documents')
@@ -610,6 +635,11 @@ Route::middleware('auth')->group(function () {
     Route::get('damage-reports/{damageReport}/print', [DamageReportController::class, 'print'])
         ->middleware('permission:view-damage-reports')
         ->name('damage-reports.print');
+    Route::middleware('permission:import-damage-reports')->group(function () {
+        Route::get('damage-reports/import', [DamageReportController::class, 'import'])->name('damage-reports.import');
+        Route::post('damage-reports/import', [DamageReportController::class, 'storeImport'])->name('damage-reports.store-import');
+        Route::get('damage-reports/template', [DamageReportController::class, 'template'])->name('damage-reports.template');
+    });
     Route::resource('damage-reports', DamageReportController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-damage-reports')
         ->middlewareFor(['create', 'store'], 'permission:create-damage-reports')
@@ -620,6 +650,11 @@ Route::middleware('auth')->group(function () {
     Route::get('occupational-disease-investigations/{occupationalDiseaseInvestigation}/print', [OccupationalDiseaseInvestigationController::class, 'print'])
         ->middleware('permission:view-occupational-disease-investigations')
         ->name('occupational-disease-investigations.print');
+    Route::middleware('permission:import-occupational-disease-investigations')->group(function () {
+        Route::get('occupational-disease-investigations/import', [OccupationalDiseaseInvestigationController::class, 'import'])->name('occupational-disease-investigations.import');
+        Route::post('occupational-disease-investigations/import', [OccupationalDiseaseInvestigationController::class, 'storeImport'])->name('occupational-disease-investigations.store-import');
+        Route::get('occupational-disease-investigations/template', [OccupationalDiseaseInvestigationController::class, 'template'])->name('occupational-disease-investigations.template');
+    });
     Route::resource('occupational-disease-investigations', OccupationalDiseaseInvestigationController::class)
         ->parameters(['occupational-disease-investigations' => 'occupationalDiseaseInvestigation'])
         ->middlewareFor(['index', 'show'], 'permission:view-occupational-disease-investigations')
@@ -634,6 +669,11 @@ Route::middleware('auth')->group(function () {
     Route::get('berita-acara-kecelakaan/{accidentReport}/print', [AccidentReportController::class, 'print'])
         ->middleware('permission:view-accident-reports')
         ->name('berita-acara-kecelakaan.print');
+    Route::middleware('permission:import-accident-reports')->group(function () {
+        Route::get('berita-acara-kecelakaan/import', [AccidentReportController::class, 'import'])->name('berita-acara-kecelakaan.import');
+        Route::post('berita-acara-kecelakaan/import', [AccidentReportController::class, 'storeImport'])->name('berita-acara-kecelakaan.store-import');
+        Route::get('berita-acara-kecelakaan/template', [AccidentReportController::class, 'template'])->name('berita-acara-kecelakaan.template');
+    });
     Route::resource('berita-acara-kecelakaan', AccidentReportController::class)
         ->parameters(['berita-acara-kecelakaan' => 'accidentReport'])
         ->middlewareFor(['index', 'show'], 'permission:view-accident-reports')
@@ -648,6 +688,11 @@ Route::middleware('auth')->group(function () {
     Route::get('analisis-keselamatan-pekerjaan/{jobSafetyAnalysis}/print', [JobSafetyAnalysisController::class, 'print'])
         ->middleware('permission:view-jsa')
         ->name('analisis-keselamatan-pekerjaan.print');
+    Route::middleware('permission:import-jsa')->group(function () {
+        Route::get('analisis-keselamatan-pekerjaan/import', [JobSafetyAnalysisController::class, 'import'])->name('analisis-keselamatan-pekerjaan.import');
+        Route::post('analisis-keselamatan-pekerjaan/import', [JobSafetyAnalysisController::class, 'storeImport'])->name('analisis-keselamatan-pekerjaan.store-import');
+        Route::get('analisis-keselamatan-pekerjaan/template', [JobSafetyAnalysisController::class, 'template'])->name('analisis-keselamatan-pekerjaan.template');
+    });
     Route::resource('analisis-keselamatan-pekerjaan', JobSafetyAnalysisController::class)
         ->parameters(['analisis-keselamatan-pekerjaan' => 'jobSafetyAnalysis'])
         ->middlewareFor(['index', 'show'], 'permission:view-jsa')

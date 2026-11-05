@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\K3InspectionReportTemplate;
+use App\Imports\K3ImportContext;
+use App\Imports\K3InspectionReportImport;
 use App\Models\K3InspectionReport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class K3InspectionReportController extends Controller
 {
@@ -112,6 +116,43 @@ class K3InspectionReportController extends Controller
     public function print(K3InspectionReport $k3InspectionReport)
     {
         return view('k3-inspection-reports.print', compact('k3InspectionReport'));
+    }
+
+    public function template()
+    {
+        return Excel::download(new K3InspectionReportTemplate, 'template_laporan_inspeksi_k3.xlsx');
+    }
+
+    public function import()
+    {
+        return view('k3-inspection-reports.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new K3InspectionReportImport(new K3ImportContext());
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('k3-inspection-reports.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} laporan inspeksi K3";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('k3-inspection-reports.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateReport(Request $request): array

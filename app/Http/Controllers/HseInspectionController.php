@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\HseInspectionTemplate;
+use App\Imports\HseInspectionImport;
+use App\Imports\K3ImportContext;
 use App\Models\HseInspection;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HseInspectionController extends Controller
 {
@@ -110,6 +114,43 @@ class HseInspectionController extends Controller
     public function print(HseInspection $hseInspection)
     {
         return view('hse-inspections.print', compact('hseInspection'));
+    }
+
+    public function template()
+    {
+        return Excel::download(new HseInspectionTemplate, 'template_inspeksi_hse.xlsx');
+    }
+
+    public function import()
+    {
+        return view('hse-inspections.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
+        ]);
+
+        $import = new HseInspectionImport(new K3ImportContext());
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('hse-inspections.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} inspeksi HSE";
+        if ($errors = $import->getErrors()) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('hse-inspections.index')
+            ->with('success', $message)
+            ->with('import_errors', $import->getErrors());
     }
 
     private function validateInspection(Request $request): array
