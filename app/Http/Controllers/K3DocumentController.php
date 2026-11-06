@@ -80,8 +80,9 @@ class K3DocumentController extends Controller
     public function show(K3Document $k3Document)
     {
         $k3Document->load('uploader');
+        $fileExists = $k3Document->file_path && Storage::disk('public')->exists($k3Document->file_path);
 
-        return view('k3-documents.show', compact('k3Document'));
+        return view('k3-documents.show', compact('k3Document', 'fileExists'));
     }
 
     public function download(K3Document $k3Document)

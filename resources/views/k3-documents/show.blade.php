@@ -4,7 +4,7 @@
 @section('header', 'Detail Dokumen K3 Laboratorium')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="max-w-5xl mx-auto space-y-6">
     <a href="{{ route('k3-documents.index') }}" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-green-600 transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
@@ -63,6 +63,23 @@
                 <dd class="mt-1 text-gray-900 whitespace-pre-line">{{ $k3Document->keterangan ?: '-' }}</dd>
             </div>
         </dl>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4">Pratinjau Dokumen</h3>
+        @php($ext = strtolower($k3Document->file_extension ?? ''))
+        @if(! $fileExists)
+            <div class="px-4 py-6 text-center text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg">File tidak ditemukan di penyimpanan.</div>
+        @elseif($ext === 'pdf')
+            <iframe src="{{ asset('storage/'.$k3Document->file_path) }}" type="application/pdf" title="Pratinjau {{ $k3Document->judul }}" class="w-full h-[75vh] rounded-lg border border-gray-200"></iframe>
+        @elseif(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true))
+            <img src="{{ asset('storage/'.$k3Document->file_path) }}" alt="{{ $k3Document->judul }}" class="w-full rounded-lg border border-gray-200">
+        @else
+            <div class="px-4 py-6 text-center bg-gray-50 border border-gray-200 rounded-lg">
+                <p class="text-sm text-gray-500">Pratinjau tidak tersedia untuk tipe file {{ strtoupper($ext) ?: '-' }}.</p>
+                <a href="{{ route('k3-documents.download', $k3Document) }}" class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors">Unduh Dokumen</a>
+            </div>
+        @endif
     </div>
 </div>
 @endsection
