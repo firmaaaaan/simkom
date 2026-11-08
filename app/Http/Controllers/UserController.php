@@ -110,6 +110,15 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
 
+    public function resetPassword(User $user)
+    {
+        $user->update([
+            'password' => Hash::make('password'),
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'Password ' . $user->name . ' berhasil direset ke password awal.');
+    }
+
     public function destroy(User $user)
     {
         if ($user->id === auth()->id()) {
