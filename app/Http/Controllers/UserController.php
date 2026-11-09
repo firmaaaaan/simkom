@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\UserExport;
+use App\Exports\UserTemplate;
+use App\Imports\UserImport;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -129,5 +131,44 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+    }
+
+    public function template()
+    {
+        return Excel::download(new UserTemplate, 'template_pengguna.xlsx');
+    }
+
+    public function import()
+    {
+        return view('users.import');
+    }
+
+    public function storeImport(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $import = new UserImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return redirect()->route('users.import')
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
+        }
+
+        $message = "Berhasil mengimpor {$import->getImportedCount()} pengguna";
+        $errors = $import->getErrors();
+        if ($errors) {
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
+            if (count($errors) > 5) {
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
+            }
+        }
+
+        return redirect()->route('users.index')
+            ->with('success', $message)
+            ->with('import_errors', $errors);
     }
 }

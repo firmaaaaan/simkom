@@ -233,6 +233,15 @@ Route::middleware('auth')->group(function () {
     Route::get('users/export', [UserController::class, 'export'])
         ->middleware('permission:export-users')
         ->name('users.export');
+    Route::get('users/template', [UserController::class, 'template'])
+        ->middleware('permission:create-users')
+        ->name('users.template');
+    Route::get('users/import', [UserController::class, 'import'])
+        ->middleware('permission:create-users')
+        ->name('users.import');
+    Route::post('users/import', [UserController::class, 'storeImport'])
+        ->middleware('permission:create-users')
+        ->name('users.store-import');
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])
         ->middleware('permission:edit-users')
         ->name('users.reset-password');
