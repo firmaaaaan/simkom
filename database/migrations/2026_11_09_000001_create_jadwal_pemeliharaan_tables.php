@@ -46,7 +46,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('jadwal_pemeliharaan_id')->references('id')->on('jadwal_pemeliharaans')->cascadeOnDelete();
-            $table->index(['jadwal_pemeliharaan_id', 'sort_order']);
+            $table->index(['jadwal_pemeliharaan_id', 'sort_order'], 'jp_items_jp_id_sort_idx');
         });
     }
 
