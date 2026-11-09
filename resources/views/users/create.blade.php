@@ -72,7 +72,7 @@
                     <option value="">Pilih Role</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
-                            {{ $role->label }} - {{ $role->permissions->pluck('label')->implode(', ') }}
+                            {{ $role->label ?: $role->name }}
                         </option>
                     @endforeach
                 </select>
