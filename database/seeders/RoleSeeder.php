@@ -16,9 +16,9 @@ class RoleSeeder extends Seeder
      * menyusun role dan memberikan permission yang sudah ada.
      *
      * Catatan: permission modul K3 (incident-reports, apar-inspections,
-     * hse-inspections, accident-reports, jsa) TIDAK diatur di sini —
-     * migrasi modulnya sendiri yang membuat sekaligus melampirkannya
-     * ke role admin/laboran.
+     * hse-inspections, accident-reports, jsa) dan jadwal-pemeliharaan
+     * TIDAK diatur di sini — migrasi modulnya sendiri yang membuat
+     * sekaligus melampirkannya ke role admin/laboran.
      */
     private const MODULES = [
         'users' => ['view', 'create', 'edit', 'delete', 'export'],
@@ -61,8 +61,8 @@ class RoleSeeder extends Seeder
 
         // Laboran permissions.
         // Dipasang tanpa detach: permission modul K3 (apar-inspections,
-        // hse-inspections, accident-reports, jsa) dikelola penuh oleh
-        // migrasi masing-masing, jadi tidak boleh lepas saat re-seed.
+        // hse-inspections, accident-reports, jsa) dan jadwal-pemeliharaan
+        // dikelola penuh oleh migrasi masing-masing, jadi tidak boleh lepas saat re-seed.
         $laboranNames = [];
         foreach (self::LABORAN_MODULES as $module) {
             foreach (self::MODULES[$module] as $action) {

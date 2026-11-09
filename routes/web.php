@@ -28,6 +28,7 @@ use App\Http\Controllers\IncidentReportController;
 use App\Http\Controllers\JobSafetyAnalysisController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\LabScanController;
+use App\Http\Controllers\JadwalPemeliharaanController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MonitoringPcController;
 use App\Http\Controllers\NotificationController;
@@ -503,6 +504,7 @@ Route::middleware('auth')->group(function () {
         Route::get('maintenance/{maintenance}/print', [MaintenanceController::class, 'print'])->name('maintenance.print');
         Route::get('device-checks/report/print', [DeviceCheckController::class, 'reportPrint'])->name('device-checks.report-print');
         Route::get('device-checks/{deviceCheck}/print', [DeviceCheckController::class, 'print'])->name('device-checks.print');
+        Route::get('device-checks/{deviceCheck}/label', [DeviceCheckController::class, 'label'])->name('device-checks.label');
     });
     // Template dipakai proses import juga, jadi boleh export ATAU import.
     Route::get('device-checks/template', [DeviceCheckController::class, 'template'])
@@ -534,6 +536,23 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-maintenance')
         ->middlewareFor(['edit', 'update'], 'permission:edit-maintenance')
         ->middlewareFor(['destroy'], 'permission:delete-maintenance');
+
+    // Jadwal Pemeliharaan Alat & Bahan FM-02 (Admin + Laboran)
+    Route::middleware('permission:delete-jadwal-pemeliharaan')->group(function () {
+        Route::delete('jadwal-pemeliharaan/bulk-destroy', [JadwalPemeliharaanController::class, 'bulkDestroy'])->name('jadwal-pemeliharaan.bulk-destroy');
+    });
+    Route::get('jadwal-pemeliharaan/inventaris', [JadwalPemeliharaanController::class, 'inventaris'])
+        ->middleware('permission:view-jadwal-pemeliharaan')
+        ->name('jadwal-pemeliharaan.inventaris');
+    Route::get('jadwal-pemeliharaan/{jadwalPemeliharaan}/print', [JadwalPemeliharaanController::class, 'print'])
+        ->middleware('permission:print-jadwal-pemeliharaan')
+        ->name('jadwal-pemeliharaan.print');
+    Route::resource('jadwal-pemeliharaan', JadwalPemeliharaanController::class)
+        ->parameters(['jadwal-pemeliharaan' => 'jadwalPemeliharaan'])
+        ->middlewareFor(['index', 'show'], 'permission:view-jadwal-pemeliharaan')
+        ->middlewareFor(['create', 'store'], 'permission:create-jadwal-pemeliharaan')
+        ->middlewareFor(['edit', 'update'], 'permission:edit-jadwal-pemeliharaan')
+        ->middlewareFor(['destroy'], 'permission:delete-jadwal-pemeliharaan');
 
     // Tickets (Admin + Laboran)
     Route::get('tickets/export', [TicketController::class, 'export'])

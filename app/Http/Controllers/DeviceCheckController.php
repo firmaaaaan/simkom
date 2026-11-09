@@ -189,6 +189,11 @@ class DeviceCheckController extends Controller
         return view('device-checks.print', $this->formData($deviceCheck));
     }
 
+    public function label(DeviceCheck $deviceCheck)
+    {
+        return view('device-checks.label', $this->formData($deviceCheck));
+    }
+
     /**
      * Laporan pengecekan per tahun ajaran: rekap setiap pengecekan pada tahun
      * terpilih + matriksnya. Baris rekap bisa dipilih lewat checkbox
