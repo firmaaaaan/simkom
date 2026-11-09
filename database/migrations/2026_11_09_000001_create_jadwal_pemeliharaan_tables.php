@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('jadwal_pemeliharaan_items');
+        Schema::dropIfExists('jadwal_pemeliharaans');
+
         Schema::create('jadwal_pemeliharaans', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('kode_dokumen')->default('FM-UNISA-LAB-PBM-03-02');
