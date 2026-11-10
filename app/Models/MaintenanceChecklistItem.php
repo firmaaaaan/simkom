@@ -61,7 +61,7 @@ class MaintenanceChecklistItem extends Model
 
     public function checklist()
     {
-        return $this->belongsTo(MaintenanceChecklist::class);
+        return $this->belongsTo(MaintenanceChecklist::class, 'maintenance_checklist_id');
     }
 
     public function computer()

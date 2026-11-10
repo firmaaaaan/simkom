@@ -420,6 +420,191 @@
     </div>
 @endif
 
+{{-- ANALITIK MODUL: PEMELIHARAAN & K3 --}}
+@if($can['maintenance'] && $maintenanceAnalytics)
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Tren Pemeliharaan Alat</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $maintenanceAnalytics['total'] }} checklist pada {{ $maintenanceAnalytics['scopeLabel'] }}
+        </p>
+        @if($maintenanceAnalytics['total'] > 0)
+            <div class="h-56" data-chart-fallback>
+                <canvas id="maintenanceMonthlyChart" aria-label="Grafik pemeliharaan bulanan" role="img"></canvas>
+            </div>
+            <p class="hidden text-sm text-gray-400 text-center py-10" data-chart-unavailable>Grafik tidak dapat dimuat.</p>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada data pemeliharaan</div>
+        @endif
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Status Item Pemeliharaan</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $maintenanceAnalytics['itemStatus']['total'] }} item tercatat
+        </p>
+        @if($maintenanceAnalytics['itemStatus']['total'] > 0)
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-40 h-40 flex-shrink-0" data-chart-fallback>
+                    <canvas id="maintenanceStatusChart" aria-label="Grafik status item pemeliharaan" role="img"></canvas>
+                </div>
+                <ul class="flex-1 space-y-2.5 w-full">
+                    @foreach($maintenanceAnalytics['itemStatus']['labels'] as $i => $label)
+                        @php($count = $maintenanceAnalytics['itemStatus']['counts'][$i])
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="inline-flex items-center gap-2 text-gray-700">
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $maintenanceAnalytics['itemStatus']['colors'][$i] }}"></span>
+                                {{ $label }}
+                            </span>
+                            <span class="font-semibold text-gray-800">{{ $count }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada item</div>
+        @endif
+    </div>
+</div>
+@endif
+
+@if($can['device_checks'] && $deviceCheckAnalytics)
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Tren Pengecekan Perangkat</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $deviceCheckAnalytics['total'] }} pengecekan pada {{ $deviceCheckAnalytics['scopeLabel'] }}
+        </p>
+        @if($deviceCheckAnalytics['total'] > 0)
+            <div class="h-56" data-chart-fallback>
+                <canvas id="deviceCheckMonthlyChart" aria-label="Grafik pengecekan perangkat bulanan" role="img"></canvas>
+            </div>
+            <p class="hidden text-sm text-gray-400 text-center py-10" data-chart-unavailable>Grafik tidak dapat dimuat.</p>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada data pengecekan</div>
+        @endif
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Status Item Pengecekan</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $deviceCheckAnalytics['itemStatus']['total'] }} item tercatat
+        </p>
+        @if($deviceCheckAnalytics['itemStatus']['total'] > 0)
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-40 h-40 flex-shrink-0" data-chart-fallback>
+                    <canvas id="deviceCheckStatusChart" aria-label="Grafik status item pengecekan" role="img"></canvas>
+                </div>
+                <ul class="flex-1 space-y-2.5 w-full">
+                    @foreach($deviceCheckAnalytics['itemStatus']['labels'] as $i => $label)
+                        @php($count = $deviceCheckAnalytics['itemStatus']['counts'][$i])
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="inline-flex items-center gap-2 text-gray-700">
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $deviceCheckAnalytics['itemStatus']['colors'][$i] }}"></span>
+                                {{ $label }}
+                            </span>
+                            <span class="font-semibold text-gray-800">{{ $count }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada item</div>
+        @endif
+    </div>
+</div>
+@endif
+
+@if($can['jadwal_pemeliharaan'] && $jadwalPemeliharaanAnalytics)
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Tren Jadwal Pemeliharaan</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $jadwalPemeliharaanAnalytics['total'] }} jadwal pada {{ $jadwalPemeliharaanAnalytics['scopeLabel'] }}
+        </p>
+        @if($jadwalPemeliharaanAnalytics['total'] > 0)
+            <div class="h-56" data-chart-fallback>
+                <canvas id="jadwalMonthlyChart" aria-label="Grafik jadwal pemeliharaan bulanan" role="img"></canvas>
+            </div>
+            <p class="hidden text-sm text-gray-400 text-center py-10" data-chart-unavailable>Grafik tidak dapat dimuat.</p>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada data jadwal</div>
+        @endif
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Status Item Jadwal Pemeliharaan</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $jadwalPemeliharaanAnalytics['itemStatus']['total'] }} item tercatat
+        </p>
+        @if($jadwalPemeliharaanAnalytics['itemStatus']['total'] > 0)
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-40 h-40 flex-shrink-0" data-chart-fallback>
+                    <canvas id="jadwalStatusChart" aria-label="Grafik status item jadwal pemeliharaan" role="img"></canvas>
+                </div>
+                <ul class="flex-1 space-y-2.5 w-full">
+                    @foreach($jadwalPemeliharaanAnalytics['itemStatus']['labels'] as $i => $label)
+                        @php($count = $jadwalPemeliharaanAnalytics['itemStatus']['counts'][$i])
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="inline-flex items-center gap-2 text-gray-700">
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $jadwalPemeliharaanAnalytics['itemStatus']['colors'][$i] }}"></span>
+                                {{ $label }}
+                            </span>
+                            <span class="font-semibold text-gray-800">{{ $count }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada item</div>
+        @endif
+    </div>
+</div>
+@endif
+
+@if($can['incident_reports'] && $incidentAnalytics)
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Tren Insiden K3</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $incidentAnalytics['total'] }} laporan pada {{ $incidentAnalytics['scopeLabel'] }}
+        </p>
+        @if($incidentAnalytics['total'] > 0)
+            <div class="h-56" data-chart-fallback>
+                <canvas id="incidentMonthlyChart" aria-label="Grafik insiden K3 bulanan" role="img"></canvas>
+            </div>
+            <p class="hidden text-sm text-gray-400 text-center py-10" data-chart-unavailable>Grafik tidak dapat dimuat.</p>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada data insiden</div>
+        @endif
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-800">Tingkat Risiko Insiden</h2>
+        <p class="text-xs text-gray-500 mt-1 mb-5">
+            {{ $incidentAnalytics['risk']['total'] }} laporan tercatat
+        </p>
+        @if($incidentAnalytics['risk']['total'] > 0)
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-40 h-40 flex-shrink-0" data-chart-fallback>
+                    <canvas id="incidentRiskChart" aria-label="Grafik tingkat risiko insiden" role="img"></canvas>
+                </div>
+                <ul class="flex-1 space-y-2.5 w-full">
+                    @foreach($incidentAnalytics['risk']['labels'] as $i => $label)
+                        @php($count = $incidentAnalytics['risk']['counts'][$i])
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="inline-flex items-center gap-2 text-gray-700">
+                                <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $incidentAnalytics['risk']['colors'][$i] }}"></span>
+                                {{ $label }}
+                            </span>
+                            <span class="font-semibold text-gray-800">{{ $count }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @else
+            <div class="h-40 flex items-center justify-center text-gray-400 text-sm">Belum ada item</div>
+        @endif
+    </div>
+</div>
+@endif
+
 {{-- RINGKASAN PER LABORATORIUM --}}
 @if($laboratorySummary->isNotEmpty())
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
@@ -573,6 +758,10 @@
             var monthNames = @json($monthNames);
             var chartData = @json($chart);
             var analysisData = @json($ticketAnalysis);
+            var maintenanceData = @json($maintenanceAnalytics);
+            var deviceCheckData = @json($deviceCheckAnalytics);
+            var jadwalData = @json($jadwalPemeliharaanAnalytics);
+            var incidentData = @json($incidentAnalytics);
             var ticketsUrl = @json(route('tickets.index'));
 
             if (typeof Chart === 'undefined') {
@@ -725,6 +914,85 @@
                     });
                 }
             }
+
+            function renderMonthly (canvasId, data) {
+                if (!data || data.total <= 0) { return; }
+                var ctx = document.getElementById(canvasId);
+                if (!ctx) { return; }
+                var months = data.months;
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months.map(function (m) { return monthNames[m.month].substring(0, 3); }),
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: '#22c55e',
+                            borderRadius: 6,
+                            maxBarThickness: 36
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: function (items) {
+                                        var slot = months[items[0].dataIndex];
+                                        return monthNames[slot.month] + ' ' + slot.year;
+                                    },
+                                    label: function (item) { return item.parsed.y + ' data'; }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            function renderDoughnut (canvasId, data) {
+                if (!data || data.total <= 0) { return; }
+                var ctx = document.getElementById(canvasId);
+                if (!ctx) { return; }
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.counts,
+                            backgroundColor: data.colors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (item) { return item.label + ': ' + item.parsed; }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderMonthly('maintenanceMonthlyChart', maintenanceData);
+            renderDoughnut('maintenanceStatusChart', maintenanceData ? maintenanceData.itemStatus : null);
+            renderMonthly('deviceCheckMonthlyChart', deviceCheckData);
+            renderDoughnut('deviceCheckStatusChart', deviceCheckData ? deviceCheckData.itemStatus : null);
+            renderMonthly('jadwalMonthlyChart', jadwalData);
+            renderDoughnut('jadwalStatusChart', jadwalData ? jadwalData.itemStatus : null);
+            renderMonthly('incidentMonthlyChart', incidentData);
+            renderDoughnut('incidentRiskChart', incidentData ? incidentData.risk : null);
         })();
     </script>
 @endpush

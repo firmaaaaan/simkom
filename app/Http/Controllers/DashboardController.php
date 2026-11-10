@@ -8,7 +8,13 @@ use App\Models\ComputerBorrowing;
 use App\Models\ComputerCheck;
 use App\Models\Laboratory;
 use App\Models\LabUsage;
+use App\Models\DeviceCheck;
+use App\Models\DeviceCheckItem;
+use App\Models\IncidentReport;
+use App\Models\JadwalPemeliharaan;
+use App\Models\JadwalPemeliharaanItem;
 use App\Models\MaintenanceChecklist;
+use App\Models\MaintenanceChecklistItem;
 use App\Models\Notification;
 use App\Models\PcMonitor;
 use App\Models\Pengadaan;
@@ -39,6 +45,9 @@ class DashboardController extends Controller
             'lab_usages' => $user->hasPermission('view-lab-usages'),
             'pengadaan' => $user->hasPermission('view-pengadaan'),
             'monitoring' => $user->hasPermission('view-monitoring'),
+            'device_checks' => $user->hasPermission('view-maintenance'),
+            'jadwal_pemeliharaan' => $user->hasPermission('view-jadwal-pemeliharaan'),
+            'incident_reports' => $user->hasPermission('view-incident-reports'),
         ];
 
         $selectedAcademicYear = $this->selectedAcademicYear($request);
@@ -53,6 +62,10 @@ class DashboardController extends Controller
             'labOccupancy' => $can['lab_usages'] ? $this->labOccupancy() : null,
             'pengadaanSummary' => $can['pengadaan'] ? $this->pengadaanSummary($selectedAcademicYear) : null,
             'monitoringSummary' => $can['monitoring'] ? $this->monitoringSummary() : null,
+            'maintenanceAnalytics' => $can['maintenance'] ? $this->maintenanceAnalytics($selectedAcademicYear) : null,
+            'deviceCheckAnalytics' => $can['device_checks'] ? $this->deviceCheckAnalytics($selectedAcademicYear) : null,
+            'jadwalPemeliharaanAnalytics' => $can['jadwal_pemeliharaan'] ? $this->jadwalPemeliharaanAnalytics($selectedAcademicYear) : null,
+            'incidentAnalytics' => $can['incident_reports'] ? $this->incidentAnalytics($selectedAcademicYear) : null,
             'quickActions' => $this->quickActions($can),
             'unreadNotifications' => Notification::unreadFor($user)->count(),
             'activities' => $this->activities($can),
@@ -470,5 +483,212 @@ class DashboardController extends Controller
         }
 
         return $items->sortByDesc('at')->take(self::ACTIVITY_LIMIT)->values();
+    }
+
+    private function monthList(?AcademicYear $academicYear): array
+    {
+        if ($academicYear) {
+            return collect(range(0, 11))->map(function (int $offset) use ($academicYear) {
+                $date = $academicYear->periodStart()->copy()->addMonthsNoOverflow($offset);
+
+                return ['month' => (int) $date->month, 'year' => (int) $date->year];
+            })->all();
+        }
+
+        $year = (int) now()->year;
+
+        return collect(range(1, 12))
+            ->map(fn (int $month) => ['month' => $month, 'year' => $year])
+            ->all();
+    }
+
+    private function monthlyCounts($query, string $dateColumn, ?AcademicYear $academicYear): array
+    {
+        $counts = array_fill(0, 12, 0);
+
+        foreach ((clone $query)->pluck($dateColumn) as $date) {
+            $counts[Carbon::parse($date)->month - 1]++;
+        }
+
+        return $counts;
+    }
+
+    private function maintenanceAnalytics(?AcademicYear $academicYear): array
+    {
+        $base = MaintenanceChecklist::query();
+
+        if ($academicYear) {
+            $base->where('academic_year_id', $academicYear->id);
+        } else {
+            $base->whereYear('maintenance_date', (int) now()->year);
+        }
+
+        $counts = $this->monthlyCounts($base, 'maintenance_date', $academicYear);
+
+        $itemQuery = MaintenanceChecklistItem::query();
+        if ($academicYear) {
+            $itemQuery->whereHas('checklist', fn ($q) => $q->where('academic_year_id', $academicYear->id));
+        } else {
+            $itemQuery->whereHas('checklist', fn ($q) => $q->whereYear('maintenance_date', (int) now()->year));
+        }
+
+        $itemStatuses = $itemQuery
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusKeys = ['sudah', 'belum', 'tidak_ada'];
+        $statusLabels = ['Sudah', 'Belum', 'Tidak Ada'];
+        $statusColors = ['#22c55e', '#ef4444', '#9ca3af'];
+
+        return [
+            'months' => $this->monthList($academicYear),
+            'counts' => $counts,
+            'max' => max($counts) ?: 1,
+            'total' => array_sum($counts),
+            'scopeLabel' => $academicYear ? 'tahun ajaran '.$academicYear->name : 'tahun '.now()->year,
+            'itemStatus' => [
+                'labels' => $statusLabels,
+                'counts' => array_map(fn (string $key) => (int) ($itemStatuses[$key] ?? 0), $statusKeys),
+                'colors' => $statusColors,
+                'total' => (int) $itemStatuses->sum(),
+            ],
+        ];
+    }
+
+    private function deviceCheckAnalytics(?AcademicYear $academicYear): array
+    {
+        $base = DeviceCheck::query();
+
+        if ($academicYear) {
+            $base->where('academic_year_id', $academicYear->id);
+        } else {
+            $base->whereYear('check_date', (int) now()->year);
+        }
+
+        $counts = $this->monthlyCounts($base, 'check_date', $academicYear);
+
+        $itemQuery = DeviceCheckItem::query();
+        if ($academicYear) {
+            $itemQuery->whereHas('deviceCheck', fn ($q) => $q->where('academic_year_id', $academicYear->id));
+        } else {
+            $itemQuery->whereHas('deviceCheck', fn ($q) => $q->whereYear('check_date', (int) now()->year));
+        }
+
+        $itemStatuses = $itemQuery
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statuses = DeviceCheckItem::statuses();
+        $statusKeys = array_keys($statuses);
+        $statusLabels = array_values($statuses);
+        $statusColors = ['#22c55e', '#ef4444', '#9ca3af'];
+
+        return [
+            'months' => $this->monthList($academicYear),
+            'counts' => $counts,
+            'max' => max($counts) ?: 1,
+            'total' => array_sum($counts),
+            'scopeLabel' => $academicYear ? 'tahun ajaran '.$academicYear->name : 'tahun '.now()->year,
+            'itemStatus' => [
+                'labels' => $statusLabels,
+                'counts' => array_map(fn (string $key) => (int) ($itemStatuses[$key] ?? 0), $statusKeys),
+                'colors' => $statusColors,
+                'total' => (int) $itemStatuses->sum(),
+            ],
+        ];
+    }
+
+    private function jadwalPemeliharaanAnalytics(?AcademicYear $academicYear): array
+    {
+        $base = JadwalPemeliharaan::query();
+
+        if ($academicYear) {
+            $base->where('academic_year_id', $academicYear->id);
+        } else {
+            $base->whereYear('tanggal_penyusunan', (int) now()->year);
+        }
+
+        $counts = $this->monthlyCounts($base, 'tanggal_penyusunan', $academicYear);
+
+        $itemQuery = JadwalPemeliharaanItem::query();
+        if ($academicYear) {
+            $itemQuery->whereHas('jadwalPemeliharaan', fn ($q) => $q->where('academic_year_id', $academicYear->id));
+        } else {
+            $itemQuery->whereHas('jadwalPemeliharaan', fn ($q) => $q->whereYear('tanggal_penyusunan', (int) now()->year));
+        }
+
+        $itemStatuses = $itemQuery
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusKeys = ['Terjadwal', 'Selesai', 'Tunda'];
+        $statusLabels = ['Terjadwal', 'Selesai', 'Tunda'];
+        $statusColors = ['#3b82f6', '#22c55e', '#f59e0b'];
+
+        return [
+            'months' => $this->monthList($academicYear),
+            'counts' => $counts,
+            'max' => max($counts) ?: 1,
+            'total' => array_sum($counts),
+            'scopeLabel' => $academicYear ? 'tahun ajaran '.$academicYear->name : 'tahun '.now()->year,
+            'itemStatus' => [
+                'labels' => $statusLabels,
+                'counts' => array_map(fn (string $key) => (int) ($itemStatuses[$key] ?? 0), $statusKeys),
+                'colors' => $statusColors,
+                'total' => (int) $itemStatuses->sum(),
+            ],
+        ];
+    }
+
+    private function incidentAnalytics(?AcademicYear $academicYear): array
+    {
+        $base = IncidentReport::query();
+
+        if ($academicYear) {
+            $start = $academicYear->periodStart();
+            $end = $academicYear->periodEnd();
+            $base->whereBetween('tanggal_kejadian', [$start, $end]);
+        } else {
+            $base->whereYear('tanggal_kejadian', (int) now()->year);
+        }
+
+        $counts = $this->monthlyCounts($base, 'tanggal_kejadian', $academicYear);
+
+        $riskCounts = (clone $base)
+            ->selectRaw('risk_level, COUNT(*) as total')
+            ->groupBy('risk_level')
+            ->pluck('total', 'risk_level');
+
+        $riskLabels = ['Low', 'Moderate', 'High', 'Very High'];
+        $riskColors = ['#22c55e', '#f59e0b', '#ef4444', '#7f1d1d'];
+
+        $jenisCounts = (clone $base)
+            ->selectRaw('telah_terjadi, COUNT(*) as total')
+            ->groupBy('telah_terjadi')
+            ->pluck('total', 'telah_terjadi');
+
+        $jenisLabels = array_keys(IncidentReport::JENIS_KEJADIAN);
+
+        return [
+            'months' => $this->monthList($academicYear),
+            'counts' => $counts,
+            'max' => max($counts) ?: 1,
+            'total' => array_sum($counts),
+            'scopeLabel' => $academicYear ? 'tahun ajaran '.$academicYear->name : 'tahun '.now()->year,
+            'risk' => [
+                'labels' => $riskLabels,
+                'counts' => array_map(fn (string $label) => (int) ($riskCounts[$label] ?? 0), $riskLabels),
+                'colors' => $riskColors,
+                'total' => (int) $riskCounts->sum(),
+            ],
+            'jenis' => [
+                'labels' => $jenisLabels,
+                'counts' => array_map(fn (string $label) => (int) ($jenisCounts[$label] ?? 0), $jenisLabels),
+                'total' => (int) $jenisCounts->sum(),
+            ],
+        ];
     }
 }
