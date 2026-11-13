@@ -254,9 +254,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     function loadInventaris() {
-        var labId = labSelect ? labSelect.value : '';
-        if (!labId) { inventarisCache = []; renderKodeOptions(); return; }
-        fetch('{{ route('jadwal-pemeliharaan.inventaris') }}?laboratory_id=' + encodeURIComponent(labId), {
+        fetch('{{ route('jadwal-pemeliharaan.inventaris') }}', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         }).then(function (r) { return r.json(); }).then(function (json) {
             inventarisCache = json.data || [];
