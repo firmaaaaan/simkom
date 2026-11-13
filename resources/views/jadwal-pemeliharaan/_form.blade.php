@@ -245,6 +245,12 @@ document.addEventListener('DOMContentLoaded', function () {
         body.querySelectorAll('.kode-add').forEach(function (sel) {
             var current = sel.value;
             sel.innerHTML = '<option value="">+ Pilih kode…</option>';
+            if (inventarisCache.length) {
+                var allOpt = document.createElement('option');
+                allOpt.value = '__ALL__';
+                allOpt.textContent = 'Semua kode lab ini (' + inventarisCache.length + ')';
+                sel.appendChild(allOpt);
+            }
             inventarisCache.forEach(function (d) {
                 var opt = document.createElement('option');
                 opt.value = d.code; opt.textContent = d.label;
@@ -254,7 +260,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     function loadInventaris() {
-        fetch('{{ route('jadwal-pemeliharaan.inventaris') }}', {
+        var labId = labSelect ? labSelect.value : '';
+        if (!labId) { inventarisCache = []; renderKodeOptions(); return; }
+        fetch('{{ route('jadwal-pemeliharaan.inventaris') }}?laboratory_id=' + encodeURIComponent(labId), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         }).then(function (r) { return r.json(); }).then(function (json) {
             inventarisCache = json.data || [];
@@ -302,7 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
     body.addEventListener('change', function (e) {
         var sel = e.target.closest('.kode-add');
         if (!sel) return;
-        addKode(sel.closest('.item-row'), sel.value);
+        if (sel.value === '__ALL__') {
+            inventarisCache.forEach(function (d) { addKode(sel.closest('.item-row'), d.code); });
+        } else {
+            addKode(sel.closest('.item-row'), sel.value);
+        }
         sel.value = '';
     });
     body.addEventListener('keydown', function (e) {

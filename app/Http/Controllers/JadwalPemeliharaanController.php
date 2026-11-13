@@ -56,13 +56,17 @@ class JadwalPemeliharaanController extends Controller
     }
 
      /**
-     * Daftar inventaris untuk dropdown Kode/No. Inventaris.
-     * Sumber: semua computers (kode = label inventaris) dari seluruh lab.
+     * Daftar inventaris per lab untuk dropdown Kode/No. Inventaris.
+     * Sumber: computers yang terikat laboratory_id (kode = label inventaris).
      */
     public function inventaris(Request $request)
     {
-        // Dropdown Kode/No. Inventaris memuat semua kode dari seluruh lab.
-        $computers = Computer::orderBy('code')
+        $request->validate([
+            'laboratory_id' => 'required|exists:laboratories,id',
+        ]);
+
+        $computers = Computer::where('laboratory_id', $request->input('laboratory_id'))
+            ->orderBy('code')
             ->get(['id', 'code', 'description']);
 
         return response()->json([
