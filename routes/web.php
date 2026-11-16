@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
 use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use App\Http\Controllers\AkademikJadwalController;
+use App\Http\Controllers\AlatController;
 use App\Http\Controllers\AparInspectionController;
 use App\Http\Controllers\AccidentReportController;
 use App\Http\Controllers\AuthController;
@@ -308,6 +309,37 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:create-hardware')
         ->middlewareFor(['edit', 'update'], 'permission:edit-hardware')
         ->middlewareFor(['destroy'], 'permission:delete-hardware');
+
+    // Alat Laboratorium / Kartu Kendali Alat (Admin + Laboran)
+    Route::get("alat/kartu", [AlatController::class, "kartu"])->name("alat.kartu");
+    Route::get("alat/kartu/print", [AlatController::class, "kartuPrint"])->name("alat.kartu.print");
+    Route::get("alat/print", [AlatController::class, "kartuPrint"])->name("alat.print");
+    Route::get("alat/labels", [AlatController::class, "labels"])->name("alat.labels");
+    Route::resource("alat", AlatController::class)->parameters(["alat" => "alat"]);
+    Route::get("alat/{alat}/checks", [AlatController::class, "checks"])->name("alat.checks");
+    Route::post("alat/{alat}/checks", [AlatController::class, "storeCheck"])->name("alat.checks.store");
+    Route::delete("alat/{alat}/checks/{check}", [AlatController::class, "destroyCheck"])->name("alat.checks.destroy");
+    Route::get("alat/{alat}/print", [AlatController::class, "printOne"])->name("alat.print-one");
+    Route::get("alats/kartu", [AlatController::class, "kartu"])->name("alats.kartu");
+    Route::get("alats/kartu/print", [AlatController::class, "kartuPrint"])->name("alats.kartu.print");
+    Route::get("alats/print", [AlatController::class, "kartuPrint"])->name("alats.print");
+    Route::resource("alats", AlatController::class)->parameters(["alats" => "alat"]);
+    Route::get("equipment/kartu", [AlatController::class, "kartu"])->name("equipment.kartu");
+    Route::get("equipment/kartu/print", [AlatController::class, "kartuPrint"])->name("equipment.kartu.print");
+    Route::get("equipment/print", [AlatController::class, "kartuPrint"])->name("equipment.print");
+    Route::resource("equipment", AlatController::class)->parameters(["equipment" => "alat"]);
+    Route::get("kartu-alat/kartu", [AlatController::class, "kartu"])->name("kartu-alat.kartu");
+    Route::get("kartu-alat/kartu/print", [AlatController::class, "kartuPrint"])->name("kartu-alat.kartu.print");
+    Route::get("kartu-alat/print", [AlatController::class, "kartuPrint"])->name("kartu-alat.print");
+    Route::resource("kartu-alat", AlatController::class)->parameters(["kartu-alat" => "alat"]);
+    Route::get("kartu-kendali-alat/kartu", [AlatController::class, "kartu"])->name("kartu-kendali-alat.kartu");
+    Route::get("kartu-kendali-alat/kartu/print", [AlatController::class, "kartuPrint"])->name("kartu-kendali-alat.kartu.print");
+    Route::get("kartu-kendali-alat/print", [AlatController::class, "kartuPrint"])->name("kartu-kendali-alat.print");
+    Route::resource("kartu-kendali-alat", AlatController::class)->parameters(["kartu-kendali-alat" => "alat"]);
+    Route::get("alat-laboratorium/kartu", [AlatController::class, "kartu"])->name("alat-laboratorium.kartu");
+    Route::get("alat-laboratorium/kartu/print", [AlatController::class, "kartuPrint"])->name("alat-laboratorium.kartu.print");
+    Route::get("alat-laboratorium/print", [AlatController::class, "kartuPrint"])->name("alat-laboratorium.print");
+    Route::resource("alat-laboratorium", AlatController::class)->parameters(["alat-laboratorium" => "alat"]);
 
     // Software (Admin + Laboran)
     Route::middleware('permission:import-software')->group(function () {

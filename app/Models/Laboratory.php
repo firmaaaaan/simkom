@@ -28,4 +28,9 @@ class Laboratory extends Model
     {
         return $this->hasMany(Computer::class);
     }
+
+    public function alat(): HasMany
+    {
+        return $this->hasMany(Alat::class);
+    }
 }
