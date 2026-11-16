@@ -68,6 +68,17 @@
                 </a>
                 @endif
 
+                @if(auth()->user()->hasPermission('view-monitoring-suhu'))
+                <a href="{{ route('monitoring-suhu.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('monitoring-suhu.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 5.25v9.75" />
+                        <circle cx="12" cy="17.25" r="3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 7.5h4.5M9.75 10.5h4.5" />
+                    </svg>
+                    Monitoring Suhu
+                </a>
+                @endif
+
                 @if(auth()->user()->hasPermission('view-jadwal-pemeliharaan'))
                 <a href="{{ route('jadwal-pemeliharaan.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('jadwal-pemeliharaan.*') ? 'bg-green-700/50 text-white' : 'text-green-200 hover:bg-green-700/30' }} transition-colors">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

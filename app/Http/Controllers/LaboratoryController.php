@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\LaboratoryExport;
 use App\Models\Laboratory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LaboratoryController extends Controller
@@ -55,10 +56,14 @@ class LaboratoryController extends Controller
             'code' => 'required|string|max:50|unique:laboratories,code',
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
+            'temp_min' => 'nullable|numeric|between:0,100',
+            'temp_max' => 'nullable|numeric|between:0,100',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
             'show_in_computer_list' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
+
+        $this->validateTemperatureRange($validated);
 
         Laboratory::create($validated);
 
@@ -87,14 +92,33 @@ class LaboratoryController extends Controller
             'code' => 'required|string|max:50|unique:laboratories,code,'.$laboratory->id,
             'location' => 'required|string|max:255',
             'capacity' => 'required|integer|min:0',
+            'temp_min' => 'nullable|numeric|between:0,100',
+            'temp_max' => 'nullable|numeric|between:0,100',
             'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
             'show_in_computer_list' => 'nullable|boolean',
             'description' => 'nullable|string',
         ]);
 
+        $this->validateTemperatureRange($validated);
+
         $laboratory->update($validated);
 
         return redirect()->route('laboratories.index')->with('success', 'Laboratorium berhasil diperbarui.');
+    }
+
+    /**
+     * Ambang suhu opsional, tapi bila keduanya diisi maka min harus < max.
+     */
+    private function validateTemperatureRange(array $data): void
+    {
+        $min = $data['temp_min'] ?? null;
+        $max = $data['temp_max'] ?? null;
+
+        if ($min !== null && $max !== null && (float) $min >= (float) $max) {
+            throw ValidationException::withMessages([
+                'temp_max' => 'Suhu maksimal harus lebih besar dari suhu minimal.',
+            ]);
+        }
     }
 
     public function destroy(Laboratory $laboratory)

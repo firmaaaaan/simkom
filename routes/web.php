@@ -40,6 +40,7 @@ use App\Http\Controllers\PublicSpecController;
 use App\Http\Controllers\PublicTicketController;
 use App\Http\Controllers\PublicTrackerController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoomTemperatureController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SignatureController;
@@ -182,6 +183,10 @@ Route::get('/computers/{computer}/card', [ComputerController::class, 'card'])->n
 // QR Code alat: redirect kondisional (guest -> riwayat, login -> input kartu kendali)
 Route::get('alat/{alat}/scan', [AlatController::class, 'scan'])->name('alat.scan');
 Route::get('alat/{alat}/riwayat', [AlatController::class, 'riwayat'])->name('alat.riwayat');
+
+// QR Code monitoring suhu ruangan: redirect kondisional (guest -> riwayat publik, login -> riwayat ruangan)
+Route::get('monitoring-suhu/{laboratory}/scan', [RoomTemperatureController::class, 'scan'])->name('monitoring-suhu.scan');
+Route::get('monitoring-suhu/{laboratory}/riwayat', [RoomTemperatureController::class, 'riwayat'])->name('monitoring-suhu.riwayat');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -344,6 +349,24 @@ Route::middleware('auth')->group(function () {
     Route::get("alat-laboratorium/kartu/print", [AlatController::class, "kartuPrint"])->name("alat-laboratorium.kartu.print");
     Route::get("alat-laboratorium/print", [AlatController::class, "kartuPrint"])->name("alat-laboratorium.print");
     Route::resource("alat-laboratorium", AlatController::class)->parameters(["alat-laboratorium" => "alat"]);
+
+    // Monitoring Suhu Ruangan (Admin + Laboran)
+    // Route non-resource didefinisikan SEBELUM resource agar tidak tertangkap {laboratory}.
+    Route::get('monitoring-suhu/labels', [RoomTemperatureController::class, 'labels'])
+        ->middleware('permission:print-monitoring-suhu')
+        ->name('monitoring-suhu.labels');
+    Route::middleware('permission:export-monitoring-suhu')->group(function () {
+        Route::get('monitoring-suhu/export', [RoomTemperatureController::class, 'export'])->name('monitoring-suhu.export');
+        Route::get('monitoring-suhu/export-pdf', [RoomTemperatureController::class, 'exportPdf'])->name('monitoring-suhu.export-pdf');
+    });
+    Route::delete('monitoring-suhu/{laboratory}/readings/{reading}', [RoomTemperatureController::class, 'destroy'])
+        ->middleware('permission:delete-monitoring-suhu')
+        ->name('monitoring-suhu.readings.destroy');
+    Route::resource('monitoring-suhu', RoomTemperatureController::class)
+        ->only(['index', 'create', 'store', 'show'])
+        ->parameters(['monitoring-suhu' => 'laboratory'])
+        ->middlewareFor(['index', 'show'], 'permission:view-monitoring-suhu')
+        ->middlewareFor(['create', 'store'], 'permission:create-monitoring-suhu');
 
     // Software (Admin + Laboran)
     Route::middleware('permission:import-software')->group(function () {
