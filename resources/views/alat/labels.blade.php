@@ -154,7 +154,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 @foreach($alat as $item)
                     new QRCode(document.getElementById('qr-{{ $item->id }}'), {
-                        text: @js(route('alat.show', $item)),
+                        text: @js(route('alat.scan', $item)),
                         width: 84,
                         height: 84,
                         colorDark: '#000000',

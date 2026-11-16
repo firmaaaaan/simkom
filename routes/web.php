@@ -179,6 +179,10 @@ Route::get('/spesifikasi/{laboratory}', [PublicSpecController::class, 'show'])->
 Route::get('/computers/{computer}/card', [ComputerController::class, 'card'])->name('computers.card');
 
 // Protected Routes
+// QR Code alat: redirect kondisional (guest -> riwayat, login -> input kartu kendali)
+Route::get('alat/{alat}/scan', [AlatController::class, 'scan'])->name('alat.scan');
+Route::get('alat/{alat}/riwayat', [AlatController::class, 'riwayat'])->name('alat.riwayat');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

@@ -136,6 +136,32 @@ class AlatController extends Controller
         return redirect()->route('alat.index')->with('success', 'Alat berhasil dihapus.');
     }
 
+    /**
+     * Endpoint yang dipakai QR Code pada label alat.
+     * Guest diarahkan ke riwayat (read-only), user login diarahkan ke input kartu kendali.
+     */
+    public function scan(Alat $alat)
+    {
+        if (auth()->check()) {
+            return redirect()->route('alat.checks', $alat);
+        }
+
+        return redirect()->route('alat.riwayat', $alat);
+    }
+
+    /**
+     * Riwayat kartu kendali alat (read-only, dapat diakses tanpa login via QR).
+     */
+    public function riwayat(Alat $alat)
+    {
+        $alat->load(['laboratory', 'checks.checkedBy']);
+
+        return view('alat.riwayat', [
+            'alat' => $alat,
+            'checks' => $alat->checks,
+        ]);
+    }
+
     public function kartu(Request $request)
     {
         abort_unless($this->canView(), 403);

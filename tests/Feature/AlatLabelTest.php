@@ -95,7 +95,7 @@ class AlatLabelTest extends TestCase
             ->assertSee('Semua Laboratorium');
     }
 
-    public function test_labels_qr_encodes_alat_show_url(): void
+    public function test_labels_qr_encodes_alat_scan_url(): void
     {
         [$lab, $alat] = $this->seedAlat();
 
@@ -103,7 +103,7 @@ class AlatLabelTest extends TestCase
             ->get(route('alat.labels', ['laboratory_id' => $lab->id]))
             ->assertOk();
 
-        $escapedUrl = str_replace('/', '\\/', route('alat.show', $alat));
+        $escapedUrl = str_replace('/', '\\/', route('alat.scan', $alat));
         $response->assertSee('text: ', false)->assertSee($escapedUrl, false);
     }
 
