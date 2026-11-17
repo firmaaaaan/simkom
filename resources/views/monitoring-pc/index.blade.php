@@ -106,7 +106,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.41A2.25 2.25 0 012.25 5.496V5.25" />
                 </svg>
                 <p class="text-gray-500 text-sm mt-3">Belum ada PC yang terhubung.</p>
-                <p class="text-gray-400 text-xs mt-1">Jalankan agent SimKom di PC lab agar status dan penggunaan hardware muncul di sini.</p>
+                <p class="text-gray-400 text-xs mt-1">Jalankan agent SmartLabs di PC lab agar status dan penggunaan hardware muncul di sini.</p>
             </div>
         </template>
 

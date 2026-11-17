@@ -12,7 +12,7 @@ class ResetPasswordNotification extends ResetPassword
      */
     protected function buildMailMessage($url): MailMessage
     {
-        $appName = (string) config('app.name', 'SimKom');
+        $appName = (string) config('app.name', 'SmartLabs');
         $expire = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60);
 
         return (new MailMessage)

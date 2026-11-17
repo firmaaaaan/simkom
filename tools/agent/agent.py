@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Agent telemetri, kendali, & inventaris PC Lab (SimKom).
+"""Agent telemetri, kendali, & inventaris PC Lab (SmartLabs).
 
 Mengambil data hardware via psutil lalu mengirimkannya ke server Laravel:
 POST /api/v1/telemetry dengan header X-API-KEY. Setiap siklus agent juga
@@ -21,7 +21,7 @@ CARA PAKAI
 A. Dengan Python  (butuh Python 3.9+):
    1. pip install -r requirements.txt
    2. Edit config.json:
-        - server_url : alamat server SimKom, contoh http://192.168.1.5:8000
+        - server_url : alamat server SmartLabs, contoh http://192.168.1.5:8000
         - api_key    : samakan dengan MONITORING_API_KEY di .env server
         - interval_seconds (opsional): jeda laporan dalam detik, default 10
         - software_interval_seconds (opsional): jeda sync software, default 3600
@@ -29,7 +29,7 @@ A. Dengan Python  (butuh Python 3.9+):
 
 B. Dengan .exe (tanpa Python di PC target):
    1. Build di mesin developer: build_exe.bat  (butuh pyinstaller)
-   2. Salin ke PC lab: SimKomAgent.exe, config.json, install.bat,
+   2. Salin ke PC lab: SmartLabsAgent.exe, config.json, install.bat,
       uninstall.bat, dan register_task.ps1
    3. Jalankan install.bat (prompt UAC "Yes") — agent mulai sejak PC hidup.
 

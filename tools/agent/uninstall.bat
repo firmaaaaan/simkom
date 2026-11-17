@@ -1,5 +1,5 @@
 @echo off
-REM Hapus SimKomAgent dari scheduled task (dan registry Run lama bila ada).
+REM Hapus SmartLabsAgent dari scheduled task (dan registry Run lama bila ada).
 setlocal
 
 REM Penghapusan task butuh hak admin — minta UAC bila belum.
@@ -10,16 +10,16 @@ if errorlevel 1 (
     exit /b
 )
 
-schtasks /End /TN "SimKomAgent" >nul 2>&1
-schtasks /Delete /TN "SimKomAgent" /F >nul 2>&1
+schtasks /End /TN "SmartLabsAgent" >nul 2>&1
+schtasks /Delete /TN "SmartLabsAgent" /F >nul 2>&1
 if errorlevel 1 (
-    echo Task SimKomAgent tidak ditemukan.
+    echo Task SmartLabsAgent tidak ditemukan.
 ) else (
-    echo Task SimKomAgent dihentikan dan dihapus.
+    echo Task SmartLabsAgent dihentikan dan dihapus.
 )
 
 REM Sisa pendaftaran lama ^(registry Run^), kalau masih ada.
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v SimKomAgent /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v SmartLabsAgent /f >nul 2>&1
 
 echo Hapus folder agent ini bila tidak dipakai lagi.
 pause

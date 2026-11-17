@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ filemtime(public_path('favicon.svg')) }}">
-    <title>@yield('title', 'Dashboard') - SimKom - UPT Lab Terpadu</title>
+    <title>@yield('title', 'Dashboard') - SmartLabs - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -36,7 +36,7 @@
                     <img src="{{ asset('kop/cropped-logo-unisa-crop.png') }}" alt="Logo Aisyiyah" class="w-full h-full object-contain">
                 </div>
                 <span class="flex flex-col leading-none">
-                    <span class="text-lg font-bold tracking-tight">SimKom</span>
+                    <span class="text-lg font-bold tracking-tight">SmartLabs</span>
                     <span class="mt-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-green-300">BY UPT LABORATORIUM TERPADU</span>
                 </span>
             </div>

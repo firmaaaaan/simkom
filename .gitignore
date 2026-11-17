@@ -20,7 +20,7 @@
 /storage/app/backups
 /storage/pail
 /vendor
-/tools/agent/SimKomAgent.exe
+/tools/agent/*.exe
 /tools/agent/build_tmp
 /tools/agent/__pycache__/
 Homestead.json

@@ -29,7 +29,7 @@ class BackupController extends Controller
 
         return response($json, 200, [
             'Content-Type' => 'application/json',
-            'Content-Disposition' => 'attachment; filename="backup-simkom-'.date('Y-m-d-His').'.json"',
+            'Content-Disposition' => 'attachment; filename="backup-smartlabs-'.date('Y-m-d-His').'.json"',
         ]);
     }
 

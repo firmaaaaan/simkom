@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ filemtime(public_path('favicon.svg')) }}">
-    <title>Lapor Insiden K3 - SimKom - UPT Lab Terpadu</title>
+    <title>Lapor Insiden K3 - SmartLabs - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,7 +85,7 @@
         </form>
 
         <p class="text-center text-xs text-gray-400 mt-8">
-            SimKom &mdash; UPT Laboratorium Terpadu
+            SmartLabs &mdash; UPT Laboratorium Terpadu
         </p>
     </div>
 </body>

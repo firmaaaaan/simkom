@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ filemtime(public_path('favicon.svg')) }}">
-    <title>Lupa Kata Sandi - SimKom - UPT Lab Terpadu</title>
+    <title>Lupa Kata Sandi - SmartLabs - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <p class="text-center text-xs text-gray-400 mt-6">&copy; {{ date('Y') }} SimKom. All rights reserved.</p>
+        <p class="text-center text-xs text-gray-400 mt-6">&copy; {{ date('Y') }} SmartLabs. All rights reserved.</p>
     </div>
 </body>
 </html>

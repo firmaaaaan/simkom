@@ -1,4 +1,4 @@
-# Daftarkan SimKomAgent sebagai scheduled task ONSTART (SYSTEM).
+# Daftarkan SmartLabsAgent sebagai scheduled task ONSTART (SYSTEM).
 # Dipanggil dari install.bat — dipisah ke file .ps1 agar bebas masalah
 # escaping/continuation caret pada file batch.
 param(

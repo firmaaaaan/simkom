@@ -12,7 +12,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ filemtime(public_path('favicon.svg')) }}">
-    <title>{{ $code }} - SimKom - UPT Lab Terpadu</title>
+    <title>{{ $code }} - SmartLabs - UPT Lab Terpadu</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet" />
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -96,7 +96,7 @@
         </div>
 
         <p class="mt-8 text-xs text-gray-400 anim-rise-3">
-            © {{ date('Y') }} SimKom — UPT Lab Terpadu
+            © {{ date('Y') }} SmartLabs — UPT Lab Terpadu
         </p>
     </div>
 </body>

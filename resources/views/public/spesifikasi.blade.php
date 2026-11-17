@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Spesifikasi {{ $laboratory->name }} - SimKom - UPT Lab Terpadu</title>
+    <title>Spesifikasi {{ $laboratory->name }} - SmartLabs - UPT Lab Terpadu</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ filemtime(public_path('favicon.svg')) }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
@@ -89,7 +89,7 @@
     {{-- Footer --}}
     <footer class="bg-white border-t border-gray-200 py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SimKom - Sistem Manajemen Komputer</p>
+            <p class="text-sm text-gray-500">&copy; {{ date('Y') }} SmartLabs - Sistem Manajemen Komputer</p>
             <div class="flex items-center gap-4">
                 <a href="{{ url('/') }}" class="text-sm text-gray-500 hover:text-green-600">Beranda</a>
                 <a href="{{ route('daftar-komputer') }}" class="text-sm text-gray-500 hover:text-green-600">Daftar Komputer</a>

@@ -15,7 +15,7 @@ class CustomErrorPageTest extends TestCase
         $this->get('/halaman-tidak-ada')
             ->assertNotFound()
             ->assertSee('Halaman Tidak Ditemukan')
-            ->assertSee('SimKom')
+            ->assertSee('SmartLabs')
             ->assertSee('Ke Beranda')
             ->assertSee('404');
     }

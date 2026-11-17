@@ -13,31 +13,31 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Firmansyah, S.Kom',
-                'email' => 'firmansyah@simkom.com',
+                'email' => 'firmansyah@smartlabs.com',
                 'password' => bcrypt('password'),
                 'role' => 'admin',
             ],
             [
                 'name' => 'Dewi Lestari, S.T.',
-                'email' => 'dewi@simkom.com',
+                'email' => 'dewi@smartlabs.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Rudi Hartono',
-                'email' => 'rudi@simkom.com',
+                'email' => 'rudi@smartlabs.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Siti Nurhaliza',
-                'email' => 'siti@simkom.com',
+                'email' => 'siti@smartlabs.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
             [
                 'name' => 'Andi Pratama',
-                'email' => 'andi@simkom.com',
+                'email' => 'andi@smartlabs.com',
                 'password' => bcrypt('password'),
                 'role' => 'laboran',
             ],
