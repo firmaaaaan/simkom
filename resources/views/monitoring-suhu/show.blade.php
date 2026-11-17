@@ -46,9 +46,6 @@
             </div>
         </div>
         <div class="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t border-gray-100">
-            @can('print-monitoring-suhu')
-                <a href="{{ route('monitoring-suhu.labels', ['laboratory_id' => $laboratory->id]) }}" class="px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">Label QR</a>
-            @endcan
             @can('export-monitoring-suhu')
                 <a href="{{ route('monitoring-suhu.export', array_filter(['laboratory_id' => $laboratory->id, 'from' => $from, 'to' => $to])) }}" class="px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">Export Excel</a>
                 <a href="{{ route('monitoring-suhu.export-pdf', array_filter(['laboratory_id' => $laboratory->id, 'from' => $from, 'to' => $to])) }}" class="px-6 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">Export PDF</a>

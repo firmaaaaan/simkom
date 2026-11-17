@@ -71,7 +71,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="temp_min" class="block text-sm font-medium text-gray-700 mb-1">Suhu Minimal Normal (°C)</label>
-                        <input type="number" name="temp_min" id="temp_min" value="{{ old('temp_min') }}"
+                        <input type="number" name="temp_min" id="temp_min" value="{{ old('temp_min', 20) }}"
                             step="0.1" min="0" max="100"
                             class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
                             placeholder="Contoh: 18">
@@ -79,13 +79,13 @@
                     </div>
                     <div>
                         <label for="temp_max" class="block text-sm font-medium text-gray-700 mb-1">Suhu Maksimal Normal (°C)</label>
-                        <input type="number" name="temp_max" id="temp_max" value="{{ old('temp_max') }}"
+                        <input type="number" name="temp_max" id="temp_max" value="{{ old('temp_max', 25) }}"
                             step="0.1" min="0" max="100"
                             class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
                             placeholder="Contoh: 26">
                         @error('temp_max') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <p class="sm:col-span-2 text-xs text-gray-400 -mt-2">Opsional — dipakai untuk menandai status Normal, Panas, atau Dingin pada monitoring suhu.</p>
+                    <p class="sm:col-span-2 text-xs text-gray-400 -mt-2">Default 20–25°C — dipakai untuk menandai status Normal, Panas, atau Dingin pada monitoring suhu. Bisa diubah.</p>
                 </div>
 
                 <div>

@@ -81,7 +81,8 @@ class MonitoringSuhuTest extends TestCase
             ->assertSee('Riwayat Monitoring Suhu')
             ->assertSee('30.5°C')
             ->assertSee('Panas')
-            ->assertDontSee('Input Suhu');
+            ->assertDontSee('Input Suhu')
+            ->assertDontSee('Cetak');
     }
 
     public function test_public_riwayat_shows_empty_state(): void
@@ -116,7 +117,7 @@ class MonitoringSuhuTest extends TestCase
 
     public function test_index_status_shows_placeholder_when_threshold_missing(): void
     {
-        $lab = $this->seedRoom();
+        $lab = $this->seedRoom(['temp_min' => null, 'temp_max' => null]);
         $this->reading($lab, 27.5);
 
         $this->actingAs($this->userWith(['view-monitoring-suhu']))
@@ -265,6 +266,76 @@ class MonitoringSuhuTest extends TestCase
             ->assertOk()
             ->assertDontSee('Input Suhu Baru')
             ->assertDontSee('Simpan & Tambah Lagi', false);
+    }
+
+    public function test_individual_qr_buttons_removed_and_combined_label_kept(): void
+    {
+        $lab = $this->seedRoom();
+        $user = $this->userWith(['view-monitoring-suhu', 'print-monitoring-suhu']);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.index'))
+            ->assertOk()
+            ->assertSee('href="'.route('monitoring-suhu.labels').'"', false)
+            ->assertDontSee('title="Label QR"', false);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.show', $lab))
+            ->assertOk()
+            ->assertDontSee('Label QR');
+    }
+
+    public function test_threshold_edit_and_update(): void
+    {
+        $lab = $this->seedRoom();
+        $user = $this->userWith(['view-monitoring-suhu', 'edit-laboratories']);
+
+        $this->assertSame(20.0, (float) $lab->fresh()->temp_min);
+        $this->assertSame(25.0, (float) $lab->fresh()->temp_max);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.threshold.edit', $lab))
+            ->assertOk()
+            ->assertSee('Edit Ambang Suhu Ruangan')
+            ->assertSee('Suhu Minimum (°C)');
+
+        $this->actingAs($user)
+            ->from(route('monitoring-suhu.index'))
+            ->put(route('monitoring-suhu.threshold.update', $lab), [
+                'temp_min' => 18,
+                'temp_max' => 26,
+            ])
+            ->assertRedirect(route('monitoring-suhu.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('laboratories', [
+            'id' => $lab->id,
+            'temp_min' => 18,
+            'temp_max' => 26,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('monitoring-suhu.threshold.update', $lab), [
+                'temp_min' => 30,
+                'temp_max' => 20,
+            ])
+            ->assertSessionHasErrors('temp_max');
+    }
+
+    public function test_index_shows_threshold_edit_action_without_input_button(): void
+    {
+        $lab = $this->seedRoom();
+
+        $this->actingAs($this->userWith(['view-monitoring-suhu']))
+            ->get(route('monitoring-suhu.threshold.edit', $lab))
+            ->assertForbidden();
+
+        $this->actingAs($this->userWith(['view-monitoring-suhu', 'edit-laboratories']))
+            ->get(route('monitoring-suhu.index'))
+            ->assertOk()
+            ->assertSee(route('monitoring-suhu.threshold.edit', $lab), false)
+            ->assertSee('title="Edit Ambang Suhu"', false)
+            ->assertDontSee('title="Input Suhu"', false);
     }
 
     public function test_sidebar_shows_menu_with_permission(): void

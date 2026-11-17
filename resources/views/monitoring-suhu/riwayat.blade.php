@@ -16,7 +16,6 @@
     <div class="max-w-4xl mx-auto px-4 py-6">
         <div class="no-print mb-4 flex items-center justify-between gap-3">
             <a href="{{ route('login') }}" class="text-green-600 hover:text-green-700 font-medium text-sm">&larr; Masuk untuk input</a>
-            <button type="button" onclick="window.print()" class="px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900">Cetak</button>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 mb-4">

@@ -127,6 +127,35 @@ class RoomTemperatureController extends Controller
         ]);
     }
 
+    public function editThreshold(Laboratory $laboratory)
+    {
+        return view('monitoring-suhu.threshold', [
+            'laboratory' => $laboratory,
+        ]);
+    }
+
+    public function updateThreshold(Request $request, Laboratory $laboratory)
+    {
+        $validated = $request->validate([
+            'temp_min' => 'nullable|numeric|between:0,100',
+            'temp_max' => 'nullable|numeric|between:0,100|gte:temp_min',
+        ], [
+            'temp_min.numeric' => 'Ambang minimum harus berupa angka.',
+            'temp_min.between' => 'Ambang minimum harus antara 0 sampai 100°C.',
+            'temp_max.numeric' => 'Ambang maksimum harus berupa angka.',
+            'temp_max.between' => 'Ambang maksimum harus antara 0 sampai 100°C.',
+            'temp_max.gte' => 'Ambang maksimum harus lebih besar atau sama dengan ambang minimum.',
+        ]);
+
+        $laboratory->update([
+            'temp_min' => $validated['temp_min'] === null ? null : (float) $validated['temp_min'],
+            'temp_max' => $validated['temp_max'] === null ? null : (float) $validated['temp_max'],
+        ]);
+
+        return redirect()->route('monitoring-suhu.index')
+            ->with('success', "Ambang suhu {$laboratory->name} berhasil diperbarui.");
+    }
+
     public function destroy(Laboratory $laboratory, RoomTemperatureReading $reading)
     {
         if ($reading->laboratory_id !== $laboratory->id) {

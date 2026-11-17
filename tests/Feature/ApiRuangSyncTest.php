@@ -80,6 +80,8 @@ class ApiRuangSyncTest extends TestCase
             'name' => 'Ruang Laboratorium Komputer 2',
             'capacity' => 52,
             'location' => 'Gedung SB',
+            'temp_min' => 20,
+            'temp_max' => 25,
         ]);
         $this->assertDatabaseMissing('laboratories', ['code' => 'SM.1.20']);
 
