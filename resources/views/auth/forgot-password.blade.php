@@ -21,7 +21,7 @@
         {{-- Logo --}}
         <div class="text-center mb-8">
             <img src="{{ asset('kop/cropped-logo-unisa-crop.png') }}" alt="Logo Aisyiyah" class="w-28 h-28 object-contain mx-auto mb-4">
-            <h1 class="text-2xl font-bold text-gray-800">Sim<span class="text-green-600">Kom</span></h1>
+            <h1 class="text-2xl font-bold text-gray-800">Smart<span class="text-green-600">Labs</span></h1>
             <p class="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">BY UPT LABORATORIUM TERPADU</p>
             <p class="text-sm text-gray-500 mt-1">Sistem Manajemen Komputer</p>
         </div>

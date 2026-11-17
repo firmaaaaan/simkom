@@ -29,7 +29,7 @@
                 <a href="{{ url('/') }}" class="flex items-center gap-3">
                     <img src="{{ asset('kop/cropped-logo-unisa-crop.png') }}" alt="Logo Aisyiyah" class="w-9 h-9 object-contain">
                     <span class="flex flex-col justify-center leading-none">
-                        <span class="text-xl font-extrabold text-gray-800">Sim<span class="text-green-600">Kom</span></span>
+                        <span class="text-xl font-extrabold text-gray-800">Smart<span class="text-green-600">Labs</span></span>
                         <span class="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">BY UPT LABORATORIUM TERPADU</span>
                     </span>
                 </a>
