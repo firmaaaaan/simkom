@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
+use App\Http\Controllers\ApiRuangController;
 use App\Http\Controllers\Admin\BoxUsageController as AdminBoxUsageController;
 use App\Http\Controllers\Admin\LabUsageController as AdminLabUsageController;
 use App\Http\Controllers\AkademikJadwalController;
@@ -280,6 +281,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('laboratories/bulk-destroy', [LaboratoryController::class, 'bulkDestroy'])
         ->middleware('permission:delete-laboratories')
         ->name('laboratories.bulk-destroy');
+    Route::get('api-ruang', [ApiRuangController::class, 'index'])
+        ->middleware('permission:view-laboratories')
+        ->name('api-ruang.index');
+    Route::post('api-ruang/sync', [ApiRuangController::class, 'sync'])
+        ->middleware('permission:edit-laboratories')
+        ->name('api-ruang.sync');
     Route::resource('laboratories', LaboratoryController::class)
         ->middlewareFor(['index', 'show'], 'permission:view-laboratories')
         ->middlewareFor(['create', 'store'], 'permission:create-laboratories')

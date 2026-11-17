@@ -16,6 +16,13 @@
             Hapus Terpilih (<span x-text="selected.length"></span>)
         </button>
         <x-export-button permission="export-laboratories" route="laboratories.export" />
+        @if(auth()->user()->hasPermission('edit-laboratories'))
+            <form action="{{ route('api-ruang.sync') }}" method="POST">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">Sinkron Ruangan SB</button>
+            </form>
+        @endif
+        <a href="{{ route('api-ruang.index') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-emerald-600 text-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-50 transition-colors">Data Ruangan SB</a>
         <a href="{{ route('laboratories.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -32,6 +39,10 @@
         </svg>
         {{ session('success') }}
     </div>
+@endif
+
+@if(session('error'))
+    <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{{ session('error') }}</div>
 @endif
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">

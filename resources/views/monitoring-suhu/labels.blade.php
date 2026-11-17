@@ -18,7 +18,7 @@
         body { background: #f3f4f6; }
         .label-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 4mm;
         }
         .label-item {

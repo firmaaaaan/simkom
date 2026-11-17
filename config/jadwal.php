@@ -24,6 +24,18 @@ return [
     */
     'kelas_api_url' => env('JADWAL_KELAS_API_URL', 'http://157.66.9.230:3000/api/v1/jadwal/kelas'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | API Master Ruangan Eksternal (SIMPTT)
+    |--------------------------------------------------------------------------
+    |
+    | Endpoint GET /api/v1/jadwal/ruang. Response: {success, message, data}
+    | dengan tiap entri {kdruang, ruang}. Sinkron hanya menyimpan ruangan
+    | berawalan kode SB.
+    |
+    */
+    'ruang_api_url' => env('JADWAL_RUANG_API_URL', 'http://157.66.9.230:3000/api/v1/jadwal/ruang'),
+
     'timeout' => (int) env('JADWAL_API_TIMEOUT', 10),
 
     // Lama cache response per tanggal (detik).
