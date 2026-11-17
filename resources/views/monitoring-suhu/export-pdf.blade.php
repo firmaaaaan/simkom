@@ -9,7 +9,7 @@
         .meta { font-size: 10px; color: #6b7280; margin-bottom: 14px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #d1d5db; padding: 6px 8px; text-align: left; }
-        th { background: #059669; color: #ffffff; font-weight: 700; }
+        th { background: #16a34a; color: #ffffff; font-weight: 700; }
         tr:nth-child(even) td { background: #f9fafb; }
         .center { text-align: center; }
     </style>

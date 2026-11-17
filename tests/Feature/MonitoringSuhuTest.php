@@ -140,6 +140,16 @@ class MonitoringSuhuTest extends TestCase
             ->assertRedirect(route('monitoring-suhu.show', $lab))
             ->assertSessionHas('success');
 
+        $this->actingAs($user)
+            ->post(route('monitoring-suhu.store'), [
+                'laboratory_id' => $lab->id,
+                'temperature' => 25.0,
+                'recorded_at' => '2026-11-17 10:00',
+                'action' => 'save_another',
+            ])
+            ->assertRedirect(route('monitoring-suhu.show', $lab))
+            ->assertSessionHas('success');
+
         $this->assertDatabaseHas('room_temperature_readings', [
             'laboratory_id' => $lab->id,
             'temperature' => 24.5,
@@ -234,15 +244,27 @@ class MonitoringSuhuTest extends TestCase
             ->get(route('monitoring-suhu.export-pdf', ['laboratory_id' => $lab->id]))
             ->assertOk();
 
-        $this->actingAs($this->userWith(['create-monitoring-suhu']))
-            ->get(route('monitoring-suhu.create', ['laboratory_id' => $lab->id]))
+        $this->actingAs($this->userWith(['view-monitoring-suhu', 'create-monitoring-suhu']))
+            ->get(route('monitoring-suhu.show', $lab))
             ->assertOk()
-            ->assertSee('Input Monitoring Suhu');
+            ->assertSee('Input Suhu Baru')
+            ->assertSee('Simpan & Tambah Lagi', false);
 
         $this->actingAs($this->userWith(['print-monitoring-suhu']))
             ->get(route('monitoring-suhu.labels', ['laboratory_id' => 'all']))
             ->assertOk()
             ->assertSee('Label Monitoring Suhu');
+    }
+
+    public function test_input_form_hidden_without_create_permission(): void
+    {
+        $lab = $this->seedRoom();
+
+        $this->actingAs($this->userWith(['view-monitoring-suhu']))
+            ->get(route('monitoring-suhu.show', $lab))
+            ->assertOk()
+            ->assertDontSee('Input Suhu Baru')
+            ->assertDontSee('Simpan & Tambah Lagi', false);
     }
 
     public function test_sidebar_shows_menu_with_permission(): void

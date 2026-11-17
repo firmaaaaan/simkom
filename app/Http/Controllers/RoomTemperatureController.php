@@ -66,20 +66,6 @@ class RoomTemperatureController extends Controller
         ]);
     }
 
-    public function create(Request $request)
-    {
-        $laboratory = null;
-        if ($labId = $request->input('laboratory_id')) {
-            $laboratory = Laboratory::find($labId);
-        }
-
-        return view('monitoring-suhu.create', [
-            'laboratories' => Laboratory::orderBy('name')->get(),
-            'laboratory' => $laboratory,
-            'defaultTime' => now()->format('Y-m-d\TH:i'),
-        ]);
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -108,7 +94,7 @@ class RoomTemperatureController extends Controller
         $laboratory = Laboratory::findOrFail($validated['laboratory_id']);
 
         if ($request->input('action') === 'save_another') {
-            return redirect()->route('monitoring-suhu.create', ['laboratory_id' => $laboratory->id])
+            return redirect()->route('monitoring-suhu.show', $laboratory)
                 ->with('success', 'Suhu berhasil dicatat. Silakan isi form untuk data berikutnya.');
         }
 
@@ -137,6 +123,7 @@ class RoomTemperatureController extends Controller
             'latest' => $laboratory->temperatureReadings()->first(),
             'from' => $from,
             'to' => $to,
+            'defaultTime' => now()->format('Y-m-d\TH:i'),
         ]);
     }
 

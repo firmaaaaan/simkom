@@ -4,42 +4,18 @@
 @section('header', 'Monitoring Suhu Ruangan')
 
 @section('content')
-<div class="space-y-4">
+<div class="space-y-6">
     @if(session('success'))
         <div class="px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{{ session('success') }}</div>
     @endif
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p class="text-sm text-gray-500">Suhu terakhir setiap ruangan beserta status Normal, Panas, atau Dingin</p>
-        <div class="flex items-center gap-2 flex-wrap">
-            @can('export-monitoring-suhu')
-                <a href="{{ route('monitoring-suhu.export', request()->query()) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-emerald-600 text-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-50 transition-colors">
-                    Export Excel
-                </a>
-                <a href="{{ route('monitoring-suhu.export-pdf', request()->query()) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-emerald-600 text-emerald-600 text-sm font-medium rounded-lg hover:bg-emerald-50 transition-colors">
-                    Export PDF
-                </a>
-            @endcan
-            @can('print-monitoring-suhu')
-                <a href="{{ route('monitoring-suhu.labels') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-green-600 text-green-600 text-sm font-medium rounded-lg hover:bg-green-50 transition-colors">
-                    Label QR
-                </a>
-            @endcan
-            @can('create-monitoring-suhu')
-                <a href="{{ route('monitoring-suhu.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
-                    Input Suhu
-                </a>
-            @endcan
-        </div>
-    </div>
-
-    <form action="{{ route('monitoring-suhu.index') }}" method="GET" class="bg-white rounded-xl border border-gray-200 p-4 flex flex-col sm:flex-row gap-3 items-end">
-        <div class="flex-1">
+    <form action="{{ route('monitoring-suhu.index') }}" method="GET" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col sm:flex-row gap-4 items-end">
+        <div class="flex-1 w-full">
             <label class="block text-sm font-medium text-gray-700 mb-1">Cari Ruangan</label>
             <input type="text" name="search" value="{{ $search }}" placeholder="Nama atau kode ruangan..."
                 class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
         </div>
-        <div class="sm:w-56">
+        <div class="sm:w-56 w-full">
             <label class="block text-sm font-medium text-gray-700 mb-1">Status Suhu</label>
             <select name="status" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
                 <option value="">Semua Status</option>
@@ -48,30 +24,43 @@
                 @endforeach
             </select>
         </div>
-        <button type="submit" class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">Tampilkan</button>
-        @if($search !== '' || $statusFilter)
-            <a href="{{ route('monitoring-suhu.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Reset</a>
-        @endif
+        <div class="flex gap-2 flex-wrap">
+            <button type="submit" class="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">Tampilkan</button>
+            @can('print-monitoring-suhu')
+                <a href="{{ route('monitoring-suhu.labels') }}" class="px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">Label QR</a>
+            @endcan
+            @can('export-monitoring-suhu')
+                <a href="{{ route('monitoring-suhu.export', request()->query()) }}" class="px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors">Export Excel</a>
+                <a href="{{ route('monitoring-suhu.export-pdf', request()->query()) }}" class="px-6 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">Export PDF</a>
+            @endcan
+            @if($search !== '' || $statusFilter)
+                <a href="{{ route('monitoring-suhu.index') }}" class="px-6 py-2 text-sm text-gray-600 hover:underline">Reset</a>
+            @endif
+        </div>
     </form>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-base font-semibold text-gray-800">Daftar Ruangan</h2>
+            <p class="text-sm text-gray-500 mt-1">Suhu terakhir setiap ruangan beserta status Normal, Panas, atau Dingin</p>
+        </div>
         <table class="w-full text-sm table-responsive-cards">
             <thead>
-                <tr class="border-b border-gray-100">
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">No</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Ruangan</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Kode</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Suhu Terakhir</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Ambang Normal</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-500">Aksi</th>
+                <tr class="bg-green-600 text-white">
+                    <th class="px-4 py-3 text-center w-12">No</th>
+                    <th class="px-4 py-3 text-left">Ruangan</th>
+                    <th class="px-4 py-3 text-left">Kode</th>
+                    <th class="px-4 py-3 text-left">Suhu Terakhir</th>
+                    <th class="px-4 py-3 text-left">Status</th>
+                    <th class="px-4 py-3 text-left">Ambang Normal</th>
+                    <th class="px-4 py-3 text-center w-28">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
                 @forelse($rooms as $index => $row)
                     @php($lab = $row['laboratory'])
-                    <tr class="border-b border-gray-50 hover:bg-gray-50">
-                        <td class="px-4 py-3">{{ $rooms->firstItem() + $index }}</td>
+                    <tr>
+                        <td class="px-4 py-3 text-center">{{ $rooms->firstItem() + $index }}</td>
                         <td class="px-4 py-3 font-medium">
                             {{ $lab->name }}
                             @if($lab->location)
@@ -101,14 +90,14 @@
                             @endif
                         </td>
                         <td class="px-4 py-3" data-label="Aksi">
-                            <div class="flex items-center gap-1 flex-wrap">
+                            <div class="flex items-center justify-center gap-1 flex-wrap">
                                 <a href="{{ route('monitoring-suhu.show', $lab) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Riwayat">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </a>
                                 @can('create-monitoring-suhu')
-                                    <a href="{{ route('monitoring-suhu.create', ['laboratory_id' => $lab->id]) }}" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Input Suhu">
+                                    <a href="{{ route('monitoring-suhu.show', $lab) }}" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Input Suhu">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M12 4.5v15m7.5-7.5h-15" />
                                         </svg>

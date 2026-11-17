@@ -363,10 +363,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:delete-monitoring-suhu')
         ->name('monitoring-suhu.readings.destroy');
     Route::resource('monitoring-suhu', RoomTemperatureController::class)
-        ->only(['index', 'create', 'store', 'show'])
+        ->only(['index', 'store', 'show'])
         ->parameters(['monitoring-suhu' => 'laboratory'])
         ->middlewareFor(['index', 'show'], 'permission:view-monitoring-suhu')
-        ->middlewareFor(['create', 'store'], 'permission:create-monitoring-suhu');
+        ->middlewareFor('store', 'permission:create-monitoring-suhu');
 
     // Software (Admin + Laboran)
     Route::middleware('permission:import-software')->group(function () {
