@@ -19,14 +19,43 @@
         'Produktivitas' => ['todos'],
     ];
 
+    // Alias modul alat adalah permission yang sama secara fungsional —
+    // digabung agar tidak muncul beberapa kartu identik di pemilih role.
+    $moduleAliases = [
+        'kartu-alat' => 'alat',
+        'alat-laboratorium' => 'alat',
+        'equipment' => 'alat',
+        'kartu-kendali-alat' => 'alat',
+    ];
+
     // Kelompokkan permission per modul: name = <aksi>-<modul>.
     $byModule = [];
     $unparsed = [];
     foreach ($permissions as $permission) {
         if (preg_match('/^(view|create|edit|delete|export|import|print)-(.+)$/', $permission->name, $m)) {
-            $byModule[$m[2]][$m[1]] = $permission;
+            $key = $moduleAliases[$m[2]] ?? $m[2];
+            $byModule[$key][$m[1]][] = $permission;
         } else {
             $unparsed[] = $permission;
+        }
+    }
+
+    // Utamakan permission dengan slug kanonik sebagai wakil kartu (mis. view-alat).
+    foreach ($byModule as $key => $actionsByAction) {
+        foreach ($actionsByAction as $action => $actionPermissions) {
+            usort($actionPermissions, fn ($a, $b) => str_ends_with($b->name, '-'.$key) <=> str_ends_with($a->name, '-'.$key));
+            $byModule[$key][$action] = $actionPermissions;
+        }
+    }
+
+    // Role lama mungkin hanya memiliki salah satu alias — pilih semua alias
+    // sekelompok agar tersimpan utuh saat form disubmit.
+    foreach ($byModule as $modulePermissions) {
+        foreach ($modulePermissions as $actionPermissions) {
+            $ids = array_map(fn ($permission) => (string) $permission->id, $actionPermissions);
+            if (array_intersect($ids, $selectedIds) !== []) {
+                $selectedIds = array_values(array_unique(array_merge($selectedIds, $ids)));
+            }
         }
     }
 
@@ -34,7 +63,11 @@
         $items = [];
         foreach ($actionOrder as $action) {
             if (isset($modulePermissions[$action])) {
-                $items[] = ['permission' => $modulePermissions[$action], 'word' => $actionWords[$action]];
+                $items[] = [
+                    'permission' => $modulePermissions[$action][0],
+                    'aliases' => array_slice($modulePermissions[$action], 1),
+                    'word' => $actionWords[$action],
+                ];
             }
         }
 
@@ -73,17 +106,31 @@
     foreach ($structure as $category => $categoryModules) {
         foreach ($categoryModules as $key => $module) {
             foreach ($module['items'] as $item) {
-                $groups[$category][] = $item['permission']->name;
-                $modulesAlpine[$key][] = $item['permission']->name;
+                foreach (array_merge([$item['permission']], $item['aliases']) as $permission) {
+                    $groups[$category][] = $permission->name;
+                    $modulesAlpine[$key][] = $permission->name;
+                }
             }
         }
     }
     foreach ($unparsed as $permission) {
         $groups['Lainnya'][] = $permission->name;
     }
+
+    $aliasesByPrimary = [];
+    foreach ($structure as $categoryModules) {
+        foreach ($categoryModules as $module) {
+            foreach ($module['items'] as $item) {
+                $aliasesByPrimary[(string) $item['permission']->id] = array_map(
+                    fn ($permission) => (string) $permission->id,
+                    $item['aliases']
+                );
+            }
+        }
+    }
 @endphp
 
-<div x-data="permissionPicker({{ collect($selectedIds)->map(fn ($id) => (string) $id)->toJson() }}, {{ collect($permissions)->map(fn ($p) => ['id' => (string) $p->id, 'name' => $p->name])->toJson() }}, @js($groups), @js($modulesAlpine))">
+<div x-data="permissionPicker({{ collect($selectedIds)->map(fn ($id) => (string) $id)->toJson() }}, {{ collect($permissions)->map(fn ($p) => ['id' => (string) $p->id, 'name' => $p->name])->toJson() }}, @js($groups), @js($modulesAlpine), @js($aliasesByPrimary))">
     <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <p class="text-xs text-gray-500">
             Terpilih: <span class="font-semibold text-gray-700" x-text="selected.length"></span> dari {{ $permissions->count() }} permission
@@ -117,6 +164,11 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach($module['items'] as $item)
+                                    @foreach($item['aliases'] as $alias)
+                                        <input type="hidden" name="permissions[]" value="{{ $alias->id }}"
+                                            @disabled(! in_array($item['permission']->id, $selectedIds, true))
+                                            :disabled="! selected.includes('{{ $item['permission']->id }}')">
+                                    @endforeach
                                     <label class="flex items-center gap-2 px-2 py-1.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors"
                                         title="{{ $item['permission']->label }} ({{ $item['permission']->name }})">
                                         <input type="checkbox" name="permissions[]" value="{{ $item['permission']->id }}"
@@ -158,11 +210,12 @@
 @push('scripts')
 <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('permissionPicker', (initialSelected, permissions, groups, modules) => ({
+        Alpine.data('permissionPicker', (initialSelected, permissions, groups, modules, aliasesByPrimary) => ({
             selected: initialSelected,
             permissions,
             groups,
             modules,
+            aliasesByPrimary,
             get idByName() {
                 return Object.fromEntries(this.permissions.map(p => [p.name, p.id]));
             },
@@ -176,9 +229,10 @@
                 return this.idsOf(this.modules[key] || []);
             },
             toggle(id) {
+                const aliases = this.aliasesByPrimary[id] || [];
                 this.selected = this.selected.includes(id)
-                    ? this.selected.filter(v => v !== id)
-                    : [...this.selected, id];
+                    ? this.selected.filter(v => v !== id && ! aliases.includes(v))
+                    : [...new Set([...this.selected, id, ...aliases])];
             },
             selectAll() {
                 this.selected = this.permissions.map(p => p.id);
