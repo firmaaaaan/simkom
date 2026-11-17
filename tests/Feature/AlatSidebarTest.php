@@ -1,5 +1,7 @@
 <?php
+
 namespace Tests\Feature;
+
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -20,6 +22,7 @@ class AlatSidebarTest extends TestCase
         }
         $u = User::create(['name' => 'Uji', 'email' => 'alat@uji.test', 'password' => 'rahasia123']);
         $u->roles()->attach($role);
+
         return $u;
     }
 
@@ -28,7 +31,7 @@ class AlatSidebarTest extends TestCase
         $this->actingAs($this->userWith(['view-alat']))
             ->get(route('alat.index'))
             ->assertOk()
-            ->assertSee('>Data Master Lab</p>', false)
+            ->assertSee('>Data Master Lab</span>', false)
             ->assertSee(route('alat.index'), false)
             ->assertSee('Alat Laboratorium')
             ->assertSee('Kartu Kendali Alat');

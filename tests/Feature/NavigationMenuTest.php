@@ -32,8 +32,8 @@ class NavigationMenuTest extends TestCase
             ->assertOk()
             ->assertSee('Kartu Kendali')
             ->assertDontSee('Laporan Pengecekan')
-            ->assertSee('<p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Laporan</p>', false)
-            ->assertDontSee('<p class="text-[10px] font-bold text-green-400 uppercase tracking-wider px-3 pt-4 pb-1">Transaksi</p>', false);
+            ->assertSee('>Laporan</span>', false)
+            ->assertDontSee('>Transaksi</span>', false);
     }
 
     public function test_laporan_pengecekan_moves_to_reports_for_laboran(): void
@@ -43,8 +43,19 @@ class NavigationMenuTest extends TestCase
         $this->actingAs($user)->get(route('maintenance.index'))
             ->assertOk()
             ->assertSee('Laporan Pengecekan')
-            ->assertSee('>Laporan</p>', false)
-            ->assertSee('>Transaksi</p>', false);
+            ->assertSee('>Laporan</span>', false)
+            ->assertSee('>Transaksi</span>', false);
+    }
+
+    public function test_sidebar_groups_collapse_except_the_active_one(): void
+    {
+        $user = $this->userWith('nav-accordion@uji.test', ['view-reports', 'view-maintenance', 'view-users']);
+
+        $this->actingAs($user)->get(route('reports.laporan'))
+            ->assertOk()
+            ->assertSee('<div x-data="{ open: true }" x-cloak>', false)
+            ->assertSee('<div x-data="{ open: false }" x-cloak>', false)
+            ->assertSee('>Laporan</span>', false);
     }
 
     public function test_transaksi_menu_does_not_contain_reports(): void
@@ -53,8 +64,8 @@ class NavigationMenuTest extends TestCase
 
         $this->actingAs($user)->get(route('tickets.index'))
             ->assertOk()
-            ->assertSee('>Transaksi</p>', false)
-            ->assertDontSee('>Laporan</p>', false)
+            ->assertSee('>Transaksi</span>', false)
+            ->assertDontSee('>Laporan</span>', false)
             ->assertDontSee(route('reports.laporan'), false);
     }
 }
