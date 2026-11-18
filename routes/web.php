@@ -335,6 +335,7 @@ Route::middleware('auth')->group(function () {
     Route::get("alat/print", [AlatController::class, "kartuPrint"])->name("alat.print");
     Route::get("alat/labels", [AlatController::class, "labels"])->name("alat.labels");
     Route::post("alat/scan-store", [AlatController::class, "scanStore"])->name("alat.scan-store");
+    Route::get("alat/lab-list", [AlatController::class, "labList"])->name("alat.lab-list");
     Route::resource("alat", AlatController::class)->parameters(["alat" => "alat"]);
     Route::get("alat/{alat}/checks", [AlatController::class, "checks"])->name("alat.checks");
     Route::post("alat/{alat}/checks", [AlatController::class, "storeCheck"])->name("alat.checks.store");

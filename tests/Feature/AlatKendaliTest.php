@@ -224,6 +224,7 @@ class AlatKendaliTest extends TestCase
             ->assertOk()
             ->assertSee('id="toggle-scan"', false)
             ->assertSee('id="qr-reader"', false)
+            ->assertSee('id="lab-alat-list"', false)
             ->assertSee('html5-qrcode');
     }
 
@@ -319,5 +320,47 @@ class AlatKendaliTest extends TestCase
             ->assertForbidden();
 
         $this->assertDatabaseMissing('alat', ['code' => 'INV.FORBID']);
+    }
+
+    public function test_lab_list_returns_only_alat_of_selected_laboratory(): void
+    {
+        $alat = $this->seedAlat('INV-LIST-1');
+
+        $otherLab = Laboratory::create([
+            'code' => 'LAB-OTHER',
+            'name' => 'Lab Lain',
+            'location' => 'Gedung X',
+            'capacity' => 10,
+        ]);
+
+        Alat::create([
+            'laboratory_id' => $otherLab->id,
+            'name' => 'Alat Lain',
+            'code' => 'INV-LIST-2',
+        ]);
+
+        $this->actingAs($this->userWith(['view-alat']))
+            ->getJson(route('alat.lab-list', ['laboratory_id' => $alat->laboratory_id]))
+            ->assertOk()
+            ->assertJsonCount(1, 'alat')
+            ->assertJsonPath('alat.0.code', 'INV-LIST-1')
+            ->assertJsonPath('laboratory.name', 'Lab Komputer 1');
+    }
+
+    public function test_lab_list_requires_laboratory(): void
+    {
+        $this->actingAs($this->userWith(['view-alat']))
+            ->getJson(route('alat.lab-list'))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('laboratory_id');
+    }
+
+    public function test_lab_list_requires_permission(): void
+    {
+        $alat = $this->seedAlat('INV-LIST-3');
+
+        $this->actingAs($this->userWith([]))
+            ->getJson(route('alat.lab-list', ['laboratory_id' => $alat->laboratory_id]))
+            ->assertForbidden();
     }
 }

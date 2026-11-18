@@ -140,9 +140,44 @@ class AlatController extends Controller
                 'id' => $alat->id,
                 'name' => $alat->name,
                 'code' => $alat->code,
+                'status' => $alat->status,
                 'laboratory' => $alat->laboratory?->name,
             ],
         ], 201);
+    }
+
+    /**
+     * Daftar alat pada satu laboratorium — untuk panel samping di form tambah,
+     * menampilkan alat yang sudah ada sekaligus hasil scan terbaru.
+     */
+    public function labList(Request $request)
+    {
+        abort_unless($this->canView() || $this->canCreate(), 403);
+
+        $validated = $request->validate([
+            'laboratory_id' => 'required|exists:laboratories,id',
+        ]);
+
+        $lab = Laboratory::findOrFail($validated['laboratory_id']);
+
+        $alat = Alat::where('laboratory_id', $lab->id)
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Alat $item) => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'code' => $item->code,
+                'status' => $item->status,
+            ]);
+
+        return response()->json([
+            'ok' => true,
+            'laboratory' => [
+                'id' => $lab->id,
+                'name' => $lab->name,
+            ],
+            'alat' => $alat,
+        ]);
     }
 
     public function show(Alat $alat)
