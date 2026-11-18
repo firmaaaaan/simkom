@@ -448,4 +448,24 @@ class MonitoringSuhuTest extends TestCase
             ->assertOk()
             ->assertSee('id="qr-'.$first->id.'"', false);
     }
+
+    public function test_labels_page_shows_upt_header_above_qr(): void
+    {
+        $lab = $this->seedRoom();
+        $user = $this->userWith(['print-monitoring-suhu']);
+
+        $content = $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels'))
+            ->assertOk()
+            ->assertSee('UPT LABORATORIUM TERPADU')
+            ->assertSee('MONITORING SUHU')
+            ->getContent();
+
+        $headerPos = strpos($content, 'class="label-header"');
+        $qrPos = strpos($content, 'id="qr-'.$lab->id.'"');
+
+        $this->assertNotFalse($headerPos);
+        $this->assertNotFalse($qrPos);
+        $this->assertLessThan($qrPos, $headerPos, 'Header UPT harus berada di atas QR.');
+    }
 }
