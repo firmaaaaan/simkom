@@ -4,10 +4,39 @@
 @section('header', 'Data Laboratorium')
 
 @section('content')
-<div x-data="{ selected: [] }">
+<div x-data="{ selected: [], allActive: @js($allActive) }">
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <p class="text-sm text-gray-500">Kelola seluruh data laboratorium</p>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+        @if(auth()->user()->hasPermission('edit-laboratories') && $allCount > 0)
+            <div class="flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-2 bg-white">
+                <div class="leading-tight">
+                    <span class="block text-sm font-medium text-gray-700" x-text="allActive ? 'Seluruh Lab Aktif' : 'Seluruh Lab Nonaktif'">Seluruh Lab</span>
+                    <span class="block text-xs text-gray-400">{{ $allCount }} laboratorium</span>
+                </div>
+                <button type="button" role="switch" :aria-checked="allActive.toString()"
+                    @click="const next = allActive ? 'Tidak Aktif' : 'Aktif';
+                        window.showConfirm({
+                            title: next === 'Aktif' ? 'Aktifkan Seluruh Laboratorium?' : 'Nonaktifkan Seluruh Laboratorium?',
+                            message: next === 'Aktif'
+                                ? 'Seluruh {{ $allCount }} laboratorium akan diubah statusnya menjadi Aktif.'
+                                : 'Seluruh {{ $allCount }} laboratorium akan diubah statusnya menjadi Tidak Aktif.',
+                            confirmText: next === 'Aktif' ? 'Aktifkan' : 'Nonaktifkan',
+                            cancelText: 'Batal',
+                            type: next === 'Aktif' ? 'warning' : 'danger'
+                        }).then(ok => {
+                            if (!ok) return;
+                            $refs.statusValue.value = next;
+                            allActive = next === 'Aktif';
+                            $refs.statusAllForm.submit();
+                        })"
+                    :class="allActive ? 'bg-green-600' : 'bg-gray-300'"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    <span :class="allActive ? 'translate-x-5' : 'translate-x-0.5'"
+                        class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform"></span>
+                </button>
+            </div>
+        @endif
         <button x-show="selected.length > 0" x-cloak @click="if(confirm('Yakin ingin menghapus ' + selected.length + ' laboratorium?')) $refs.bulkForm.submit()"
             class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -146,6 +175,13 @@
     <template x-for="id in selected" :key="id">
         <input type="hidden" name="ids[]" :value="id">
     </template>
+</form>
+
+<form x-ref="statusAllForm" action="{{ route('laboratories.bulk-status') }}" method="POST" class="hidden">
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="status" x-ref="statusValue">
+    <input type="hidden" name="scope" value="all">
 </form>
 </div>
 @endsection

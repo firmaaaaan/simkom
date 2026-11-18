@@ -281,6 +281,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('laboratories/bulk-destroy', [LaboratoryController::class, 'bulkDestroy'])
         ->middleware('permission:delete-laboratories')
         ->name('laboratories.bulk-destroy');
+    Route::put('laboratories/bulk-status', [LaboratoryController::class, 'bulkStatus'])
+        ->middleware('permission:edit-laboratories')
+        ->name('laboratories.bulk-status');
     Route::get('api-ruang', [ApiRuangController::class, 'index'])
         ->middleware('permission:view-laboratories')
         ->name('api-ruang.index');

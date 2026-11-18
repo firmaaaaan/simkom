@@ -33,7 +33,14 @@ class LaboratoryController extends Controller
     {
         $laboratories = $this->filteredQuery($request)->latest()->paginate(10)->withQueryString();
 
-        return view('laboratories.index', compact('laboratories'));
+        $allCount = Laboratory::query()->count();
+        $activeCount = Laboratory::query()->where('status', 'Aktif')->count();
+
+        return view('laboratories.index', [
+            'laboratories' => $laboratories,
+            'allCount' => $allCount,
+            'allActive' => $allCount > 0 && $activeCount === $allCount,
+        ]);
     }
 
     public function export(Request $request)
@@ -138,5 +145,37 @@ class LaboratoryController extends Controller
         Laboratory::whereIn('id', $request->ids)->delete();
 
         return redirect()->route('laboratories.index')->with('success', count($request->ids).' laboratorium berhasil dihapus.');
+    }
+
+    /**
+     * Ubah status banyak laboratorium sekaligus — scope "selected" untuk
+     * baris yang dicentang, scope "all" untuk seluruh data laboratorium.
+     */
+    public function bulkStatus(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
+            'scope' => 'required|in:selected,all',
+            'ids' => 'nullable|array',
+            'ids.*' => 'exists:laboratories,id',
+        ], [
+            'status.in' => 'Status laboratorium tidak valid.',
+        ]);
+
+        $ids = array_values(array_filter((array) $request->input('ids', [])));
+
+        if ($request->input('scope') === 'selected' && $ids === []) {
+            return back()->with('error', 'Pilih minimal satu laboratorium untuk diubah statusnya.');
+        }
+
+        $count = $request->input('scope') === 'all'
+            ? Laboratory::query()->update(['status' => $request->input('status')])
+            : Laboratory::whereIn('id', $ids)->update(['status' => $request->input('status')]);
+
+        $message = $request->input('scope') === 'all'
+            ? 'Seluruh '.$count.' laboratorium diubah statusnya menjadi '.$request->input('status').'.'
+            : $count.' laboratorium terpilih diubah statusnya menjadi '.$request->input('status').'.';
+
+        return back()->with('success', $message);
     }
 }
