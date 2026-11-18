@@ -4,35 +4,35 @@
 @section('header', 'Data Laboratorium')
 
 @section('content')
-<div x-data="{ selected: [], allActive: @js($allActive) }">
+<div x-data="{ selected: [], allVisible: @js($allVisible) }">
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <p class="text-sm text-gray-500">Kelola seluruh data laboratorium</p>
     <div class="flex flex-wrap items-center gap-2">
         @if(auth()->user()->hasPermission('edit-laboratories') && $allCount > 0)
             <div class="flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-2 bg-white">
                 <div class="leading-tight">
-                    <span class="block text-sm font-medium text-gray-700" x-text="allActive ? 'Seluruh Lab Aktif' : 'Seluruh Lab Nonaktif'">Seluruh Lab</span>
-                    <span class="block text-xs text-gray-400">{{ $allCount }} laboratorium</span>
+                    <span class="block text-sm font-medium text-gray-700" x-text="allVisible ? 'Seluruh Lab Tampil' : 'Seluruh Lab Disembunyikan'">Seluruh Lab</span>
+                    <span class="block text-xs text-gray-400">{{ $allCount }} laboratorium · daftar komputer</span>
                 </div>
-                <button type="button" role="switch" :aria-checked="allActive.toString()"
-                    @click="const next = allActive ? 'Tidak Aktif' : 'Aktif';
+                <button type="button" role="switch" :aria-checked="allVisible.toString()"
+                    @click="const next = !allVisible;
                         window.showConfirm({
-                            title: next === 'Aktif' ? 'Aktifkan Seluruh Laboratorium?' : 'Nonaktifkan Seluruh Laboratorium?',
-                            message: next === 'Aktif'
-                                ? 'Seluruh {{ $allCount }} laboratorium akan diubah statusnya menjadi Aktif.'
-                                : 'Seluruh {{ $allCount }} laboratorium akan diubah statusnya menjadi Tidak Aktif.',
-                            confirmText: next === 'Aktif' ? 'Aktifkan' : 'Nonaktifkan',
+                            title: next ? 'Tampilkan Seluruh Laboratorium?' : 'Sembunyikan Seluruh Laboratorium?',
+                            message: next
+                                ? 'Seluruh {{ $allCount }} laboratorium akan ditampilkan pada daftar komputer publik.'
+                                : 'Seluruh {{ $allCount }} laboratorium akan disembunyikan dari daftar komputer publik.',
+                            confirmText: next ? 'Tampilkan' : 'Sembunyikan',
                             cancelText: 'Batal',
-                            type: next === 'Aktif' ? 'warning' : 'danger'
+                            type: next ? 'warning' : 'danger'
                         }).then(ok => {
                             if (!ok) return;
-                            $refs.statusValue.value = next;
-                            allActive = next === 'Aktif';
-                            $refs.statusAllForm.submit();
+                            $refs.visibilityValue.value = next ? '1' : '0';
+                            allVisible = next;
+                            $refs.visibilityForm.submit();
                         })"
-                    :class="allActive ? 'bg-green-600' : 'bg-gray-300'"
+                    :class="allVisible ? 'bg-green-600' : 'bg-gray-300'"
                     class="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    <span :class="allActive ? 'translate-x-5' : 'translate-x-0.5'"
+                    <span :class="allVisible ? 'translate-x-5' : 'translate-x-0.5'"
                         class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform"></span>
                 </button>
             </div>
@@ -177,11 +177,10 @@
     </template>
 </form>
 
-<form x-ref="statusAllForm" action="{{ route('laboratories.bulk-status') }}" method="POST" class="hidden">
+<form x-ref="visibilityForm" action="{{ route('laboratories.bulk-visibility') }}" method="POST" class="hidden">
     @csrf
     @method('PUT')
-    <input type="hidden" name="status" x-ref="statusValue">
-    <input type="hidden" name="scope" value="all">
+    <input type="hidden" name="visible" x-ref="visibilityValue">
 </form>
 </div>
 @endsection

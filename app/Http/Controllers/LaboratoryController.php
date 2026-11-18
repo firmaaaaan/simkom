@@ -34,12 +34,12 @@ class LaboratoryController extends Controller
         $laboratories = $this->filteredQuery($request)->latest()->paginate(10)->withQueryString();
 
         $allCount = Laboratory::query()->count();
-        $activeCount = Laboratory::query()->where('status', 'Aktif')->count();
+        $visibleCount = Laboratory::query()->where('show_in_computer_list', true)->count();
 
         return view('laboratories.index', [
             'laboratories' => $laboratories,
             'allCount' => $allCount,
-            'allActive' => $allCount > 0 && $activeCount === $allCount,
+            'allVisible' => $allCount > 0 && $visibleCount === $allCount,
         ]);
     }
 
@@ -148,33 +148,22 @@ class LaboratoryController extends Controller
     }
 
     /**
-     * Ubah status banyak laboratorium sekaligus — scope "selected" untuk
-     * baris yang dicentang, scope "all" untuk seluruh data laboratorium.
+     * Tampilkan atau sembunyikan seluruh laboratorium dari daftar komputer
+     * publik sekaligus (field show_in_computer_list).
      */
-    public function bulkStatus(Request $request)
+    public function bulkVisibility(Request $request)
     {
         $request->validate([
-            'status' => 'required|in:Aktif,Tidak Aktif,Maintenance',
-            'scope' => 'required|in:selected,all',
-            'ids' => 'nullable|array',
-            'ids.*' => 'exists:laboratories,id',
-        ], [
-            'status.in' => 'Status laboratorium tidak valid.',
+            'visible' => 'required|boolean',
         ]);
 
-        $ids = array_values(array_filter((array) $request->input('ids', [])));
+        $visible = $request->boolean('visible');
 
-        if ($request->input('scope') === 'selected' && $ids === []) {
-            return back()->with('error', 'Pilih minimal satu laboratorium untuk diubah statusnya.');
-        }
+        $count = Laboratory::query()->update(['show_in_computer_list' => $visible]);
 
-        $count = $request->input('scope') === 'all'
-            ? Laboratory::query()->update(['status' => $request->input('status')])
-            : Laboratory::whereIn('id', $ids)->update(['status' => $request->input('status')]);
-
-        $message = $request->input('scope') === 'all'
-            ? 'Seluruh '.$count.' laboratorium diubah statusnya menjadi '.$request->input('status').'.'
-            : $count.' laboratorium terpilih diubah statusnya menjadi '.$request->input('status').'.';
+        $message = $visible
+            ? $count.' laboratorium ditampilkan di daftar komputer.'
+            : $count.' laboratorium disembunyikan dari daftar komputer.';
 
         return back()->with('success', $message);
     }
