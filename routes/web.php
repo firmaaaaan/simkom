@@ -367,10 +367,10 @@ Route::middleware('auth')->group(function () {
         Route::get('monitoring-suhu/export-pdf', [RoomTemperatureController::class, 'exportPdf'])->name('monitoring-suhu.export-pdf');
     });
     Route::get('monitoring-suhu/{laboratory}/threshold/edit', [RoomTemperatureController::class, 'editThreshold'])
-        ->middleware('permission:edit-laboratories')
+        ->middleware('permission:edit-monitoring-suhu')
         ->name('monitoring-suhu.threshold.edit');
     Route::put('monitoring-suhu/{laboratory}/threshold', [RoomTemperatureController::class, 'updateThreshold'])
-        ->middleware('permission:edit-laboratories')
+        ->middleware('permission:edit-monitoring-suhu')
         ->name('monitoring-suhu.threshold.update');
     Route::delete('monitoring-suhu/{laboratory}/readings/{reading}', [RoomTemperatureController::class, 'destroy'])
         ->middleware('permission:delete-monitoring-suhu')

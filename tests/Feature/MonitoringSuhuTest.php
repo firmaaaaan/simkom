@@ -288,7 +288,7 @@ class MonitoringSuhuTest extends TestCase
     public function test_threshold_edit_and_update(): void
     {
         $lab = $this->seedRoom();
-        $user = $this->userWith(['view-monitoring-suhu', 'edit-laboratories']);
+        $user = $this->userWith(['view-monitoring-suhu', 'edit-monitoring-suhu']);
 
         $this->assertSame(20.0, (float) $lab->fresh()->temp_min);
         $this->assertSame(25.0, (float) $lab->fresh()->temp_max);
@@ -330,12 +330,41 @@ class MonitoringSuhuTest extends TestCase
             ->get(route('monitoring-suhu.threshold.edit', $lab))
             ->assertForbidden();
 
-        $this->actingAs($this->userWith(['view-monitoring-suhu', 'edit-laboratories']))
+        $this->actingAs($this->userWith(['view-monitoring-suhu', 'edit-monitoring-suhu']))
             ->get(route('monitoring-suhu.index'))
             ->assertOk()
             ->assertSee(route('monitoring-suhu.threshold.edit', $lab), false)
             ->assertSee('title="Edit Ambang Suhu"', false)
             ->assertDontSee('title="Input Suhu"', false);
+    }
+
+    public function test_threshold_edit_no_longer_uses_edit_laboratories_permission(): void
+    {
+        $lab = $this->seedRoom();
+
+        $this->actingAs($this->userWith(['view-monitoring-suhu', 'edit-laboratories']))
+            ->get(route('monitoring-suhu.threshold.edit', $lab))
+            ->assertForbidden();
+
+        $this->actingAs($this->userWith(['view-monitoring-suhu', 'edit-monitoring-suhu']))
+            ->get(route('monitoring-suhu.threshold.edit', $lab))
+            ->assertOk()
+            ->assertSee('Edit Ambang Suhu Ruangan');
+    }
+
+    public function test_edit_monitoring_permission_exists_and_seeded_for_admin_roles(): void
+    {
+        $permission = Permission::where('name', 'edit-monitoring-suhu')->first();
+
+        $this->assertNotNull($permission);
+        $this->assertSame('Ubah Monitoring Suhu Ruangan', $permission->label);
+        $this->assertContains(
+            $permission->id,
+            Role::whereIn('name', ['admin', 'laboran', 'superadmin'])->get()
+                ->flatMap(fn ($role) => $role->permissions->pluck('id'))
+                ->map(fn ($id) => (string) $id)
+                ->all()
+        );
     }
 
     public function test_sidebar_shows_menu_with_permission(): void
@@ -351,5 +380,72 @@ class MonitoringSuhuTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertDontSee($menuUrl, false);
+    }
+
+    private function seedSecondRoom(): Laboratory
+    {
+        return Laboratory::create([
+            'name' => 'Lab Komputer 2',
+            'code' => 'LK2',
+            'location' => 'Gedung B',
+            'capacity' => 30,
+        ]);
+    }
+
+    public function test_labels_page_lists_checkboxes_for_all_rooms(): void
+    {
+        $first = $this->seedRoom();
+        $second = $this->seedSecondRoom();
+        $user = $this->userWith(['print-monitoring-suhu']);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels'))
+            ->assertOk()
+            ->assertSee('name="rooms[]"', false)
+            ->assertSee('name="filtered"', false)
+            ->assertSee('id="qr-'.$first->id.'"', false)
+            ->assertSee('id="qr-'.$second->id.'"', false);
+    }
+
+    public function test_labels_page_prints_only_selected_rooms(): void
+    {
+        $first = $this->seedRoom();
+        $second = $this->seedSecondRoom();
+        $user = $this->userWith(['print-monitoring-suhu']);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels', ['filtered' => 1, 'rooms' => [$first->id]]))
+            ->assertOk()
+            ->assertSee('id="qr-'.$first->id.'"', false)
+            ->assertDontSee('id="qr-'.$second->id.'"', false);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels', ['filtered' => 1, 'rooms' => [$second->id]]))
+            ->assertOk()
+            ->assertSee('id="qr-'.$second->id.'"', false)
+            ->assertDontSee('id="qr-'.$first->id.'"', false);
+    }
+
+    public function test_labels_page_with_no_selected_room_shows_prompt(): void
+    {
+        $this->seedRoom();
+        $user = $this->userWith(['print-monitoring-suhu']);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels', ['filtered' => 1]))
+            ->assertOk()
+            ->assertDontSee('id="qr-', false)
+            ->assertSee('Tidak ada ruangan yang dicentang');
+    }
+
+    public function test_labels_page_ignores_unknown_room_ids(): void
+    {
+        $first = $this->seedRoom();
+        $user = $this->userWith(['print-monitoring-suhu']);
+
+        $this->actingAs($user)
+            ->get(route('monitoring-suhu.labels', ['filtered' => 1, 'rooms' => ['bukan-uuid', $first->id]]))
+            ->assertOk()
+            ->assertSee('id="qr-'.$first->id.'"', false);
     }
 }

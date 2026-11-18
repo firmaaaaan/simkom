@@ -198,22 +198,28 @@ class RoomTemperatureController extends Controller
     }
 
     /**
-     * Halaman cetak label QR per ruangan. Pilih satu ruangan atau semua.
+     * Halaman cetak label QR per ruangan.
+     * Kunjungan pertama menampilkan semua ruangan; setelah form disaring
+     * (parameter filtered) hanya ruangan yang dicentang user yang dicetak.
      */
     public function labels(Request $request)
     {
         $laboratories = Laboratory::orderBy('name')->get();
-        $selectedLabId = $request->input('laboratory_id', 'all');
+        $filtered = $request->has('filtered');
 
-        if ($selectedLabId === 'all') {
-            $rooms = $laboratories;
-        } else {
-            $rooms = $laboratories->where('id', $selectedLabId)->values();
-        }
+        $requestedIds = collect($request->input('rooms', []))
+            ->filter(fn ($id) => $laboratories->pluck('id')->contains($id))
+            ->values()
+            ->all();
+
+        $selectedIds = $filtered ? $requestedIds : $laboratories->pluck('id')->all();
+
+        $rooms = $laboratories->whereIn('id', $selectedIds)->values();
 
         return view('monitoring-suhu.labels', [
             'laboratories' => $laboratories,
-            'selectedLabId' => $selectedLabId,
+            'selectedIds' => $selectedIds,
+            'filtered' => $filtered,
             'rooms' => $rooms,
         ]);
     }

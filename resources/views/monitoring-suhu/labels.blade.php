@@ -66,6 +66,21 @@
             border-radius: 1mm;
             padding: 0.3mm 1.5mm;
         }
+        .room-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.6rem 0.75rem;
+            background: #fff;
+            cursor: pointer;
+        }
+        .room-option:hover { background: #f0fdf4; }
+        .room-option.checked { border-color: #16a34a; background: #f0fdf4; }
+        .room-option input { margin-top: 0.15rem; accent-color: #16a34a; }
+        .room-option .nama { font-size: 0.875rem; font-weight: 600; color: #111827; }
+        .room-option .meta { font-size: 0.75rem; color: #6b7280; }
         @media screen {
             .label-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
         }
@@ -82,24 +97,46 @@
         <div class="no-print bg-white rounded-xl border border-gray-200 mb-6">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h1 class="text-xl font-bold text-gray-800">Label Monitoring Suhu Ruangan</h1>
-                <p class="text-sm text-gray-500 mt-1">Cetak stiker label ber-QR Code untuk setiap ruangan — scan untuk melihat riwayat suhu</p>
+                <p class="text-sm text-gray-500 mt-1">Centang ruangan yang ingin dicetak labelnya — tidak semua ruangan harus dicetak. Scan QR untuk melihat riwayat suhu.</p>
             </div>
             <form method="GET" action="{{ route('monitoring-suhu.labels') }}" class="p-6">
-                <div class="flex flex-wrap items-end gap-4">
-                    <div class="flex-1 min-w-[240px]">
-                        <label for="laboratory_id" class="block text-sm font-medium text-gray-700 mb-1">Ruangan</label>
-                        <select name="laboratory_id" id="laboratory_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                            <option value="all" {{ $selectedLabId === 'all' ? 'selected' : '' }}>Semua Ruangan</option>
-                            @foreach($laboratories as $lab)
-                                <option value="{{ $lab->id }}" {{ $selectedLabId == $lab->id ? 'selected' : '' }}>
-                                    {{ $lab->name }}{{ $lab->code ? ' ('.$lab->code.')' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
+                <input type="hidden" name="filtered" value="1">
+
+                <div class="flex flex-wrap items-end justify-between gap-3 mb-3">
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700">Pilih Ruangan</span>
+                        <span class="block text-xs text-gray-500 mt-0.5">Terpilih: <b id="selected-count">{{ count($selectedIds) }}</b> dari {{ $laboratories->count() }} ruangan</span>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="select-all"
+                            class="px-3 py-1.5 text-xs font-medium border border-green-600 text-green-700 bg-white rounded-lg hover:bg-green-50">
+                            Pilih Semua
+                        </button>
+                        <button type="button" id="select-none"
+                            class="px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-600 bg-white rounded-lg hover:bg-gray-50">
+                            Hapus Pilihan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
+                    @foreach($laboratories as $lab)
+                        <label class="room-option {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}">
+                            <input type="checkbox" name="rooms[]" value="{{ $lab->id }}"
+                                {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}>
+                            <span class="min-w-0">
+                                <span class="nama block truncate">{{ $lab->name }}</span>
+                                <span class="meta block">
+                                    {{ $lab->code ?? '-' }}
+                                </span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
                     <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
-                        Tampilkan
+                        Tampilkan Label
                     </button>
                     @if($rooms->count())
                         <button type="button" onclick="window.print()"
@@ -107,6 +144,7 @@
                             Cetak Label
                         </button>
                     @endif
+                    <a href="{{ route('monitoring-suhu.labels') }}" class="px-4 py-2 text-sm text-gray-600 hover:underline">Reset</a>
                 </div>
             </form>
         </div>
@@ -114,8 +152,11 @@
         @if($rooms->count())
             <div class="no-print bg-white rounded-xl border border-gray-200 px-6 py-4 mb-6">
                 <p class="text-sm text-gray-600">
-                    Menampilkan <span class="font-semibold">{{ $rooms->count() }}</span> label untuk
-                    <span class="font-semibold">{{ $selectedLabId === 'all' ? 'Semua Ruangan' : ($rooms->first()->name ?? '') }}</span>
+                    Menampilkan <span class="font-semibold">{{ $rooms->count() }}</span> label dari
+                    <span class="font-semibold">{{ $laboratories->count() }}</span> ruangan
+                    @if($rooms->count() < $laboratories->count())
+                        · siap dicetak, ruangan lain tidak ikut tercetak
+                    @endif
                 </p>
             </div>
 
@@ -135,6 +176,10 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+        @elseif($filtered)
+            <div class="no-print bg-white rounded-xl border border-gray-200 px-6 py-10 text-center text-gray-500">
+                Tidak ada ruangan yang dicentang. Centang minimal satu ruangan lalu klik <b>Tampilkan Label</b>.
             </div>
         @else
             <div class="no-print bg-white rounded-xl border border-gray-200 px-6 py-10 text-center text-gray-500">
@@ -159,5 +204,36 @@
             });
         </script>
     @endif
+
+    <script>
+        (function () {
+            var boxes = Array.prototype.slice.call(document.querySelectorAll('input[name="rooms[]"]'));
+            var counter = document.getElementById('selected-count');
+
+            function refresh() {
+                var total = boxes.filter(function (box) { return box.checked; }).length;
+                counter.textContent = total;
+                boxes.forEach(function (box) {
+                    box.closest('.room-option').classList.toggle('checked', box.checked);
+                });
+            }
+
+            boxes.forEach(function (box) {
+                box.addEventListener('change', refresh);
+            });
+
+            document.getElementById('select-all').addEventListener('click', function () {
+                boxes.forEach(function (box) { box.checked = true; });
+                refresh();
+            });
+
+            document.getElementById('select-none').addEventListener('click', function () {
+                boxes.forEach(function (box) { box.checked = false; });
+                refresh();
+            });
+
+            refresh();
+        })();
+    </script>
 </body>
 </html>
