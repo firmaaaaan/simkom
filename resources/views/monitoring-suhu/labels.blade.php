@@ -133,18 +133,39 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
-                    @foreach($laboratories as $lab)
-                        <label class="room-option {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}">
-                            <input type="checkbox" name="rooms[]" value="{{ $lab->id }}"
-                                {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}>
-                            <span class="min-w-0">
-                                <span class="nama block truncate">{{ $lab->name }}</span>
-                                <span class="meta block">
-                                    {{ $lab->code ?? '-' }}
-                                </span>
-                            </span>
-                        </label>
+                <div class="space-y-5 mb-4">
+                    @foreach($groupLabels as $groupKey => $groupLabel)
+                        @php($groupRooms = $grouped->get($groupKey, collect()))
+                        @if($groupRooms->isNotEmpty())
+                            <div class="group-block" data-group="{{ $groupKey }}">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-sm font-semibold text-gray-800">{{ $groupLabel }}</h3>
+                                        <span class="text-xs text-gray-500">({{ $groupRooms->count() }} ruangan)</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <button type="button" class="group-pick text-green-700 hover:underline" data-group="{{ $groupKey }}">Pilih grup</button>
+                                        <span class="text-gray-300">|</span>
+                                        <button type="button" class="group-clear text-gray-500 hover:underline" data-group="{{ $groupKey }}">Kosongkan</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    @foreach($groupRooms as $lab)
+                                        <label class="room-option {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}">
+                                            <input type="checkbox" name="rooms[]" value="{{ $lab->id }}"
+                                                data-group="{{ $groupKey }}"
+                                                {{ in_array($lab->id, $selectedIds) ? 'checked' : '' }}>
+                                            <span class="min-w-0">
+                                                <span class="nama block truncate">{{ $lab->name }}</span>
+                                                <span class="meta block">
+                                                    {{ $lab->code ?? '-' }}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
 
@@ -249,6 +270,28 @@
             document.getElementById('select-none').addEventListener('click', function () {
                 boxes.forEach(function (box) { box.checked = false; });
                 refresh();
+            });
+
+            document.querySelectorAll('.group-pick').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    boxes.forEach(function (box) {
+                        if (box.dataset.group === btn.dataset.group) {
+                            box.checked = true;
+                        }
+                    });
+                    refresh();
+                });
+            });
+
+            document.querySelectorAll('.group-clear').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    boxes.forEach(function (box) {
+                        if (box.dataset.group === btn.dataset.group) {
+                            box.checked = false;
+                        }
+                    });
+                    refresh();
+                });
             });
 
             refresh();

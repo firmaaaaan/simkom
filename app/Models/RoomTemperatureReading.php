@@ -15,6 +15,7 @@ class RoomTemperatureReading extends Model
     protected $fillable = [
         'laboratory_id',
         'temperature',
+        'kelembapan',
         'notes',
         'recorded_by',
         'recorded_at',

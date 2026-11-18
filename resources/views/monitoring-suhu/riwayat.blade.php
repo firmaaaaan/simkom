@@ -54,6 +54,7 @@
                             <th class="px-4 py-3 text-center w-12">No</th>
                             <th class="px-4 py-3 text-left">Waktu</th>
                             <th class="px-4 py-3 text-center">Suhu</th>
+                            <th class="px-4 py-3 text-center">Kelembapan</th>
                             <th class="px-4 py-3 text-center">Status</th>
                             <th class="px-4 py-3 text-left">Catatan</th>
                             <th class="px-4 py-3 text-left">Petugas</th>
@@ -65,6 +66,7 @@
                                 <td class="px-4 py-3 text-center text-gray-600">{{ $readings->firstItem() + $index }}</td>
                                 <td class="px-4 py-3 text-gray-900 whitespace-nowrap">{{ $reading->recorded_at->translatedFormat('d F Y H:i') }}</td>
                                 <td class="px-4 py-3 text-center font-semibold text-gray-900">{{ number_format($reading->temperature, 1) }}°C</td>
+                                <td class="px-4 py-3 text-center">{{ $reading->kelembapan !== null ? number_format($reading->kelembapan, 1).'%' : '-' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ \App\Models\RoomTemperatureReading::statusBadge($reading->status()) }}">
                                         {{ $reading->status() ?? '-' }}
@@ -75,7 +77,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-10 text-center text-gray-500">
+                                <td colspan="7" class="px-4 py-10 text-center text-gray-500">
                                     Belum ada riwayat monitoring suhu untuk ruangan ini
                                 </td>
                             </tr>

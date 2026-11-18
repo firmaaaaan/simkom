@@ -71,6 +71,7 @@ class RoomTemperatureController extends Controller
         $validated = $request->validate([
             'laboratory_id' => 'required|exists:laboratories,id',
             'temperature' => 'required|numeric|between:0,100',
+            'kelembapan' => 'nullable|numeric|between:0,100',
             'notes' => 'nullable|string|max:255',
             'recorded_at' => 'required|date',
         ], [
@@ -79,6 +80,8 @@ class RoomTemperatureController extends Controller
             'temperature.required' => 'Suhu wajib diisi.',
             'temperature.numeric' => 'Suhu harus berupa angka.',
             'temperature.between' => 'Suhu harus antara 0 sampai 100°C.',
+            'kelembapan.numeric' => 'Kelembapan harus berupa angka.',
+            'kelembapan.between' => 'Kelembapan harus antara 0 sampai 100%.',
             'recorded_at.required' => 'Waktu pencatatan wajib diisi.',
             'recorded_at.date' => 'Waktu pencatatan tidak valid.',
         ]);
@@ -86,6 +89,7 @@ class RoomTemperatureController extends Controller
         RoomTemperatureReading::create([
             'laboratory_id' => $validated['laboratory_id'],
             'temperature' => $validated['temperature'],
+            'kelembapan' => $validated['kelembapan'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'recorded_by' => auth()->id(),
             'recorded_at' => $validated['recorded_at'],
@@ -216,12 +220,43 @@ class RoomTemperatureController extends Controller
 
         $rooms = $laboratories->whereIn('id', $selectedIds)->values();
 
+        $groupLabels = [
+            'skills' => 'Skills Laboratory',
+            'tutor' => 'Ruang Tutor & OSCE',
+            'mini_hospital' => 'Mini Hospital',
+            'lainnya' => 'Lainnya',
+        ];
+
+        $grouped = $laboratories->groupBy(fn (Laboratory $lab) => $this->labelGroup($lab->name));
+
         return view('monitoring-suhu.labels', [
             'laboratories' => $laboratories,
             'selectedIds' => $selectedIds,
             'filtered' => $filtered,
             'rooms' => $rooms,
+            'groupLabels' => $groupLabels,
+            'grouped' => $grouped,
         ]);
+    }
+
+    /**
+     * Kelompok ruangan pada halaman label berdasarkan nama ruangan.
+     */
+    private function labelGroup(string $name): string
+    {
+        if (preg_match('/skills?\s*laborator|skillab/i', $name)) {
+            return 'skills';
+        }
+
+        if (preg_match('/\btutor\b|\bosce\b/i', $name)) {
+            return 'tutor';
+        }
+
+        if (preg_match('/mini\s*hospital/i', $name)) {
+            return 'mini_hospital';
+        }
+
+        return 'lainnya';
     }
 
     /**

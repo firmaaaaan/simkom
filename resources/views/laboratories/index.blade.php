@@ -112,6 +112,7 @@
                     <td data-label="Nama" class="px-6 py-4">{{ $lab->name }}</td>
                     <td data-label="Lokasi" class="px-6 py-4">{{ $lab->location }}</td>
                     <td data-label="Kapasitas" class="px-6 py-4">{{ $lab->capacity }} orang</td>
+                    <td data-label="Kelembapan" class="px-6 py-4">{{ $lab->kelembapan ?? '-' }}</td>
                     <td data-label="Status" class="px-6 py-4">
                         @if($lab->status === 'Aktif')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>

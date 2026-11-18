@@ -46,11 +46,17 @@
                             placeholder="Contoh: LAB-KIM-01">
                     </div>
                     <div>
-                        <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Kapasitas <span class="text-red-500">*</span></label>
+<label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Kapasitas <span class="text-red-500">*</span></label>
                         <input type="number" name="capacity" id="capacity" value="{{ old('capacity', $laboratory->capacity) }}" required min="0"
                             class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
                             placeholder="0">
-                    </div>
+                        <div>
+                            <label for="kelembapan" class="block text-sm font-medium text-gray-700 mb-1">Kelembapan</label>
+                            <input type="number" name="kelembapan" id="kelembapan" value="{{ old('kelembapan', $laboratory->kelembapan) }}" max="100"
+                                class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
+                                placeholder="0-100">
+                        </div>
+
                 </div>
 
                 <div>

@@ -216,4 +216,14 @@ class AlatKendaliTest extends TestCase
 
         $this->assertSame(1, AlatCheck::count());
     }
+
+    public function test_create_page_has_barcode_scan_feature(): void
+    {
+        $this->actingAs($this->userWith(['view-alat', 'create-alat']))
+            ->get(route('alat.create'))
+            ->assertOk()
+            ->assertSee('id="toggle-scan"', false)
+            ->assertSee('id="qr-reader"', false)
+            ->assertSee('html5-qrcode');
+    }
 }

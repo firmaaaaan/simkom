@@ -51,6 +51,7 @@
                     <th class="px-4 py-3 text-left">Ruangan</th>
                     <th class="px-4 py-3 text-left">Kode</th>
                     <th class="px-4 py-3 text-left">Suhu Terakhir</th>
+                    <th class="px-4 py-3 text-left">Kelembapan</th>
                     <th class="px-4 py-3 text-left">Status</th>
                     <th class="px-4 py-3 text-left">Ambang Normal</th>
                     <th class="px-4 py-3 text-center w-28">Aksi</th>
@@ -74,6 +75,13 @@
                                 <span class="block text-xs text-gray-400">{{ $row['reading']->recorded_at->translatedFormat('d F Y H:i') }}</span>
                             @else
                                 <span class="text-gray-400">Belum ada data</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3" data-label="Kelembapan">
+                            @if($row['reading'])
+                                {{ $row['reading']->kelembapan !== null ? number_format($row['reading']->kelembapan, 1).'%' : '-' }}
+                            @else
+                                <span class="text-gray-400">-</span>
                             @endif
                         </td>
                         <td class="px-4 py-3" data-label="Status">

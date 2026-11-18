@@ -79,7 +79,12 @@
                             @endif
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Pencatatan</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kelembapan (%)</label>
+                            <input type="number" name="kelembapan" value="{{ old('kelembapan') }}" min="0" max="100"
+                                class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
+                            @error('kelembapan') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
                             <input type="datetime-local" name="recorded_at" value="{{ old('recorded_at', $defaultTime) }}" required
                                 class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
                             @error('recorded_at') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
@@ -125,6 +130,7 @@
                             <th class="px-4 py-3 text-center w-12">No</th>
                             <th class="px-4 py-3 text-left">Waktu</th>
                             <th class="px-4 py-3 text-left">Suhu</th>
+                            <th class="px-4 py-3 text-left">Kelembapan</th>
                             <th class="px-4 py-3 text-left">Status</th>
                             <th class="px-4 py-3 text-left">Catatan</th>
                             <th class="px-4 py-3 text-left">Diinput Oleh</th>
@@ -137,6 +143,7 @@
                                 <td class="px-4 py-3 text-center">{{ $readings->firstItem() + $index }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">{{ $reading->recorded_at->translatedFormat('d F Y H:i') }}</td>
                                 <td class="px-4 py-3 font-semibold">{{ number_format($reading->temperature, 1) }}°C</td>
+                                <td class="px-4 py-3">{{ $reading->kelembapan !== null ? number_format($reading->kelembapan, 1).'%' : '-' }}</td>
                                 <td class="px-4 py-3" data-label="Status">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ \App\Models\RoomTemperatureReading::statusBadge($reading->status()) }}">
                                         {{ $reading->status() ?? '-' }}
@@ -162,7 +169,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                                     @if($from || $to)
                                         Tidak ada riwayat suhu pada rentang tanggal tersebut.
                                     @else

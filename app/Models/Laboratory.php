@@ -15,6 +15,7 @@ class Laboratory extends Model
         'name',
         'code',
         'location',
+        'kelembapan',
         'capacity',
         'temp_min',
         'temp_max',

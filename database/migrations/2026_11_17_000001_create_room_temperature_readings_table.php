@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('laboratory_id')->constrained('laboratories')->cascadeOnDelete();
             $table->decimal('temperature', 5, 2);
+            $table->decimal('kelembapan', 5, 2)->nullable();
             $table->string('notes')->nullable();
             $table->uuid('recorded_by')->nullable();
             $table->datetime('recorded_at');
