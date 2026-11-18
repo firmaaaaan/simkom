@@ -10,9 +10,13 @@ use Illuminate\Http\Request;
 class AlatController extends Controller
 {
     private const VIEW_ALIASES = ['view-alat', 'view-kartu-alat', 'view-alat-laboratorium', 'view-equipment', 'view-kartu-kendali-alat'];
+
     private const CREATE_ALIASES = ['create-alat', 'create-kartu-alat', 'create-alat-laboratorium', 'create-equipment', 'create-kartu-kendali-alat'];
+
     private const EDIT_ALIASES = ['edit-alat', 'edit-kartu-alat', 'edit-alat-laboratorium', 'edit-equipment', 'edit-kartu-kendali-alat'];
+
     private const DELETE_ALIASES = ['delete-alat', 'delete-kartu-alat', 'delete-alat-laboratorium', 'delete-equipment', 'delete-kartu-kendali-alat'];
+
     private const PRINT_ALIASES = ['print-alat', 'print-kartu-alat', 'print-alat-laboratorium', 'print-equipment', 'print-kartu-kendali-alat'];
 
     private function canView(): bool
@@ -89,6 +93,56 @@ class AlatController extends Controller
         }
 
         return redirect()->route('alat.index')->with('success', 'Alat berhasil ditambahkan.');
+    }
+
+    /**
+     * Simpan alat hasil scan barcode. Dipakai alur "pilih lab lalu scan":
+     * setiap scan langsung membuat data alat pada laboratorium terpilih.
+     * Mendukung payload barcode berupa kode saja atau JSON (integrasi SIMPTT).
+     */
+    public function scanStore(Request $request)
+    {
+        abort_unless($this->canCreate(), 403);
+
+        $validated = $request->validate([
+            'laboratory_id' => 'required|exists:laboratories,id',
+            'code' => 'required|string|max:50',
+            'name' => 'nullable|string|max:255',
+            'merk_type' => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'status' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+        ]);
+
+        $existing = Alat::where('code', $validated['code'])->first();
+
+        if ($existing) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Kode '.$validated['code'].' sudah terdaftar sebagai '.$existing->name.'.',
+            ], 422);
+        }
+
+        $alat = Alat::create([
+            'laboratory_id' => $validated['laboratory_id'],
+            'name' => $validated['name'] ?? $validated['code'],
+            'code' => $validated['code'],
+            'merk_type' => $validated['merk_type'] ?? null,
+            'location' => $validated['location'] ?? null,
+            'status' => $validated['status'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'message' => $alat->name.' ('.$alat->code.') tersimpan.',
+            'alat' => [
+                'id' => $alat->id,
+                'name' => $alat->name,
+                'code' => $alat->code,
+                'laboratory' => $alat->laboratory?->name,
+            ],
+        ], 201);
     }
 
     public function show(Alat $alat)

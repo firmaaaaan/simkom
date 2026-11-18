@@ -226,4 +226,98 @@ class AlatKendaliTest extends TestCase
             ->assertSee('id="qr-reader"', false)
             ->assertSee('html5-qrcode');
     }
+
+    public function test_scan_store_saves_alat_to_selected_laboratory(): void
+    {
+        $lab = Laboratory::create([
+            'code' => 'LAB-SCAN',
+            'name' => 'Lab Scan',
+            'location' => 'Gedung S',
+            'capacity' => 20,
+        ]);
+
+        $this->actingAs($this->userWith(['view-alat', 'create-alat']))
+            ->postJson(route('alat.scan-store'), [
+                'laboratory_id' => $lab->id,
+                'code' => 'INV.SCAN.001',
+                'name' => 'Mikroskop Digital',
+                'merk_type' => 'Olympus',
+                'location' => 'Rak 1',
+                'status' => 'Baik',
+            ])
+            ->assertCreated()
+            ->assertJson(['ok' => true]);
+
+        $this->assertDatabaseHas('alat', [
+            'laboratory_id' => $lab->id,
+            'code' => 'INV.SCAN.001',
+            'name' => 'Mikroskop Digital',
+            'merk_type' => 'Olympus',
+            'status' => 'Baik',
+        ]);
+    }
+
+    public function test_scan_store_uses_code_as_name_when_only_code_scanned(): void
+    {
+        $lab = Laboratory::create([
+            'code' => 'LAB-SCAN2',
+            'name' => 'Lab Scan 2',
+            'location' => 'Gedung S',
+            'capacity' => 20,
+        ]);
+
+        $this->actingAs($this->userWith(['view-alat', 'create-alat']))
+            ->postJson(route('alat.scan-store'), [
+                'laboratory_id' => $lab->id,
+                'code' => 'INV.SCAN.002',
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('alat', [
+            'code' => 'INV.SCAN.002',
+            'name' => 'INV.SCAN.002',
+        ]);
+    }
+
+    public function test_scan_store_requires_laboratory(): void
+    {
+        $this->actingAs($this->userWith(['view-alat', 'create-alat']))
+            ->postJson(route('alat.scan-store'), ['code' => 'INV.NO.LAB'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('laboratory_id');
+    }
+
+    public function test_scan_store_rejects_duplicate_code(): void
+    {
+        $alat = $this->seedAlat('INV-DUP-01');
+
+        $this->actingAs($this->userWith(['view-alat', 'create-alat']))
+            ->postJson(route('alat.scan-store'), [
+                'laboratory_id' => $alat->laboratory_id,
+                'code' => 'INV-DUP-01',
+            ])
+            ->assertStatus(422)
+            ->assertJson(['ok' => false]);
+
+        $this->assertSame(1, Alat::where('code', 'INV-DUP-01')->count());
+    }
+
+    public function test_scan_store_requires_permission(): void
+    {
+        $lab = Laboratory::create([
+            'code' => 'LAB-SCAN3',
+            'name' => 'Lab Scan 3',
+            'location' => 'Gedung S',
+            'capacity' => 20,
+        ]);
+
+        $this->actingAs($this->userWith(['view-alat']))
+            ->postJson(route('alat.scan-store'), [
+                'laboratory_id' => $lab->id,
+                'code' => 'INV.FORBID',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('alat', ['code' => 'INV.FORBID']);
+    }
 }
