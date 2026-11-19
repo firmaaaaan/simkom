@@ -11,6 +11,7 @@ use App\Models\PcMonitor;
 use App\Models\Pengadaan;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\RoomTemperatureReading;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -375,5 +376,70 @@ class DashboardTest extends TestCase
         $greetings = ['Selamat pagi', 'Selamat siang', 'Selamat sore', 'Selamat malam'];
         $matched = array_filter($greetings, fn (string $g) => str_contains($response->getContent(), $g));
         $this->assertNotEmpty($matched, 'Welcome banner greeting not found in response');
+    }
+
+    public function test_temperature_summary_counts_abnormal_rooms(): void
+    {
+        $panas = $this->laboratory('A');
+        $panas->update(['temp_min' => 20, 'temp_max' => 25]);
+        RoomTemperatureReading::create([
+            'laboratory_id' => $panas->id,
+            'temperature' => 30,
+            'recorded_at' => now(),
+        ]);
+
+        $normal = $this->laboratory('B');
+        $normal->update(['temp_min' => 20, 'temp_max' => 25]);
+        RoomTemperatureReading::create([
+            'laboratory_id' => $normal->id,
+            'temperature' => 22,
+            'recorded_at' => now(),
+        ]);
+
+        $noReading = $this->laboratory('C');
+        $noReading->update(['temp_min' => 20, 'temp_max' => 25]);
+
+        $user = $this->userWith('view-monitoring-suhu');
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Suhu Ruangan')
+            ->assertViewHas('temperatureSummary', fn (array $s) => $s['abnormal'] === 1
+                && $s['panas'] === 1
+                && $s['normal'] === 1
+                && $s['unmonitored'] === 1
+                && $s['total'] === 3);
+    }
+
+    public function test_temperature_summary_shows_all_normal_when_no_abnormal(): void
+    {
+        $lab = $this->laboratory('A');
+        $lab->update(['temp_min' => 20, 'temp_max' => 25]);
+        RoomTemperatureReading::create([
+            'laboratory_id' => $lab->id,
+            'temperature' => 22,
+            'recorded_at' => now(),
+        ]);
+
+        $user = $this->userWith('view-monitoring-suhu');
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Suhu Ruangan')
+            ->assertSee('Semua normal')
+            ->assertViewHas('temperatureSummary', fn (array $s) => $s['abnormal'] === 0 && $s['normal'] === 1);
+    }
+
+    public function test_temperature_card_hidden_without_permission(): void
+    {
+        $user = $this->userWith('view-tickets');
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('Suhu Ruangan')
+            ->assertViewHas('temperatureSummary', fn ($summary) => $summary === null);
     }
 }

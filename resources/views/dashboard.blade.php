@@ -167,6 +167,30 @@
         </a>
     @endif
 
+    @if($can['monitoring_suhu'] && $temperatureSummary)
+        <a href="{{ route('monitoring-suhu.index') }}" class="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 {{ $temperatureSummary['abnormal'] > 0 ? 'bg-red-100' : 'bg-blue-100' }} rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 {{ $temperatureSummary['abnormal'] > 0 ? 'text-red-700' : 'text-blue-700' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 18.75a3 3 0 01-6 0m6 0V9.75A2.25 2.25 0 0013.5 7.5h-3A2.25 2.25 0 008.25 9.75v8.945m3-14.697a3.375 3.375 0 00-6.75 0v.757a5.25 5.25 0 003.375 4.868 3.375 3.375 0 013.375-4.868V4.053z" />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm text-gray-500">Suhu Ruangan</p>
+                <p class="text-2xl font-bold {{ $temperatureSummary['abnormal'] > 0 ? 'text-red-600' : 'text-green-600' }}">
+                    {{ $temperatureSummary['abnormal'] }}
+                </p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    <span class="inline-block w-2 h-2 rounded-full {{ $temperatureSummary['abnormal'] > 0 ? 'bg-red-500' : 'bg-green-500' }} mr-1 align-middle"></span>
+                    @if($temperatureSummary['abnormal'] > 0)
+                        {{ $temperatureSummary['panas'] }} panas &middot; {{ $temperatureSummary['dingin'] }} dingin
+                    @else
+                        Semua normal &middot; {{ $temperatureSummary['normal'] }} ruangan
+                    @endif
+                </p>
+            </div>
+        </a>
+    @endif
+
     @if($can['lab_usages'] && $labOccupancy)
         <a href="{{ route('lab-usages.index', ['status' => 'In']) }}" class="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
             <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">

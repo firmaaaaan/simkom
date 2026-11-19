@@ -45,6 +45,7 @@ class DashboardController extends Controller
             'lab_usages' => $user->hasPermission('view-lab-usages'),
             'pengadaan' => $user->hasPermission('view-pengadaan'),
             'monitoring' => $user->hasPermission('view-monitoring'),
+            'monitoring_suhu' => $user->hasPermission('view-monitoring-suhu'),
             'device_checks' => $user->hasPermission('view-maintenance'),
             'jadwal_pemeliharaan' => $user->hasPermission('view-jadwal-pemeliharaan'),
             'incident_reports' => $user->hasPermission('view-incident-reports'),
@@ -62,6 +63,7 @@ class DashboardController extends Controller
             'labOccupancy' => $can['lab_usages'] ? $this->labOccupancy() : null,
             'pengadaanSummary' => $can['pengadaan'] ? $this->pengadaanSummary($selectedAcademicYear) : null,
             'monitoringSummary' => $can['monitoring'] ? $this->monitoringSummary() : null,
+            'temperatureSummary' => $can['monitoring_suhu'] ? $this->temperatureSummary() : null,
             'maintenanceAnalytics' => $can['maintenance'] ? $this->maintenanceAnalytics($selectedAcademicYear) : null,
             'deviceCheckAnalytics' => $can['device_checks'] ? $this->deviceCheckAnalytics($selectedAcademicYear) : null,
             'jadwalPemeliharaanAnalytics' => $can['jadwal_pemeliharaan'] ? $this->jadwalPemeliharaanAnalytics($selectedAcademicYear) : null,
@@ -374,6 +376,39 @@ class DashboardController extends Controller
             'online' => $total - $offline,
             'offline' => $offline,
         ];
+    }
+
+    /**
+     * Ringkasan suhu ruangan: jumlah ruangan Panas/Dingin dari pembacaan
+     * terakhir dibanding ambang batas masing-masing ruangan.
+     */
+    private function temperatureSummary(): array
+    {
+        $summary = [
+            'total' => 0,
+            'normal' => 0,
+            'panas' => 0,
+            'dingin' => 0,
+            'unmonitored' => 0,
+            'abnormal' => 0,
+        ];
+
+        Laboratory::with('latestTemperatureReadingRelation')
+            ->get()
+            ->each(function (Laboratory $lab) use (&$summary) {
+                $summary['total']++;
+
+                match ($lab->temperatureStatus($lab->latestTemperatureReadingRelation)) {
+                    'Normal' => $summary['normal']++,
+                    'Panas' => $summary['panas']++,
+                    'Dingin' => $summary['dingin']++,
+                    default => $summary['unmonitored']++,
+                };
+            });
+
+        $summary['abnormal'] = $summary['panas'] + $summary['dingin'];
+
+        return $summary;
     }
 
     /**
