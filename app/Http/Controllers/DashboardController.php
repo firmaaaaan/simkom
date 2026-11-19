@@ -118,11 +118,12 @@ class DashboardController extends Controller
     /**
      * Pemeliharaan terakhir, pengecekan terakhir, dan distribusi status
      * komputer untuk setiap laboratorium. Hanya lab yang ditandai tampil
-     * (show_in_computer_list) — sama dengan toggle tampilkan di fitur Lab.
+     * (show_in_computer_list) dan benar-benar punya komputer.
      */
     private function laboratorySummary(): Collection
     {
         $laboratories = Laboratory::where('show_in_computer_list', true)
+            ->whereHas('computers')
             ->orderBy('name')
             ->get();
 

@@ -254,25 +254,32 @@ class DashboardTest extends TestCase
             ->assertViewHas('chart', fn (array $chart) => $chart['total'] === 3);
     }
 
-    public function test_laboratory_summary_only_includes_visible_labs(): void
+    public function test_laboratory_summary_only_includes_visible_labs_with_computers(): void
     {
         $visible = $this->laboratory('A');
+        Computer::create(['code' => 'PC-SUM-01', 'laboratory_id' => $visible->id, 'status' => 'Aktif']);
+
         $hidden = $this->laboratory('B');
+        Computer::create(['code' => 'PC-SUM-02', 'laboratory_id' => $hidden->id, 'status' => 'Aktif']);
         $hidden->update(['show_in_computer_list' => false]);
+
+        $noComputer = $this->laboratory('C');
 
         $user = $this->userWith(...$this->fullPermissions());
 
         $this->actingAs($user)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertViewHas('laboratorySummary', function ($summary) use ($visible, $hidden) {
+            ->assertViewHas('laboratorySummary', function ($summary) use ($visible, $hidden, $noComputer) {
                 $ids = $summary->map(fn (array $row) => $row['laboratory']->id);
 
                 return $ids->contains($visible->id)
-                    && !$ids->contains($hidden->id);
+                    && !$ids->contains($hidden->id)
+                    && !$ids->contains($noComputer->id);
             })
             ->assertSee($visible->name)
-            ->assertDontSee($hidden->name);
+            ->assertDontSee($hidden->name)
+            ->assertDontSee($noComputer->name);
     }
 
     public function test_ticket_analysis_counts_priorities_and_categories(): void
