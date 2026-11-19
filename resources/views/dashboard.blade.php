@@ -45,9 +45,40 @@
         'blue' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         'green' => 'M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.41A2.25 2.25 0 012.25 5.496V5.25',
     ];
+
+    $hour = (int) now()->format('G');
+    $greeting = match (true) {
+        $hour < 11 => 'Selamat pagi',
+        $hour < 15 => 'Selamat siang',
+        $hour < 18 => 'Selamat sore',
+        default => 'Selamat malam',
+    };
 @endphp
 
 @section('content')
+{{-- BANNER SELAMAT DATANG --}}
+<div class="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 sm:p-7 text-white mb-6 shadow-lg shadow-green-200">
+    <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+    <div class="absolute -bottom-14 right-24 w-32 h-32 bg-white/10 rounded-full"></div>
+    <div class="relative flex items-center gap-4 sm:gap-5">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8 sm:w-9 sm:h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+        </div>
+        <div class="min-w-0">
+            <p class="text-xl sm:text-2xl font-bold leading-tight">
+                {{ $greeting }}, {{ auth()->user()->name }}!
+            </p>
+            <p class="text-sm text-green-100 mt-1">
+                {{ auth()->user()->role_label }} &middot; {{ now()->translatedFormat('d F Y') }}
+            </p>
+            <p class="text-xs text-green-200 mt-1.5">
+                Selamat datang kembali di Dashboard UPT Laboratorium Terpadu
+            </p>
+        </div>
+    </div>
+</div>
 {{-- FILTER TAHUN AJARAN --}}
 <div class="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>

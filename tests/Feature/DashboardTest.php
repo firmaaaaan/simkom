@@ -332,4 +332,20 @@ class DashboardTest extends TestCase
             ->assertSee('Belum ada tiket pada tahun ajaran')
             ->assertSee('Tidak ada kendala aktif pada periode ini');
     }
+
+    public function test_welcome_banner_greets_user_by_name_and_role(): void
+    {
+        $user = $this->userWith('view-tickets');
+
+        $response = $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Selamat datang kembali di Dashboard UPT Laboratorium Terpadu')
+            ->assertSee($user->name)
+            ->assertSee($user->role_label);
+
+        $greetings = ['Selamat pagi', 'Selamat siang', 'Selamat sore', 'Selamat malam'];
+        $matched = array_filter($greetings, fn (string $g) => str_contains($response->getContent(), $g));
+        $this->assertNotEmpty($matched, 'Welcome banner greeting not found in response');
+    }
 }
