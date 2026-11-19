@@ -254,6 +254,27 @@ class DashboardTest extends TestCase
             ->assertViewHas('chart', fn (array $chart) => $chart['total'] === 3);
     }
 
+    public function test_laboratory_summary_only_includes_visible_labs(): void
+    {
+        $visible = $this->laboratory('A');
+        $hidden = $this->laboratory('B');
+        $hidden->update(['show_in_computer_list' => false]);
+
+        $user = $this->userWith(...$this->fullPermissions());
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertViewHas('laboratorySummary', function ($summary) use ($visible, $hidden) {
+                $ids = $summary->map(fn (array $row) => $row['laboratory']->id);
+
+                return $ids->contains($visible->id)
+                    && !$ids->contains($hidden->id);
+            })
+            ->assertSee($visible->name)
+            ->assertDontSee($hidden->name);
+    }
+
     public function test_ticket_analysis_counts_priorities_and_categories(): void
     {
         $lab = $this->laboratory();

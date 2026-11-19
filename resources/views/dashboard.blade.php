@@ -79,35 +79,6 @@
         </div>
     </div>
 </div>
-{{-- FILTER TAHUN AJARAN --}}
-<div class="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <div>
-        <p class="text-sm font-semibold text-gray-800">Periode Data Dashboard</p>
-        <p class="text-xs text-gray-500 mt-0.5">
-            @if($selectedAcademicYear)
-                Tahun ajaran <span class="font-medium text-gray-700">{{ $selectedAcademicYear->name }}</span>
-                &middot; {{ $selectedAcademicYear->periodLabel() }}
-            @else
-                Semua tahun ajaran (statistik kumulatif).
-            @endif
-        </p>
-    </div>
-    <form action="{{ route('dashboard') }}" method="GET" class="flex items-center gap-2">
-        <label for="academic_year" class="text-sm text-gray-500 flex-shrink-0">Tahun Ajaran</label>
-        <select id="academic_year" name="academic_year" onchange="this.form.submit()"
-            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-            <option value="">Semua Tahun Ajaran</option>
-            @foreach($academicYears as $year)
-                <option value="{{ $year->id }}" {{ $selectedAcademicYear?->id === $year->id ? 'selected' : '' }}>
-                    {{ $year->name }} ({{ $year->periodLabel() }})
-                </option>
-            @endforeach
-        </select>
-        <noscript>
-            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg">Terapkan</button>
-        </noscript>
-    </form>
-</div>
 
 {{-- STAT CARDS --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
@@ -642,7 +613,7 @@
         <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h2 class="text-base font-semibold text-gray-800">Pemeliharaan &amp; Pengecekan Terakhir per Laboratorium</h2>
-                <p class="text-xs text-gray-500 mt-1">{{ $laboratorySummary->count() }} laboratorium terdaftar.</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $laboratorySummary->count() }} laboratorium ditampilkan.</p>
             </div>
             @if($can['maintenance'])
                 <a href="{{ route('maintenance.index') }}" class="px-4 py-2 border border-green-600 text-green-600 text-sm font-medium rounded-lg hover:bg-green-50 transition-colors">
