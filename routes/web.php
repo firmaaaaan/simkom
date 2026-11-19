@@ -899,6 +899,8 @@ Route::middleware('auth')->group(function () {
             ->name('box-scan.return');
         Route::post('box-scan/multi-return', [BoxScanController::class, 'multiReturn'])
             ->name('box-scan.multi-return');
+        Route::post('box-scan/return-by-code', [BoxScanController::class, 'returnByCode'])
+            ->name('box-scan.return-by-code');
         Route::get('box-scan/{boxCode}/active-usages', [BoxScanController::class, 'activeUsagesByNim'])
             ->name('box-scan.active-usages');
     });

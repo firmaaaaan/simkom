@@ -31,13 +31,23 @@
             <p class="text-sm text-gray-500 mt-1">Pantau penggunaan box oleh mahasiswa</p>
         </div>
         @if(auth()->user()->hasAnyRole(['admin', 'superadmin']))
-            <button type="button" onclick="openBoxUsageForm()"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors self-start">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Input Manual
-            </button>
+            <div class="flex items-center gap-2 self-start">
+                <button type="button" onclick="openScanReturnModal()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+                    </svg>
+                    Scan untuk Kembalikan
+                </button>
+                <button type="button" onclick="openBoxUsageForm()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Input Manual
+                </button>
+            </div>
         @endif
     </div>
 
@@ -322,6 +332,49 @@
     </div>
 </div>
 
+{{-- Modal Scan QR — Pengembalian Box via Scan (admin) --}}
+<div id="scanReturnModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display:none">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Kembalikan via Scan</h3>
+                    <p class="text-xs text-gray-500">Arahkan kamera ke QR box, pengembalian otomatis</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeScanReturnModal()" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div id="scanReturnReader" class="w-full rounded-xl overflow-hidden bg-gray-100"></div>
+            <p class="text-xs text-center text-gray-500">QR yang dipindai: <span class="font-mono font-semibold text-gray-700">/box-scan/BOX-...</span></p>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (opsional)</label>
+                <input type="text" id="scanReturnNote" maxlength="500" placeholder="Catatan pengembalian..."
+                    class="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+            </div>
+
+            <div id="scanReturnStatus" class="hidden p-4 rounded-lg text-sm"></div>
+
+            <button type="button" onclick="closeScanReturnModal()"
+                class="w-full px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     function toggleSelectAllUsing(master) {
@@ -452,5 +505,129 @@
             btn.textContent = originalText;
         }
     }
+
+    // ===== Scan QR — pengembalian otomatis =====
+    let scanReturnScanner = null;
+    let scanReturnRunning = false;
+    let scanReturnBusy = false;
+    let scanReturnLastCode = '';
+    let scanReturnLastAt = 0;
+
+    function showScanReturnStatus(message, type) {
+        const el = document.getElementById('scanReturnStatus');
+        if (!el) return;
+        const colors = {
+            success: 'bg-green-50 text-green-700 border border-green-200',
+            error: 'bg-red-50 text-red-700 border border-red-200',
+            warning: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+        };
+        el.className = 'p-4 rounded-lg text-sm border ' + (colors[type] || colors.error);
+        el.textContent = message;
+        el.classList.remove('hidden');
+    }
+
+    function extractBoxCode(text) {
+        const trimmed = (text || '').trim();
+        const match = trimmed.match(/box-scan\/([A-Za-z0-9\-_]+)/);
+        return match ? match[1] : trimmed;
+    }
+
+    async function openScanReturnModal() {
+        const modal = document.getElementById('scanReturnModal');
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+        document.getElementById('scanReturnStatus').classList.add('hidden');
+        document.getElementById('scanReturnNote').value = '';
+        scanReturnBusy = false;
+        scanReturnLastCode = '';
+        await startScanReturnCamera();
+    }
+
+    async function closeScanReturnModal() {
+        const modal = document.getElementById('scanReturnModal');
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        await stopScanReturnCamera();
+    }
+
+    async function startScanReturnCamera() {
+        if (scanReturnRunning) return;
+        if (typeof Html5Qrcode === 'undefined') {
+            showScanReturnStatus('Library scanner belum termuat. Muat ulang halaman.', 'error');
+            return;
+        }
+        if (!scanReturnScanner) {
+            scanReturnScanner = new Html5Qrcode('scanReturnReader');
+        }
+        try {
+            await scanReturnScanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 },
+                (decodedText) => handleScanReturn(decodedText),
+                () => {}
+            );
+            scanReturnRunning = true;
+        } catch (err) {
+            showScanReturnStatus('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', 'error');
+        }
+    }
+
+    async function stopScanReturnCamera() {
+        if (!scanReturnRunning || !scanReturnScanner) return;
+        try {
+            await scanReturnScanner.stop();
+        } catch (err) {}
+        scanReturnRunning = false;
+    }
+
+    async function handleScanReturn(decodedText) {
+        if (scanReturnBusy) return;
+
+        const boxCode = extractBoxCode(decodedText);
+        if (!boxCode) return;
+
+        const now = Date.now();
+        if (boxCode === scanReturnLastCode && now - scanReturnLastAt < 5000) return;
+        scanReturnLastCode = boxCode;
+        scanReturnLastAt = now;
+
+        scanReturnBusy = true;
+        showScanReturnStatus('Memproses box ' + boxCode + '...', 'warning');
+
+        try {
+            const response = await fetch('{{ route('box-scan.return-by-code') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    box_code: boxCode,
+                    note: document.getElementById('scanReturnNote').value.trim(),
+                }),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showHistoryToast('success', 'Berhasil', data.message || 'Box dikembalikan');
+                await stopScanReturnCamera();
+                setTimeout(() => location.reload(), 600);
+                return;
+            }
+
+            const message = data.message || 'Gagal mengembalikan box';
+            showScanReturnStatus(message, response.status === 422 ? 'warning' : 'error');
+            if (response.status !== 422) {
+                showHistoryToast('error', 'Gagal', message);
+            }
+        } catch (err) {
+            showScanReturnStatus('Terjadi kesalahan jaringan', 'error');
+            showHistoryToast('error', 'Kesalahan', 'Terjadi kesalahan jaringan');
+        } finally {
+            scanReturnBusy = false;
+        }
+    }
 </script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 @endpush

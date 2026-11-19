@@ -129,6 +129,76 @@ class BoxScanController extends Controller
         ]);
     }
 
+    public function returnByCode(Request $request)
+    {
+        $validated = $request->validate([
+            'box_code' => 'required|string|max:255',
+            'note'     => 'nullable|string|max:500',
+        ]);
+
+        $boxCode = trim($validated['box_code']);
+
+        if (str_contains($boxCode, 'box-scan/')) {
+            $parts = explode('box-scan/', $boxCode);
+            $boxCode = trim(explode('?', end($parts))[0], '/');
+        }
+
+        $box = Box::where('code', $boxCode)->first();
+
+        if (!$box) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Box tidak ditemukan',
+            ], 404);
+        }
+
+        $usages = BoxUsage::where('box_id', $box->id)
+            ->where('status', 'Using')
+            ->get();
+
+        if ($usages->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada yang dikembalikan',
+            ], 422);
+        }
+
+        $note = $validated['note'] ?? null;
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($usages as $usage) {
+                $usage->update([
+                    'status'      => 'Returned',
+                    'returned_at' => now(),
+                ]);
+
+                if ($note !== null && $note !== '') {
+                    BoxReturnNote::create([
+                        'box_usage_id' => $usage->id,
+                        'note'         => $note,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => $usages->count() . ' box berhasil dikembalikan',
+                'count'   => $usages->count(),
+                'box'     => ['code' => $box->code, 'name' => $box->name],
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function checkStatus($boxCode)
     {
         $box = Box::where('code', $boxCode)->firstOrFail();
