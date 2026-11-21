@@ -25,7 +25,7 @@
     <div class="bg-white rounded-xl border border-amber-200 p-6 space-y-3">
         <h2 class="text-base font-semibold text-gray-800">Pindah Laboratorium</h2>
         <p class="text-sm text-gray-500">
-            Pindahkan alat ke laboratorium/ruangan lain. No Inventaris dan QR code yang sudah tercetak <span class="font-semibold">tetap sama</span>.
+            Pindahkan alat ke laboratorium lain. Lokasi tetap menggunakan default dari SIMPTT Inventaris. No Inventaris dan QR code yang sudah tercetak <span class="font-semibold">tetap sama</span>.
         </p>
         <form action="{{ route('alat.pindah', $alat) }}" method="POST" class="space-y-3">
             @csrf
@@ -37,16 +37,6 @@
                     @endforeach
                 </select>
                 @error('laboratory_id') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi/Ruangan Baru</label>
-                <select name="location" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
-                    <option value="">-- pertahankan lokasi lama --</option>
-                    @foreach(\App\Models\Laboratory::orderBy('name')->get() as $labOpt)
-                        <option value="{{ $labOpt->name }}" {{ $alat->location === $labOpt->name ? 'selected' : '' }}>{{ $labOpt->name }}</option>
-                    @endforeach
-                </select>
-                @error('location') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <button type="submit" class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700">Pindahkan</button>
         </form>

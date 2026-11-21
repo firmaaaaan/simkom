@@ -54,12 +54,12 @@ class AlatPindahTest extends TestCase
         [$labA, $labB, $alat] = $this->seedAlat();
         $originalId = $alat->id;
         $originalCode = $alat->code;
+        $originalLocation = $alat->location;
         $originalScanUrl = route('alat.scan', $alat);
 
         $this->actingAs($this->userWith(['edit-alat']))
             ->post(route('alat.pindah', $alat), [
                 'laboratory_id' => $labB->id,
-                'location' => $labB->name,
             ])
             ->assertRedirect(route('alat.show', $alat))
             ->assertSessionHas('success');
@@ -67,25 +67,11 @@ class AlatPindahTest extends TestCase
         $alat->refresh();
 
         $this->assertSame($labB->id, $alat->laboratory_id);
-        $this->assertSame($labB->name, $alat->location);
+        // Lokasi (default dari SIMPTT Inventaris) tidak berubah.
+        $this->assertSame($originalLocation, $alat->location);
         $this->assertSame($originalId, $alat->id);
         $this->assertSame($originalCode, $alat->code);
         $this->assertSame($originalScanUrl, route('alat.scan', $alat));
-    }
-
-    public function test_pindah_keeps_location_when_not_provided(): void
-    {
-        [$labA, $labB, $alat] = $this->seedAlat();
-
-        $this->actingAs($this->userWith(['edit-alat']))
-            ->post(route('alat.pindah', $alat), [
-                'laboratory_id' => $labB->id,
-            ])
-            ->assertRedirect(route('alat.show', $alat));
-
-        $alat->refresh();
-        $this->assertSame($labB->id, $alat->laboratory_id);
-        $this->assertSame('Meja 1', $alat->location);
     }
 
     public function test_pindah_requires_edit_permission(): void

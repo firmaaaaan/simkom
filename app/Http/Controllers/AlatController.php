@@ -285,18 +285,11 @@ class AlatController extends Controller
 
         $validated = $request->validate([
             'laboratory_id' => 'required|exists:laboratories,id',
-            'location' => 'nullable|string|max:255',
         ]);
 
         $lab = Laboratory::findOrFail($validated['laboratory_id']);
 
-        $data = ['laboratory_id' => $lab->id];
-
-        if (! empty($validated['location'])) {
-            $data['location'] = $validated['location'];
-        }
-
-        $alat->update($data);
+        $alat->update(['laboratory_id' => $lab->id]);
 
         return redirect()->route('alat.show', $alat)
             ->with('success', 'Alat dipindahkan ke '.$lab->name.'. QR code tetap sama.');
