@@ -30,7 +30,7 @@
         <form action="{{ route('alat.pindah', $alat) }}" method="POST" class="space-y-3">
             @csrf
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Laboratorium Sebelumnya <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Laboratorium Baru/Tujuan <span class="text-red-500">*</span></label>
                 <select name="laboratory_id" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
                     @foreach(\App\Models\Laboratory::orderBy('name')->get() as $lab)
                         <option value="{{ $lab->id }}" {{ $alat->laboratory_id == $lab->id ? 'selected' : '' }}>{{ $lab->name }}</option>
