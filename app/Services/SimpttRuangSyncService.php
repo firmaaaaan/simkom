@@ -36,7 +36,7 @@ class SimpttRuangSyncService
             $ruang = isset($item['ruang']) ? trim((string) $item['ruang']) : '';
             $kdruang = isset($item['kdruang']) ? (int) $item['kdruang'] : 0;
 
-            if ($kdruang <= 0 || ! preg_match('/^SB(?=[\s.\/]|$)/i', $ruang)) {
+            if ($kdruang <= 0 || $ruang === '') {
                 $stats['dilewati']++;
 
                 continue;
@@ -64,16 +64,16 @@ class SimpttRuangSyncService
     }
 
     /**
-     * Cerminkan ruangan SB ke master laboratories yang dipakai modul
-     * monitoring suhu & kartu kendali alat. Field manual (ambang suhu,
-     * lokasi yang sudah diubah, status, deskripsi) tidak ditimpa.
+     * Cerminkan ruangan dari API ke master laboratories yang dipakai modul.
+     * Field manual (ambang suhu, lokasi yang sudah diubah, status, deskripsi) tidak ditimpa.
      */
     private function mirrorToLaboratory(string $kode, string $nama, int $kapasitas): void
     {
         $laboratory = Laboratory::query()->firstOrNew(['code' => $kode]);
 
         if (! $laboratory->exists) {
-            $laboratory->location = 'Gedung SB';
+            $prefix = strtoupper(strtok($kode, '.'));
+            $laboratory->location = 'Gedung '.$prefix;
         }
 
         $laboratory->name = $nama;

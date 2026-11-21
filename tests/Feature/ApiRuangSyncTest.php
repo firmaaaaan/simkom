@@ -52,13 +52,13 @@ class ApiRuangSyncTest extends TestCase
         ];
     }
 
-    public function test_sync_only_stores_sb_rooms_and_parses_fields(): void
+    public function test_sync_stores_all_rooms_and_parses_fields(): void
     {
         Http::fake([config('jadwal.ruang_api_url') => Http::response($this->payload())]);
 
         $this->artisan('simptt:sync-ruang')->assertExitCode(0);
 
-        $this->assertDatabaseCount('api_ruang', 2);
+        $this->assertDatabaseCount('api_ruang', 3);
         $this->assertDatabaseHas('api_ruang', [
             'kdruang' => 1389,
             'kode' => 'SB.1.02',
@@ -67,14 +67,19 @@ class ApiRuangSyncTest extends TestCase
             'ruang_asli' => 'SB.1.02 / Ruang Laboratorium Komputer 2 (52)',
         ]);
         $this->assertDatabaseHas('api_ruang', [
+            'kdruang' => 1421,
+            'kode' => 'SM.1.20',
+            'nama' => 'Ruang Laboratorium Komputer 3',
+            'kapasitas' => 52,
+        ]);
+        $this->assertDatabaseHas('api_ruang', [
             'kdruang' => 1423,
             'kode' => 'SB.4.23',
             'nama' => 'SB.4.23',
             'kapasitas' => 20,
         ]);
-        $this->assertDatabaseMissing('api_ruang', ['kdruang' => 1421]);
 
-        $this->assertDatabaseCount('laboratories', 2);
+        $this->assertDatabaseCount('laboratories', 3);
         $this->assertDatabaseHas('laboratories', [
             'code' => 'SB.1.02',
             'name' => 'Ruang Laboratorium Komputer 2',
@@ -83,7 +88,12 @@ class ApiRuangSyncTest extends TestCase
             'temp_min' => 20,
             'temp_max' => 25,
         ]);
-        $this->assertDatabaseMissing('laboratories', ['code' => 'SM.1.20']);
+        $this->assertDatabaseHas('laboratories', [
+            'code' => 'SM.1.20',
+            'name' => 'Ruang Laboratorium Komputer 3',
+            'capacity' => 52,
+            'location' => 'Gedung SM',
+        ]);
 
         Http::assertSent(fn (HttpRequest $request) => $request->url() === config('jadwal.ruang_api_url'));
     }
@@ -149,7 +159,7 @@ class ApiRuangSyncTest extends TestCase
             ->assertRedirect(route('laboratories.index'))
             ->assertSessionHas('success');
 
-        $this->assertDatabaseCount('api_ruang', 2);
+        $this->assertDatabaseCount('api_ruang', 3);
     }
 
     public function test_index_page_lists_synced_rooms(): void

@@ -10,7 +10,7 @@ class SimpttSyncRuangCommand extends Command
 {
     protected $signature = 'simptt:sync-ruang';
 
-    protected $description = 'Sinkron master ruangan berawalan SB dari API SIMPTT ke tabel api_ruang';
+    protected $description = 'Sinkron master ruangan dari API SIMPTT ke tabel api_ruang dan laboratories';
 
     public function handle(SimpttRuangSyncService $service): int
     {
@@ -23,7 +23,7 @@ class SimpttSyncRuangCommand extends Command
         }
 
         $this->info(sprintf(
-            'Ruangan SB: %d ditemukan, %d baru, %d diperbarui, %d dilewati.',
+            'Ruangan: %d ditemukan, %d baru, %d diperbarui, %d dilewati.',
             $stats['ditemukan'],
             $stats['baru'],
             $stats['diperbarui'],
