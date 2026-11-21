@@ -59,7 +59,7 @@ class AlatPindahTest extends TestCase
         $this->actingAs($this->userWith(['edit-alat']))
             ->post(route('alat.pindah', $alat), [
                 'laboratory_id' => $labB->id,
-                'location' => 'Rak 2',
+                'location' => $labB->name,
             ])
             ->assertRedirect(route('alat.show', $alat))
             ->assertSessionHas('success');
@@ -67,7 +67,7 @@ class AlatPindahTest extends TestCase
         $alat->refresh();
 
         $this->assertSame($labB->id, $alat->laboratory_id);
-        $this->assertSame('Rak 2', $alat->location);
+        $this->assertSame($labB->name, $alat->location);
         $this->assertSame($originalId, $alat->id);
         $this->assertSame($originalCode, $alat->code);
         $this->assertSame($originalScanUrl, route('alat.scan', $alat));

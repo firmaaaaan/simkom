@@ -292,7 +292,7 @@ class AlatController extends Controller
 
         $data = ['laboratory_id' => $lab->id];
 
-        if (array_key_exists('location', $validated)) {
+        if (! empty($validated['location'])) {
             $data['location'] = $validated['location'];
         }
 

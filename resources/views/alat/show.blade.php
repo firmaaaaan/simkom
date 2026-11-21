@@ -40,7 +40,13 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi/Ruangan Baru</label>
-                <input type="text" name="location" value="{{ old('location', $alat->location) }}" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm" placeholder="Kosongkan untuk mempertahankan lokasi lama">
+                <select name="location" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm">
+                    <option value="">-- pertahankan lokasi lama --</option>
+                    @foreach(\App\Models\Laboratory::orderBy('name')->get() as $labOpt)
+                        <option value="{{ $labOpt->name }}" {{ $alat->location === $labOpt->name ? 'selected' : '' }}>{{ $labOpt->name }}</option>
+                    @endforeach
+                </select>
+                @error('location') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <button type="submit" class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700">Pindahkan</button>
         </form>
