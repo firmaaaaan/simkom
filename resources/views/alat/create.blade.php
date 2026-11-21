@@ -43,6 +43,17 @@
                 </p>
             </div>
 
+            {{-- Input kode manual --}}
+            <div class="flex flex-wrap items-end gap-2">
+                <div class="flex-1 min-w-[200px]">
+                    <label for="manual-scan-input" class="block text-sm font-medium text-gray-700 mb-1">Input Kode Manual</label>
+                    <input type="text" id="manual-scan-input" class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm font-mono" placeholder="Ketik kode barcode / no inventaris..." autocomplete="off">
+                </div>
+                <button type="button" id="manual-scan-btn" class="px-4 py-2 text-sm font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 whitespace-nowrap">
+                    Simpan
+                </button>
+            </div>
+
             <div id="scan-container" class="hidden">
                 <div id="qr-reader" class="w-full max-w-sm mx-auto"></div>
                 <p class="mt-2 text-xs text-center text-gray-500">Arahkan kamera ke barcode alat (Code128, Code39, QR, dll).</p>
@@ -132,6 +143,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const countEl = document.getElementById('lab-alat-count');
     const nameEl = document.getElementById('lab-alat-name');
     const emptyEl = document.getElementById('lab-alat-empty');
+
+    const manualInput = document.getElementById('manual-scan-input');
+    const manualBtn = document.getElementById('manual-scan-btn');
+
+    function submitManualScan() {
+        const text = (manualInput.value || '').trim();
+        if (!text) {
+            manualInput.focus();
+            return;
+        }
+        saveScan(text);
+        manualInput.value = '';
+        manualInput.focus();
+    }
+
+    if (manualBtn) {
+        manualBtn.addEventListener('click', submitManualScan);
+    }
+    if (manualInput) {
+        manualInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitManualScan();
+            }
+        });
+    }
 
     let scanner = null;
     let running = false;
