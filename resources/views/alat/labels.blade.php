@@ -7,6 +7,7 @@
     <title>Label Alat Laboratorium - SmartLabs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css">
     <style>
         @media print {
             @page { size: A4 portrait; margin: 8mm; }
@@ -181,5 +182,15 @@
             });
         </script>
     @endif
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof TomSelect === 'undefined') return;
+            var el = document.getElementById('laboratory_id');
+            if (el && !el.tomselect) {
+                new TomSelect(el, { create: false, sortField: { field: 'text', direction: 'asc' }, placeholder: 'Cari laboratorium...', allowEmptyOption: true, maxOptions: null });
+            }
+        });
+    </script>
 </body>
 </html>

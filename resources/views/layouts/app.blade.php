@@ -25,6 +25,12 @@
         }
     </style>
     @stack('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css">
+    <style>
+        .ts-wrapper .ts-control { border-color: #d1d5db; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+        .ts-wrapper.focus .ts-control { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,0.2); }
+        .ts-dropdown .option.active { background: #dcfce7; color: #166534; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
     <div class="flex min-h-screen">
@@ -617,5 +623,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof TomSelect === 'undefined') return;
+            var targets = document.querySelectorAll('select[name="laboratory_id"], #scan_laboratory_id');
+            targets.forEach(function (el) {
+                if (el.tomselect) return;
+                // Skip selects with very few options? keep all for consistency.
+                new TomSelect(el, {
+                    create: false,
+                    sortField: { field: 'text', direction: 'asc' },
+                    placeholder: 'Cari laboratorium...',
+                    allowEmptyOption: true,
+                    maxOptions: null,
+                });
+            });
+        });
+    </script>
 </body>
 </html>
