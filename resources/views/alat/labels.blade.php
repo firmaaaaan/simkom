@@ -149,8 +149,8 @@
                                 <p class="nama">{{ $item->name }}</p>
                                 <p class="baris"><b>No Inv:</b> {{ $item->code ?? '-' }}</p>
                                 <p class="baris"><b>Merk:</b> {{ $item->merk_type ?? '-' }}</p>
-                                @if($item->location)
-                                    <p class="baris"><b>Lokasi:</b> {{ $item->location }}</p>
+                                @if($item->laboratory)
+                                    <p class="baris"><b>Lokasi:</b> {{ $item->laboratory->name }}</p>
                                 @endif
                             </div>
                         </div>

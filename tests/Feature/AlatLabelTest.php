@@ -68,7 +68,6 @@ class AlatLabelTest extends TestCase
             ->assertSee('Mikroskop')
             ->assertSee('INV-001')
             ->assertSee('Olympus CX23')
-            ->assertSee('Meja 1')
             ->assertSee($lab->name)
             ->assertSee('id="qr-'.$alat->id.'"', false)
             ->assertSee('Cetak Label');
