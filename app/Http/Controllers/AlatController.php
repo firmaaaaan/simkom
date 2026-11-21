@@ -275,6 +275,33 @@ class AlatController extends Controller
         return redirect()->route('alat.index')->with('success', 'Alat berhasil diperbarui.');
     }
 
+    /**
+     * Pindahkan alat ke laboratorium/ruangan lain tanpa mengubah kode
+     * (No Inventaris) maupun QR code yang sudah tercetak.
+     */
+    public function pindah(Request $request, Alat $alat)
+    {
+        abort_unless($this->canEdit(), 403);
+
+        $validated = $request->validate([
+            'laboratory_id' => 'required|exists:laboratories,id',
+            'location' => 'nullable|string|max:255',
+        ]);
+
+        $lab = Laboratory::findOrFail($validated['laboratory_id']);
+
+        $data = ['laboratory_id' => $lab->id];
+
+        if (array_key_exists('location', $validated)) {
+            $data['location'] = $validated['location'];
+        }
+
+        $alat->update($data);
+
+        return redirect()->route('alat.show', $alat)
+            ->with('success', 'Alat dipindahkan ke '.$lab->name.'. QR code tetap sama.');
+    }
+
     public function destroy(Alat $alat)
     {
         abort_unless($this->canDelete(), 403);

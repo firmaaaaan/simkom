@@ -337,10 +337,11 @@ Route::middleware('auth')->group(function () {
     Route::post("alat/scan-store", [AlatController::class, "scanStore"])->name("alat.scan-store");
     Route::get("alat/lab-list", [AlatController::class, "labList"])->name("alat.lab-list");
     Route::resource("alat", AlatController::class)->parameters(["alat" => "alat"]);
-    Route::get("alat/{alat}/checks", [AlatController::class, "checks"])->name("alat.checks");
-    Route::post("alat/{alat}/checks", [AlatController::class, "storeCheck"])->name("alat.checks.store");
-    Route::delete("alat/{alat}/checks/{check}", [AlatController::class, "destroyCheck"])->name("alat.checks.destroy");
-    Route::get("alat/{alat}/print", [AlatController::class, "printOne"])->name("alat.print-one");
+Route::get("alat/{alat}/checks", [AlatController::class, "checks"])->name("alat.checks");
+Route::post("alat/{alat}/checks", [AlatController::class, "storeCheck"])->name("alat.checks.store");
+Route::delete("alat/{alat}/checks/{check}", [AlatController::class, "destroyCheck"])->name("alat.checks.destroy");
+Route::post("alat/{alat}/pindah", [AlatController::class, "pindah"])->name("alat.pindah");
+Route::get("alat/{alat}/print", [AlatController::class, "printOne"])->name("alat.print-one");
     Route::get("alats/kartu", [AlatController::class, "kartu"])->name("alats.kartu");
     Route::get("alats/kartu/print", [AlatController::class, "kartuPrint"])->name("alats.kartu.print");
     Route::get("alats/print", [AlatController::class, "kartuPrint"])->name("alats.print");
