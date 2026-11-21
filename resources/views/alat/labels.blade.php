@@ -23,14 +23,39 @@
         }
         .label-item {
             display: flex;
-            gap: 3mm;
-            align-items: center;
+            flex-direction: column;
+            gap: 2mm;
+            align-items: stretch;
             border: 1px solid #9ca3af;
             border-radius: 2mm;
             padding: 3mm;
             background: #fff;
             box-shadow: 0 1px 2px rgba(0,0,0,.06);
             min-height: 28mm;
+        }
+        .label-header {
+            text-align: center;
+            padding-bottom: 1.5mm;
+            border-bottom: 0.4mm solid #d1d5db;
+        }
+        .label-header .upt {
+            font-weight: 700;
+            font-size: 9.5pt;
+            letter-spacing: 0.04em;
+            line-height: 1.2;
+            color: #111827;
+        }
+        .label-header .modul {
+            font-weight: 700;
+            font-size: 8pt;
+            letter-spacing: 0.08em;
+            line-height: 1.3;
+            color: #065f46;
+        }
+        .label-body {
+            display: flex;
+            gap: 3mm;
+            align-items: center;
         }
         .label-item .qr {
             flex: 0 0 auto;
@@ -55,17 +80,6 @@
             overflow-wrap: anywhere;
         }
         .label-info .baris b { color: #111827; }
-        .label-info .lab {
-            display: inline-block;
-            margin-top: 1mm;
-            font-size: 7.5pt;
-            font-weight: 700;
-            color: #065f46;
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            border-radius: 1mm;
-            padding: 0.3mm 1.5mm;
-        }
         @media screen {
             .label-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
         }
@@ -123,17 +137,22 @@
             <div class="label-grid">
                 @foreach($alat as $item)
                     <div class="label-item">
-                        <div class="qr">
-                            <div id="qr-{{ $item->id }}"></div>
+                        <div class="label-header">
+                            <p class="upt">UPT LABORATORIUM TERPADU</p>
+                            <p class="modul">KARTU KENDALI ALAT</p>
                         </div>
-                        <div class="label-info">
-                            <p class="nama">{{ $item->name }}</p>
-                            <p class="baris"><b>No Inv:</b> {{ $item->code ?? '-' }}</p>
-                            <p class="baris"><b>Merk:</b> {{ $item->merk_type ?? '-' }}</p>
-                            @if($item->location)
-                                <p class="baris"><b>Lokasi:</b> {{ $item->location }}</p>
-                            @endif
-                            <span class="lab">{{ $item->laboratory->name ?? '-' }}</span>
+                        <div class="label-body">
+                            <div class="qr">
+                                <div id="qr-{{ $item->id }}"></div>
+                            </div>
+                            <div class="label-info">
+                                <p class="nama">{{ $item->name }}</p>
+                                <p class="baris"><b>No Inv:</b> {{ $item->code ?? '-' }}</p>
+                                <p class="baris"><b>Merk:</b> {{ $item->merk_type ?? '-' }}</p>
+                                @if($item->location)
+                                    <p class="baris"><b>Lokasi:</b> {{ $item->location }}</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach

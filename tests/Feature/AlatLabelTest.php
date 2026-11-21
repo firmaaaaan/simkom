@@ -125,6 +125,25 @@ class AlatLabelTest extends TestCase
             ->assertOk();
     }
 
+    public function test_labels_page_shows_upt_header_above_qr(): void
+    {
+        [$lab, $alat] = $this->seedAlat();
+
+        $content = $this->actingAs($this->userWith(['print-alat']))
+            ->get(route('alat.labels', ['laboratory_id' => $lab->id]))
+            ->assertOk()
+            ->assertSee('UPT LABORATORIUM TERPADU')
+            ->assertSee('KARTU KENDALI ALAT')
+            ->getContent();
+
+        $headerPos = strpos($content, 'class="label-header"');
+        $qrPos = strpos($content, 'id="qr-'.$alat->id.'"');
+
+        $this->assertNotFalse($headerPos);
+        $this->assertNotFalse($qrPos);
+        $this->assertLessThan($qrPos, $headerPos, 'Header UPT harus berada di atas QR.');
+    }
+
     public function test_guest_is_redirected_to_login(): void
     {
         $this->get(route('alat.labels'))->assertRedirect(route('login'));
