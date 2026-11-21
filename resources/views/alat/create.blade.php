@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function showStatus(message, ok) {
-        status.className = 'p-3 rounded-lg text-xs ' + (ok
+        status.className = 'p-3 rounded-lg text-xs whitespace-pre-line ' + (ok
             ? 'bg-green-50 text-green-700 border border-green-200'
             : 'bg-red-50 text-red-700 border border-red-200');
         status.textContent = message;
@@ -294,7 +294,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (response.ok && data.ok) {
                 addScannedItem(data.alat);
-                showStatus('Tersimpan: ' + data.message, true);
+
+                let message = 'Tersimpan: ' + data.message;
+                if (data.inventaris) {
+                    const inv = data.inventaris;
+                    const lines = [];
+                    if (inv.merk_type) lines.push('Merk/Type: ' + inv.merk_type);
+                    if (inv.lokasi) lines.push('Lokasi: ' + inv.lokasi);
+                    if (inv.status) lines.push('Status: ' + inv.status);
+                    if (lines.length) message += '\n' + lines.join('\n');
+                }
+
+                showStatus(message, true);
             } else {
                 showStatus(data.message || 'Gagal menyimpan hasil scan.', false);
             }

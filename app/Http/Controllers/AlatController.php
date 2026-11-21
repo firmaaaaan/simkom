@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Alat;
 use App\Models\AlatCheck;
 use App\Models\Laboratory;
+use App\Services\SimpttInventarisService;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class AlatController extends Controller
 {
@@ -98,9 +100,13 @@ class AlatController extends Controller
     /**
      * Simpan alat hasil scan barcode. Dipakai alur "pilih lab lalu scan":
      * setiap scan langsung membuat data alat pada laboratorium terpilih.
-     * Mendukung payload barcode berupa kode saja atau JSON (integrasi SIMPTT).
+     *
+     * Payload berupa kode saja dilookup ke API SIMPTT Inventaris, lalu data
+     * hasil lookup (no inventaris, nama, merk/type, lokasi, status, keterangan)
+     * yang dipakai untuk record lokal. Payload JSON berisi data lengkap tetap
+     * didukung tanpa lookup (kompatibilitas lama).
      */
-    public function scanStore(Request $request)
+    public function scanStore(Request $request, SimpttInventarisService $inventaris)
     {
         abort_unless($this->canCreate(), 403);
 
@@ -123,19 +129,66 @@ class AlatController extends Controller
             ], 422);
         }
 
+        $simptt = null;
+
+        if (empty($validated['name'])) {
+            try {
+                $simptt = $inventaris->scan($validated['code']);
+            } catch (RuntimeException $e) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Gagal menghubungi SIMPTT Inventaris. Coba lagi atau gunakan input manual.',
+                ], 502);
+            }
+
+            if ($simptt === null) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Kode '.$validated['code'].' tidak ditemukan di SIMPTT Inventaris. '
+                        .'Pastikan barcode berisi no inventaris (format 00.00.00.00.00.000) '
+                        .'atau hubungi pengembang SIMPTT agar kode barcode didukung.',
+                ], 422);
+            }
+        }
+
+        $code = ($simptt['no_inventaris'] ?? null) ?: $validated['code'];
+
+        if ($code !== $validated['code']) {
+            $existing = Alat::where('code', $code)->first();
+
+            if ($existing) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Kode '.$code.' sudah terdaftar sebagai '.$existing->name.'.',
+                ], 422);
+            }
+        }
+
+        $merk = ($simptt['merk_type'] ?? null) ?: ($validated['merk_type'] ?? null);
+        $merk = is_string($merk) ? trim((string) preg_replace('/\s+/', ' ', $merk)) : null;
+        $merk = $merk ?: null;
+
+        $name = ($simptt['nama_alat'] ?? null) ?: ($validated['name'] ?? null) ?: $code;
+
         $alat = Alat::create([
             'laboratory_id' => $validated['laboratory_id'],
-            'name' => $validated['name'] ?? $validated['code'],
-            'code' => $validated['code'],
-            'merk_type' => $validated['merk_type'] ?? null,
-            'location' => $validated['location'] ?? null,
-            'status' => $validated['status'] ?? null,
-            'description' => $validated['description'] ?? null,
+            'name' => $name,
+            'code' => $code,
+            'merk_type' => $merk,
+            'location' => ($simptt['lokasi'] ?? null) ?: ($validated['location'] ?? null) ?: null,
+            'status' => ($simptt['status'] ?? null) ?: ($validated['status'] ?? null) ?: null,
+            'description' => ($simptt['keterangan'] ?? null) ?: ($validated['description'] ?? null) ?: null,
         ]);
 
-        return response()->json([
+        $message = $alat->name.' ('.$alat->code.') tersimpan.';
+
+        if (! empty($simptt['laboratorium'])) {
+            $message .= ' Lab: '.$simptt['laboratorium'].'.';
+        }
+
+        $payload = [
             'ok' => true,
-            'message' => $alat->name.' ('.$alat->code.') tersimpan.',
+            'message' => $message,
             'alat' => [
                 'id' => $alat->id,
                 'name' => $alat->name,
@@ -143,7 +196,13 @@ class AlatController extends Controller
                 'status' => $alat->status,
                 'laboratory' => $alat->laboratory?->name,
             ],
-        ], 201);
+        ];
+
+        if ($simptt !== null) {
+            $payload['inventaris'] = $simptt;
+        }
+
+        return response()->json($payload, 201);
     }
 
     /**

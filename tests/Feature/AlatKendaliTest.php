@@ -9,6 +9,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AlatKendaliTest extends TestCase
@@ -258,8 +259,16 @@ class AlatKendaliTest extends TestCase
         ]);
     }
 
-    public function test_scan_store_uses_code_as_name_when_only_code_scanned(): void
+    public function test_scan_store_rejects_plain_code_not_found_in_simptt(): void
     {
+        Http::fake([
+            config('inventaris.scan_api_url').'*' => Http::response([
+                'success' => false,
+                'message' => 'Inventaris dengan kode tersebut tidak ditemukan',
+                'data' => null,
+            ], 404),
+        ]);
+
         $lab = Laboratory::create([
             'code' => 'LAB-SCAN2',
             'name' => 'Lab Scan 2',
@@ -272,12 +281,10 @@ class AlatKendaliTest extends TestCase
                 'laboratory_id' => $lab->id,
                 'code' => 'INV.SCAN.002',
             ])
-            ->assertCreated();
+            ->assertStatus(422)
+            ->assertJson(['ok' => false]);
 
-        $this->assertDatabaseHas('alat', [
-            'code' => 'INV.SCAN.002',
-            'name' => 'INV.SCAN.002',
-        ]);
+        $this->assertDatabaseMissing('alat', ['code' => 'INV.SCAN.002']);
     }
 
     public function test_scan_store_requires_laboratory(): void
@@ -290,6 +297,7 @@ class AlatKendaliTest extends TestCase
 
     public function test_scan_store_rejects_duplicate_code(): void
     {
+        Http::fake();
         $alat = $this->seedAlat('INV-DUP-01');
 
         $this->actingAs($this->userWith(['view-alat', 'create-alat']))
@@ -300,6 +308,8 @@ class AlatKendaliTest extends TestCase
             ->assertStatus(422)
             ->assertJson(['ok' => false]);
 
+        // Duplikat dicek sebelum lookup SIMPTT.
+        Http::assertNothingSent();
         $this->assertSame(1, Alat::where('code', 'INV-DUP-01')->count());
     }
 
