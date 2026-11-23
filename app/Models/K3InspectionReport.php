@@ -168,16 +168,26 @@ class K3InspectionReport extends Model
                 continue;
             }
 
+            $dokumentasi = $row['dokumentasi'] ?? '';
+            if (is_array($dokumentasi)) {
+                $dokumentasi = array_values(array_filter(array_map(
+                    fn ($path) => is_string($path) ? trim($path) : '',
+                    $dokumentasi
+                ), fn ($path) => $path !== ''));
+            } else {
+                $dokumentasi = trim((string) $dokumentasi);
+            }
+
             $finding = [
                 'temuan' => trim((string) ($row['temuan'] ?? '')),
-                'dokumentasi' => trim((string) ($row['dokumentasi'] ?? '')),
+                'dokumentasi' => $dokumentasi,
                 'saran_perbaikan' => trim((string) ($row['saran_perbaikan'] ?? '')),
                 'pelaksana' => trim((string) ($row['pelaksana'] ?? '')),
                 'target' => trim((string) ($row['target'] ?? '')),
                 'catatan' => trim((string) ($row['catatan'] ?? '')),
             ];
 
-            $isEmpty = collect($finding)->every(fn ($v) => $v === '');
+            $isEmpty = collect($finding)->every(fn ($v) => $v === '' || $v === []);
             if (! $isEmpty) {
                 $findings[] = $finding;
             }
@@ -209,14 +219,24 @@ class K3InspectionReport extends Model
     public function getFindingRowsAttribute(): array
     {
         return collect($this->findings ?? [])
-            ->map(fn (array $row) => [
-                'temuan' => (string) ($row['temuan'] ?? ''),
-                'dokumentasi' => (string) ($row['dokumentasi'] ?? ''),
-                'saran_perbaikan' => (string) ($row['saran_perbaikan'] ?? ''),
-                'pelaksana' => (string) ($row['pelaksana'] ?? ''),
-                'target' => (string) ($row['target'] ?? ''),
-                'catatan' => (string) ($row['catatan'] ?? ''),
-            ])
+            ->map(function (array $row) {
+                $dokumentasi = $row['dokumentasi'] ?? '';
+                $files = is_array($dokumentasi)
+                    ? array_values(array_filter($dokumentasi, fn ($p) => is_string($p) && $p !== ''))
+                    : [];
+
+                return [
+                    'temuan' => (string) ($row['temuan'] ?? ''),
+                    'dokumentasi' => $files !== []
+                        ? implode(', ', array_map(fn ($p) => basename($p), $files))
+                        : (is_string($dokumentasi) ? $dokumentasi : ''),
+                    'dokumentasi_files' => $files,
+                    'saran_perbaikan' => (string) ($row['saran_perbaikan'] ?? ''),
+                    'pelaksana' => (string) ($row['pelaksana'] ?? ''),
+                    'target' => (string) ($row['target'] ?? ''),
+                    'catatan' => (string) ($row['catatan'] ?? ''),
+                ];
+            })
             ->values()
             ->all();
     }

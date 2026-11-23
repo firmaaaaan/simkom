@@ -7,10 +7,15 @@ use App\Imports\K3ImportContext;
 use App\Imports\K3InspectionReportImport;
 use App\Models\K3InspectionReport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class K3InspectionReportController extends Controller
 {
+    private const EVIDENCE_DIR = 'k3-inspection-evidence';
+
+    private const MAX_EVIDENCE_PER_FINDING = 3;
     private function filteredQuery(Request $request)
     {
         return K3InspectionReport::query()
@@ -54,7 +59,7 @@ class K3InspectionReportController extends Controller
     {
         $validated = $this->validateReport($request);
         $validated['checklist_items'] = K3InspectionReport::normalizeChecklist($request->input('checklist', []));
-        $validated['findings'] = K3InspectionReport::normalizeFindings($request->input('findings', []));
+        $validated['findings'] = K3InspectionReport::normalizeFindings($this->attachDokumentasiFiles($request));
         $validated['created_by'] = auth()->id();
 
         K3InspectionReport::create($validated);
@@ -84,7 +89,7 @@ class K3InspectionReportController extends Controller
     {
         $validated = $this->validateReport($request);
         $validated['checklist_items'] = K3InspectionReport::normalizeChecklist($request->input('checklist', []));
-        $validated['findings'] = K3InspectionReport::normalizeFindings($request->input('findings', []));
+        $validated['findings'] = K3InspectionReport::normalizeFindings($this->attachDokumentasiFiles($request, $k3InspectionReport));
 
         $k3InspectionReport->update($validated);
 
@@ -94,6 +99,7 @@ class K3InspectionReportController extends Controller
 
     public function destroy(K3InspectionReport $k3InspectionReport)
     {
+        $this->deleteEvidence($k3InspectionReport);
         $k3InspectionReport->delete();
 
         return redirect()->route('k3-inspection-reports.index')
@@ -107,7 +113,11 @@ class K3InspectionReportController extends Controller
             'ids.*' => 'exists:k3_inspection_reports,id',
         ]);
 
-        K3InspectionReport::whereIn('id', $request->ids)->delete();
+        $reports = K3InspectionReport::whereIn('id', $request->ids)->get();
+        foreach ($reports as $report) {
+            $this->deleteEvidence($report);
+            $report->delete();
+        }
 
         return redirect()->route('k3-inspection-reports.index')
             ->with('success', count($request->ids).' laporan inspeksi K3 berhasil dihapus.');
@@ -169,11 +179,17 @@ class K3InspectionReportController extends Controller
             'checklist' => 'nullable|array',
             'findings' => 'nullable|array|max:30',
             'findings.*.temuan' => 'nullable|string|max:2000',
-            'findings.*.dokumentasi' => 'nullable|string|max:255',
+            'findings.*.dokumentasi' => 'nullable|array|max:'.self::MAX_EVIDENCE_PER_FINDING,
+            'findings.*.dokumentasi.*' => 'file|mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx|max:5120',
+            'findings.*.dokumentasi_existing' => 'nullable|array|max:'.self::MAX_EVIDENCE_PER_FINDING,
+            'findings.*.dokumentasi_existing.*' => 'string|max:255',
+            'findings.*.dokumentasi_text' => 'nullable|string|max:255',
             'findings.*.saran_perbaikan' => 'nullable|string|max:2000',
             'findings.*.pelaksana' => 'nullable|string|max:255',
             'findings.*.target' => 'nullable|string|max:255',
             'findings.*.catatan' => 'nullable|string|max:2000',
+            'remove_dokumentasi' => 'nullable|array',
+            'remove_dokumentasi.*' => 'string|max:255',
         ], [
             'hari.required' => 'Hari pada berita acara wajib diisi.',
             'tanggal_ba.required' => 'Tanggal berita acara wajib diisi.',
@@ -183,6 +199,116 @@ class K3InspectionReportController extends Controller
             'lokasi.required' => 'Lokasi inspeksi wajib diisi.',
             'pemeriksa_nama.required' => 'Nama pemeriksa wajib diisi.',
             'pemeriksa_jabatan.required' => 'Jabatan pemeriksa wajib diisi.',
+            'findings.*.dokumentasi.max' => 'Maksimal '.self::MAX_EVIDENCE_PER_FINDING.' file dokumentasi per temuan.',
+            'findings.*.dokumentasi.*.mimes' => 'Dokumentasi harus berupa gambar (JPG/PNG/WEBP) atau dokumen (PDF/Word/Excel).',
+            'findings.*.dokumentasi.*.max' => 'Ukuran setiap file dokumentasi maksimal 5 MB.',
         ]);
+    }
+
+    /**
+     * Simpan file dokumentasi temuan ke disk public dan kembalikan
+     * baris findings siap dinormalisasi (dokumentasi = array path | teks legacy).
+     */
+    private function attachDokumentasiFiles(Request $request, ?K3InspectionReport $report = null): array
+    {
+        $rows = $request->input('findings', []);
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $remove = array_values(array_filter((array) $request->input('remove_dokumentasi', []), 'is_string'));
+        $oldPaths = $this->evidencePaths($report);
+
+        // Hanya path yang memang milik laporan ini yang boleh dipertahankan/dihapus.
+        $postedExisting = [];
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            foreach ((array) ($row['dokumentasi_existing'] ?? []) as $path) {
+                if (is_string($path) && $path !== '') {
+                    $postedExisting[] = $path;
+                }
+            }
+        }
+        $postedExisting = array_values(array_unique($postedExisting));
+
+        $drop = array_values(array_unique(array_merge(
+            array_intersect($remove, $oldPaths),
+            array_diff($oldPaths, $postedExisting)
+        )));
+
+        // Cek total (tersimpan + baru) per baris sebelum menyimpan/menghapus apa pun.
+        foreach ($rows as $i => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $kept = $this->keptEvidence($row, $oldPaths, $remove);
+            $uploads = $request->file("findings.{$i}.dokumentasi", []);
+            if (count($kept) + count($uploads) > self::MAX_EVIDENCE_PER_FINDING) {
+                throw ValidationException::withMessages([
+                    "findings.{$i}.dokumentasi" => 'Total dokumentasi maksimal '.self::MAX_EVIDENCE_PER_FINDING.' file per temuan (termasuk file tersimpan).',
+                ]);
+            }
+        }
+
+        if ($drop !== []) {
+            Storage::disk('public')->delete($drop);
+        }
+
+        foreach ($rows as $i => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $files = $this->keptEvidence($row, $oldPaths, $remove);
+            foreach ($request->file("findings.{$i}.dokumentasi", []) as $file) {
+                $files[] = $file->store(self::EVIDENCE_DIR, 'public');
+            }
+
+            $text = trim((string) ($row['dokumentasi_text'] ?? ''));
+            $rows[$i]['dokumentasi'] = $files !== [] ? $files : ($text !== '' ? $text : []);
+            unset($rows[$i]['dokumentasi_existing'], $rows[$i]['dokumentasi_text']);
+        }
+
+        return $rows;
+    }
+
+    private function keptEvidence(array $row, array $oldPaths, array $remove): array
+    {
+        $existing = array_values(array_intersect(
+            array_filter((array) ($row['dokumentasi_existing'] ?? []), 'is_string'),
+            $oldPaths
+        ));
+
+        return array_values(array_diff($existing, $remove));
+    }
+
+    private function evidencePaths(?K3InspectionReport $report): array
+    {
+        if (! $report) {
+            return [];
+        }
+
+        $paths = [];
+        foreach ($report->findings ?? [] as $row) {
+            if (! is_array($row['dokumentasi'] ?? null)) {
+                continue;
+            }
+            foreach ($row['dokumentasi'] as $path) {
+                if (is_string($path) && $path !== '') {
+                    $paths[] = $path;
+                }
+            }
+        }
+
+        return array_values(array_unique($paths));
+    }
+
+    private function deleteEvidence(K3InspectionReport $report): void
+    {
+        if ($paths = $this->evidencePaths($report)) {
+            Storage::disk('public')->delete($paths);
+        }
     }
 }

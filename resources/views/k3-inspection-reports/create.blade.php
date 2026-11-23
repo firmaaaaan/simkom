@@ -12,7 +12,7 @@
         Kembali
     </a>
 
-    <form action="{{ route('k3-inspection-reports.store') }}" method="POST" class="space-y-6">
+    <form action="{{ route('k3-inspection-reports.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @include('k3-inspection-reports._form', ['pemeriksaNama' => $pemeriksaNama, 'pemeriksaJabatan' => $pemeriksaJabatan])
 

@@ -54,6 +54,7 @@
                     <tr>
                         <th class="px-3 py-3 text-center font-medium text-gray-600 w-10">No</th>
                         <th class="px-3 py-3 text-left font-medium text-gray-600">Temuan</th>
+                        <th class="px-3 py-3 text-left font-medium text-gray-600 w-48">Dokumentasi</th>
                         <th class="px-3 py-3 text-left font-medium text-gray-600">Saran Perbaikan</th>
                         <th class="px-3 py-3 text-left font-medium text-gray-600">Pelaksana</th>
                         <th class="px-3 py-3 text-left font-medium text-gray-600">Target</th>
@@ -65,6 +66,29 @@
                         <tr class="align-top">
                             <td class="px-3 py-3 text-center text-gray-500">{{ $loop->iteration }}</td>
                             <td class="px-3 py-3 text-gray-900 whitespace-pre-line">{{ $row['temuan'] ?: '-' }}</td>
+                            <td class="px-3 py-3">
+                                @if(count($row['dokumentasi_files']))
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($row['dokumentasi_files'] as $path)
+                                            @php($url = \Illuminate\Support\Facades\Storage::disk('public')->url($path))
+                                            @if(preg_match('/\.(jpe?g|png|webp)$/i', $path))
+                                                <a href="{{ $url }}" target="_blank" title="{{ basename($path) }}">
+                                                    <img src="{{ $url }}" alt="Dokumentasi" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                                                </a>
+                                            @else
+                                                <a href="{{ $url }}" target="_blank" download class="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs text-green-700 hover:bg-green-50 max-w-[10rem]">
+                                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18v-5a4 4 0 0 0-4-4H6m12 4v3M10 8h6m-6 4h6" />
+                                                    </svg>
+                                                    <span class="truncate">{{ basename($path) }}</span>
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-gray-900">{{ $row['dokumentasi'] ?: '-' }}</span>
+                                @endif
+                            </td>
                             <td class="px-3 py-3 text-gray-900 whitespace-pre-line">{{ $row['saran_perbaikan'] ?: '-' }}</td>
                             <td class="px-3 py-3 text-gray-900">{{ $row['pelaksana'] ?: '-' }}</td>
                             <td class="px-3 py-3 text-gray-900">{{ $row['target'] ?: '-' }}</td>
@@ -72,7 +96,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500">Tidak ada temuan.</td>
+                            <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-500">Tidak ada temuan.</td>
                         </tr>
                     @endforelse
                 </tbody>

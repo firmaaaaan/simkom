@@ -7,6 +7,8 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class K3InspectionReportTest extends TestCase
@@ -54,7 +56,7 @@ class K3InspectionReportTest extends TestCase
             'checklist' => $checklist,
             'findings' => [[
                 'temuan' => 'APAR habis masa pakai',
-                'dokumentasi' => 'Foto',
+                'dokumentasi_text' => 'Foto',
                 'saran_perbaikan' => 'Ganti APAR',
                 'pelaksana' => 'Teknisi',
                 'target' => 'Akhir Bulan',
@@ -170,6 +172,105 @@ class K3InspectionReportTest extends TestCase
         $report->refresh();
         $this->assertSame('Gedung Baru', $report->lokasi);
         $this->assertSame('Desember 2026', $report->bulan_inspeksi);
+    }
+
+    /** PNG transparan 1×1 valid untuk aturan validasi mimes (tanpa dependensi GD). */
+    private function tinyPng(): string
+    {
+        return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+    }
+
+    public function test_store_uploads_dokumentasi_files(): void
+    {
+        Storage::fake('public');
+        $user = $this->userWith(['create-k3-inspection-reports'], 'upload-k3insp@uji.test');
+
+        $payload = $this->payload();
+        $payload['findings'][0]['dokumentasi'] = [
+            UploadedFile::fake()->createWithContent('foto-temuan.png', $this->tinyPng()),
+            UploadedFile::fake()->create('lampiran.pdf', 100, 'application/pdf'),
+        ];
+
+        $this->actingAs($user)
+            ->post(route('k3-inspection-reports.store'), $payload)
+            ->assertRedirect(route('k3-inspection-reports.index'))
+            ->assertSessionHas('success');
+
+        $report = K3InspectionReport::first();
+        $this->assertNotNull($report);
+        $dokumentasi = $report->findings[0]['dokumentasi'];
+        $this->assertIsArray($dokumentasi);
+        $this->assertCount(2, $dokumentasi);
+        foreach ($dokumentasi as $path) {
+            $this->assertStringStartsWith('k3-inspection-evidence/', $path);
+            Storage::disk('public')->assertExists($path);
+        }
+    }
+
+    public function test_store_rejects_more_than_three_dokumentasi_files(): void
+    {
+        Storage::fake('public');
+        $user = $this->userWith(['create-k3-inspection-reports'], 'banyakk3insp@uji.test');
+
+        $payload = $this->payload();
+        $payload['findings'][0]['dokumentasi'] = array_fill(
+            0,
+            4,
+            UploadedFile::fake()->create('lampiran.pdf', 10, 'application/pdf')
+        );
+
+        $this->actingAs($user)
+            ->post(route('k3-inspection-reports.store'), $payload)
+            ->assertSessionHasErrors('findings.0.dokumentasi');
+
+        $this->assertDatabaseCount('k3_inspection_reports', 0);
+    }
+
+    public function test_update_can_remove_dokumentasi_file(): void
+    {
+        Storage::fake('public');
+        $user = $this->userWith(['edit-k3-inspection-reports'], 'rm-k3insp@uji.test');
+
+        $path = 'k3-inspection-evidence/lama.jpg';
+        Storage::disk('public')->put($path, 'isi-file-lama');
+        $report = $this->report(['findings' => K3InspectionReport::normalizeFindings([[
+            'temuan' => 'P3K kurang lengkap',
+            'dokumentasi' => [$path],
+            'saran_perbaikan' => 'Lengkapi isi kotak P3K',
+        ]])]);
+
+        $payload = $this->payload(['lokasi' => 'Gedung Baru']);
+        $payload['findings'][0]['dokumentasi_existing'] = [$path];
+        $payload['remove_dokumentasi'] = [$path];
+
+        $this->actingAs($user)
+            ->put(route('k3-inspection-reports.update', $report), $payload)
+            ->assertRedirect(route('k3-inspection-reports.index'))
+            ->assertSessionHas('success');
+
+        Storage::disk('public')->assertMissing($path);
+        $report->refresh();
+        $this->assertSame('Foto', $report->findings[0]['dokumentasi']);
+    }
+
+    public function test_destroy_removes_dokumentasi_files(): void
+    {
+        Storage::fake('public');
+        $user = $this->userWith(['delete-k3-inspection-reports'], 'del-k3insp@uji.test');
+
+        $path = 'k3-inspection-evidence/dihapus.jpg';
+        Storage::disk('public')->put($path, 'isi-file');
+        $report = $this->report(['findings' => K3InspectionReport::normalizeFindings([[
+            'temuan' => 'APAR habis masa pakai',
+            'dokumentasi' => [$path],
+        ]])]);
+
+        $this->actingAs($user)
+            ->delete(route('k3-inspection-reports.destroy', $report))
+            ->assertRedirect(route('k3-inspection-reports.index'));
+
+        $this->assertDatabaseMissing('k3_inspection_reports', ['id' => $report->id]);
+        Storage::disk('public')->assertMissing($path);
     }
 
     public function test_destroy_and_bulk_destroy(): void

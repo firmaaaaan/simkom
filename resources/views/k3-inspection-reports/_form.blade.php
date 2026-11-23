@@ -117,26 +117,26 @@
     </div>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" x-data="k3Findings" data-findings="{{ json_encode($findings) }}">
     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div>
             <h3 class="text-sm font-semibold text-gray-900">Form Laporan Inspeksi K3 (Temuan)</h3>
             <p class="text-xs text-gray-500 mt-0.5">Catatan temuan, saran perbaikan, pelaksana, target, dan catatan.</p>
         </div>
-        <button type="button" @click="addFinding()" x-data x-bind:disabled="findingCount >= 30" class="inline-flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-xs font-medium rounded-lg hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        <button type="button" @click="addFinding()" :disabled="findingCount >= 30" class="inline-flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 text-xs font-medium rounded-lg hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             Tambah Temuan
         </button>
     </div>
-    <div class="overflow-x-auto" x-data="k3Findings" data-findings="{{ json_encode($findings) }}">
+    <div class="overflow-x-auto">
         <table class="w-full text-sm" style="min-width: 1100px;">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-3 py-3 text-center font-medium text-gray-600 w-10">No</th>
                     <th class="px-3 py-3 text-left font-medium text-gray-600">Temuan Inspeksi</th>
-                    <th class="px-3 py-3 text-left font-medium text-gray-600 w-32">Dokumentasi</th>
+                    <th class="px-3 py-3 text-left font-medium text-gray-600 w-56">Dokumentasi</th>
                     <th class="px-3 py-3 text-left font-medium text-gray-600">Saran Perbaikan</th>
                     <th class="px-3 py-3 text-left font-medium text-gray-600 w-32">Pelaksana</th>
                     <th class="px-3 py-3 text-left font-medium text-gray-600 w-32">Target</th>
@@ -152,7 +152,27 @@
                             <textarea :name="'findings[' + index + '][temuan]'" x-model="finding.temuan" rows="2" class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
                         </td>
                         <td class="px-3 py-2">
-                            <input type="text" :name="'findings[' + index + '][dokumentasi]'" x-model="finding.dokumentasi" class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <div class="space-y-1.5">
+                                <template x-for="(file, fi) in finding.files" :key="file.path">
+                                    <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5">
+                                        <a :href="file.url" target="_blank" class="flex items-center gap-2 min-w-0 flex-1 text-xs text-green-700 hover:text-green-800">
+                                            <img x-show="file.is_image" :src="file.url" alt="" class="w-8 h-8 rounded object-cover flex-shrink-0">
+                                            <span class="truncate" x-text="file.name"></span>
+                                        </a>
+                                        <label class="inline-flex items-center gap-1 text-[11px] text-red-600 cursor-pointer flex-shrink-0" title="Hapus file ini">
+                                            <input type="checkbox" name="remove_dokumentasi[]" :value="file.path" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                            Hapus
+                                        </label>
+                                        <input type="hidden" :name="'findings[' + index + '][dokumentasi_existing][]'" :value="file.path">
+                                    </div>
+                                </template>
+                                <div x-show="finding.dokumentasi_text && !finding.files.length" class="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-600">
+                                    Data lama: <span x-text="finding.dokumentasi_text"></span>
+                                    <input type="hidden" :name="'findings[' + index + '][dokumentasi_text]'" x-model="finding.dokumentasi_text">
+                                </div>
+                                <input type="file" multiple :name="'findings[' + index + '][dokumentasi][]'" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.xls,.xlsx" :disabled="finding.files.length >= 3" class="w-full text-xs text-gray-600 file:mr-2 file:px-2 file:py-1.5 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50">
+                                <p class="text-[11px] text-gray-400">Maks 3 file, 5 MB/file (gambar/dokumen).</p>
+                            </div>
                         </td>
                         <td class="px-3 py-2">
                             <textarea :name="'findings[' + index + '][saran_perbaikan]'" x-model="finding.saran_perbaikan" rows="2" class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
@@ -189,10 +209,30 @@
             get findingCount() { return this.findings.length; },
             init() {
                 const parsed = JSON.parse(this.$el.dataset.findings || '[]');
-                this.findings = parsed.map((row) => ({ ...this.blank(), ...row, uid: this.uid() }));
+                this.findings = parsed.map((row) => {
+                    const finding = { ...this.blank(), ...row, uid: this.uid() };
+                    finding.files = this.toFiles(row);
+                    finding.dokumentasi_text = typeof row.dokumentasi === 'string'
+                        ? row.dokumentasi
+                        : (typeof row.dokumentasi_text === 'string' ? row.dokumentasi_text : '');
+                    finding.dokumentasi = [];
+                    delete finding.dokumentasi_existing;
+                    return finding;
+                });
             },
             uid() { return Math.random().toString(36).slice(2); },
-            blank() { return { temuan: '', dokumentasi: '', saran_perbaikan: '', pelaksana: '', target: '', catatan: '' }; },
+            blank() { return { temuan: '', dokumentasi: [], dokumentasi_text: '', files: [], saran_perbaikan: '', pelaksana: '', target: '', catatan: '' }; },
+            toFiles(row) {
+                const paths = Array.isArray(row.dokumentasi)
+                    ? row.dokumentasi
+                    : (Array.isArray(row.dokumentasi_existing) ? row.dokumentasi_existing : []);
+                return paths
+                    .filter((p) => typeof p === 'string' && p !== '')
+                    .map((path) => {
+                        const name = path.split('/').pop();
+                        return { path, url: '/storage/' + path, name, is_image: /\.(jpe?g|png|webp)$/i.test(name) };
+                    });
+            },
             addFinding() { if (this.findings.length < 30) { this.findings.push({ ...this.blank(), uid: this.uid() }); } },
             removeFinding(index) { if (this.findings.length > 1) { this.findings.splice(index, 1); } },
         }));
