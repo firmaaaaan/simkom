@@ -70,7 +70,7 @@
                                 @if(count($row['dokumentasi_files']))
                                     <div class="flex flex-wrap gap-2">
                                         @foreach($row['dokumentasi_files'] as $path)
-                                            @php($url = \Illuminate\Support\Facades\Storage::disk('public')->url($path))
+                                            @php($url = '/storage/'.$path)
                                             @if(preg_match('/\.(jpe?g|png|webp)$/i', $path))
                                                 <a href="{{ $url }}" target="_blank" title="{{ basename($path) }}">
                                                     <img src="{{ $url }}" alt="Dokumentasi" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
