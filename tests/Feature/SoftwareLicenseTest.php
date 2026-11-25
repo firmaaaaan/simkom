@@ -62,8 +62,8 @@ class SoftwareLicenseTest extends TestCase
             'pic_name' => 'Budi Santoso',
             'pic_email' => 'budi@kampus.ac.id',
             'licenses' => [
-                ['label' => 'Lisensi 1', 'license_key' => 'AAAA-BBBB-CCCC', 'assigned_computer_id' => $pc1->id, 'purchase_date' => '2025-01-01', 'expiry_date' => '2027-01-01'],
-                ['label' => 'Lisensi 2', 'license_key' => 'DDDD-EEEE-FFFF', 'assigned_computer_id' => $pc2->id],
+                ['label' => 'Lisensi 1', 'license_key' => 'AAAA-BBBB-CCCC', 'computer_ids' => [$pc1->id], 'purchase_date' => '2025-01-01', 'expiry_date' => '2027-01-01'],
+                ['label' => 'Lisensi 2', 'license_key' => 'DDDD-EEEE-FFFF', 'computer_ids' => [$pc2->id]],
                 ['label' => 'Lisensi 3', 'license_key' => 'GGGG-HHHH-IIII'],
             ],
         ]));
@@ -110,12 +110,65 @@ class SoftwareLicenseTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('software.store'), $this->payload([
             'licenses' => [
-                ['license_key' => 'AAAA', 'assigned_computer_id' => $pc->id],
-                ['license_key' => 'BBBB', 'assigned_computer_id' => $pc->id],
+                ['license_key' => 'AAAA', 'computer_ids' => [$pc->id]],
+                ['license_key' => 'BBBB', 'computer_ids' => [$pc->id]],
             ],
         ]));
 
-        $response->assertSessionHasErrors('licenses.1.assigned_computer_id');
+        $response->assertSessionHasErrors('licenses.1.computer_ids');
+    }
+
+    public function test_one_license_can_be_assigned_to_multiple_pcs(): void
+    {
+        $pc1 = $this->computer('PC-01');
+        $pc2 = $this->computer('PC-02');
+
+        $response = $this->actingAs($this->admin())->post(route('software.store'), $this->payload([
+            'licenses' => [
+                ['license_key' => 'AAAA-BBBB-CCCC', 'max_devices' => 2, 'computer_ids' => [$pc1->id, $pc2->id]],
+            ],
+        ]));
+
+        $response->assertRedirect(route('software.index'));
+
+        $software = Software::where('name', 'Microsoft Office 2021')->firstOrFail();
+        $license = $software->licenses()->firstOrFail();
+
+        $this->assertSame(2, $license->max_devices);
+        $this->assertCount(2, $license->computers);
+        $this->assertDatabaseHas('computer_software', ['computer_id' => $pc1->id, 'software_id' => $software->id]);
+        $this->assertDatabaseHas('computer_software', ['computer_id' => $pc2->id, 'software_id' => $software->id]);
+    }
+
+    public function test_assigning_more_pcs_than_default_max_devices_is_rejected(): void
+    {
+        $pc1 = $this->computer('PC-01');
+        $pc2 = $this->computer('PC-02');
+
+        $response = $this->actingAs($this->admin())->post(route('software.store'), $this->payload([
+            'licenses' => [
+                ['license_key' => 'AAAA', 'computer_ids' => [$pc1->id, $pc2->id]],
+            ],
+        ]));
+
+        $response->assertSessionHasErrors('licenses.0.computer_ids');
+        $this->assertDatabaseCount('software_licenses', 0);
+    }
+
+    public function test_assigning_more_pcs_than_max_devices_is_rejected(): void
+    {
+        $pc1 = $this->computer('PC-01');
+        $pc2 = $this->computer('PC-02');
+        $pc3 = $this->computer('PC-03');
+
+        $response = $this->actingAs($this->admin())->post(route('software.store'), $this->payload([
+            'licenses' => [
+                ['license_key' => 'AAAA', 'max_devices' => 2, 'computer_ids' => [$pc1->id, $pc2->id, $pc3->id]],
+            ],
+        ]));
+
+        $response->assertSessionHasErrors('licenses.0.computer_ids');
+        $this->assertDatabaseCount('software_licenses', 0);
     }
 
     public function test_update_syncs_licenses_and_computer_pivot(): void
@@ -125,7 +178,7 @@ class SoftwareLicenseTest extends TestCase
         $user = $this->admin();
         $this->actingAs($user)->post(route('software.store'), $this->payload([
             'licenses' => [
-                ['license_key' => 'AAAA-BBBB-CCCC', 'assigned_computer_id' => $pc->id],
+                ['license_key' => 'AAAA-BBBB-CCCC', 'computer_ids' => [$pc->id]],
             ],
         ]));
 
@@ -135,7 +188,7 @@ class SoftwareLicenseTest extends TestCase
         $response = $this->actingAs($user)->put(route('software.update', $software), $this->payload([
             'name' => 'Microsoft Office 2021 Updated',
             'licenses' => [
-                ['id' => $license->id, 'label' => 'Lisensi Utama', 'license_key' => 'ZZZZ-YYYY-XXXX', 'assigned_computer_id' => $pc->id],
+                ['id' => $license->id, 'label' => 'Lisensi Utama', 'license_key' => 'ZZZZ-YYYY-XXXX', 'max_devices' => 2, 'computer_ids' => [$pc->id]],
                 ['label' => 'Lisensi Baru', 'license_key' => 'NEW1-NEW2-NEW3'],
             ],
         ]));
@@ -156,7 +209,7 @@ class SoftwareLicenseTest extends TestCase
         $user = $this->admin();
         $this->actingAs($user)->post(route('software.store'), $this->payload([
             'licenses' => [
-                ['license_key' => 'AAAA-BBBB-CCCC', 'assigned_computer_id' => $pc->id],
+                ['license_key' => 'AAAA-BBBB-CCCC', 'computer_ids' => [$pc->id]],
             ],
         ]));
 

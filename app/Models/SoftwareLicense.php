@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SoftwareLicense extends Model
 {
@@ -14,15 +15,20 @@ class SoftwareLicense extends Model
         'software_id',
         'label',
         'license_key',
-        'assigned_computer_id',
+        'max_devices',
         'purchase_date',
         'expiry_date',
         'notes',
     ];
 
     protected $casts = [
+        'max_devices' => 'integer',
         'purchase_date' => 'date',
         'expiry_date' => 'date',
+    ];
+
+    protected $attributes = [
+        'max_devices' => 1,
     ];
 
     public function software(): BelongsTo
@@ -30,9 +36,14 @@ class SoftwareLicense extends Model
         return $this->belongsTo(Software::class);
     }
 
-    public function computer(): BelongsTo
+    public function computers(): BelongsToMany
     {
-        return $this->belongsTo(Computer::class, 'assigned_computer_id');
+        return $this->belongsToMany(Computer::class, 'software_license_computer')->withTimestamps();
+    }
+
+    public function usedSeats(): int
+    {
+        return $this->relationLoaded('computers') ? $this->computers->count() : $this->computers()->count();
     }
 
     public function isExpired(): bool

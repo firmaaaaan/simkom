@@ -66,8 +66,9 @@
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-blue-800">Format file: 2 sheet</p>
                     <p class="text-xs text-blue-700"><span class="font-semibold">Sheet "Software":</span> Kode, Nama, Versi, Kategori, Jenis Lisensi, Penanggung Jawab, Email PJ, Status, Keterangan</p>
-                    <p class="text-xs text-blue-700"><span class="font-semibold">Sheet "Lisensi":</span> Kode Software, Label, Product Key, PC, Tanggal Beli, Tanggal Expired, Catatan, Status</p>
+                    <p class="text-xs text-blue-700"><span class="font-semibold">Sheet "Lisensi":</span> Kode Software, Label, Product Key, PC, Maks PC, Tanggal Beli, Tanggal Expired, Catatan, Status</p>
                     <p class="text-xs text-blue-700">Nama sheet harus tepat "Software" dan "Lisensi". Sheet "Lisensi" boleh kosong.</p>
+                    <p class="text-xs text-blue-700">Kolom "PC" boleh berisi banyak PC dipisah koma atau titik koma (contoh: PC-01;PC-02). Kolom "Maks PC" = batas jumlah PC untuk lisensi tersebut (default 1, atau otomatis mengikuti jumlah PC jika kosong).</p>
                     <p class="text-xs text-blue-700">Kode software opsional. Jika kosong, kode di-generate otomatis (SW-001, SW-002, ...).</p>
                     <p class="text-xs text-blue-700">Product key pada file export hanya tampil penuh jika Anda punya izin "Lihat Product Key Lisensi". Key yang disamarkan tidak akan menimpa key asli saat import.</p>
                 </div>

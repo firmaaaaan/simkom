@@ -22,11 +22,11 @@ class SoftwareImportExportTest extends TestCase
     private const SOFTWARE_HEADINGS = [
         'Kode', 'Nama', 'Versi', 'Kategori', 'Jenis Lisensi',
         'Penanggung Jawab', 'Email PJ', 'Status', 'Keterangan',
-        'Penyedia', 'Link Download',
+        'Catatan Lisensi', 'Penyedia', 'Link Download',
     ];
 
     private const LICENSE_HEADINGS = [
-        'Kode Software', 'Label', 'Product Key', 'PC',
+        'Kode Software', 'Label', 'Product Key', 'PC', 'Maks PC',
         'Tanggal Beli', 'Tanggal Expired', 'Catatan', 'Status',
     ];
 
@@ -73,13 +73,14 @@ class SoftwareImportExportTest extends TestCase
             'status' => 'Aktif',
         ]);
 
-        $software->licenses()->create([
+        $license = $software->licenses()->create([
             'label' => 'Lisensi 1',
             'license_key' => 'AAAA-BBBB-CCCC',
-            'assigned_computer_id' => $computer->id,
+            'max_devices' => 2,
             'purchase_date' => '2025-01-01',
             'expiry_date' => '2027-01-01',
         ]);
+        $license->computers()->attach($computer->id);
 
         return compact('computer', 'software');
     }
@@ -99,7 +100,7 @@ class SoftwareImportExportTest extends TestCase
 
     private function uploadableWorkbook(array $softwareRows = [], array $licenseRows = []): UploadedFile
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
 
         $softwareSheet = $spreadsheet->getActiveSheet();
         $softwareSheet->setTitle('Software');
@@ -109,7 +110,7 @@ class SoftwareImportExportTest extends TestCase
         $licenseSheet->setTitle('Lisensi');
         $licenseSheet->fromArray(array_merge([self::LICENSE_HEADINGS], $licenseRows), null, 'A1');
 
-        $path = tempnam(sys_get_temp_dir(), 'software') . '.xlsx';
+        $path = tempnam(sys_get_temp_dir(), 'software').'.xlsx';
         (new Xlsx($spreadsheet))->save($path);
         $spreadsheet->disconnectWorksheets();
 
@@ -140,14 +141,30 @@ class SoftwareImportExportTest extends TestCase
 
         $softwareRow = $sheets['software'][1];
         $this->assertSame('SW-001', $softwareRow[0]);
-        $this->assertSame('PT Distribusi Software Nusantara', $softwareRow[9]);
-        $this->assertSame('https://contoh.ac.id/download/office', $softwareRow[10]);
+        $this->assertSame('PT Distribusi Software Nusantara', $softwareRow[10]);
+        $this->assertSame('https://contoh.ac.id/download/office', $softwareRow[11]);
 
         $licenseRow = $sheets['licenses'][1];
         $this->assertSame('SW-001', $licenseRow[0]);
         $this->assertSame('AAAA-BBBB-CCCC', $licenseRow[2]);
         $this->assertSame('PC-01', $licenseRow[3]);
-        $this->assertSame('2025-01-01', $licenseRow[4]);
+        $this->assertEquals(2, $licenseRow[4]);
+        $this->assertSame('2025-01-01', $licenseRow[5]);
+    }
+
+    public function test_export_joins_multiple_computers_in_pc_column(): void
+    {
+        $seeded = $this->seedSoftware();
+        $pc2 = Computer::create(['code' => 'PC-02', 'status' => 'Aktif']);
+        $seeded['software']->licenses()->first()->computers()->attach($pc2->id);
+
+        $response = $this->actingAs($this->admin())->get(route('software.export'));
+
+        $response->assertOk();
+
+        $licenseRow = $this->download($response)['licenses'][1];
+
+        $this->assertSame('PC-01;PC-02', $licenseRow[3]);
     }
 
     public function test_export_masks_key_without_license_key_permission(): void
@@ -183,11 +200,11 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-100', 'AutoCAD', '2024', 'Design', 'Subscription', 'Sari', 'sari@kampus.ac.id', 'Aktif', 'Lisensi pendidikan', 'PT Media Kreatif', 'https://contoh.ac.id/download/autocad'],
+                ['SW-100', 'AutoCAD', '2024', 'Design', 'Subscription', 'Sari', 'sari@kampus.ac.id', 'Aktif', 'Lisensi pendidikan', '', 'PT Media Kreatif', 'https://contoh.ac.id/download/autocad'],
             ],
             [
-                ['SW-100', 'Lisensi 1', 'KEY1-KEY1-KEY1', 'PC-01', '2025-02-01', '2027-02-01', 'Catatan', 'Aktif'],
-                ['SW-100', 'Lisensi 2', 'KEY2-KEY2-KEY2', '', '', '', '', ''],
+                ['SW-100', 'Lisensi 1', 'KEY1-KEY1-KEY1', 'PC-01', '', '2025-02-01', '2027-02-01', 'Catatan', 'Aktif'],
+                ['SW-100', 'Lisensi 2', 'KEY2-KEY2-KEY2', '', '', '', '', '', ''],
             ]
         );
 
@@ -215,11 +232,11 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', ''],
+                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', '', ''],
             ],
             [
-                ['SW-001', 'Lisensi 1', 'NEW-AAA-BBB', 'PC-01', '2025-01-01', '2027-01-01', '', ''],
-                ['SW-001', 'Lisensi 3', 'NEW-CCC-DDD', '', '', '', '', ''],
+                ['SW-001', 'Lisensi 1', 'NEW-AAA-BBB', 'PC-01', '', '2025-01-01', '2027-01-01', '', ''],
+                ['SW-001', 'Lisensi 3', 'NEW-CCC-DDD', '', '', '', '', '', ''],
             ]
         );
 
@@ -237,10 +254,10 @@ class SoftwareImportExportTest extends TestCase
     {
         $file = $this->uploadableWorkbook(
             [
-                ['SW-200', 'Matlab', '2024', 'Utilities', 'Subscription', '', '', 'Aktif', '', '', ''],
+                ['SW-200', 'Matlab', '2024', 'Utilities', 'Subscription', '', '', 'Aktif', '', '', '', ''],
             ],
             [
-                ['SW-200', 'Lisensi 1', 'KEY-KEY-KEY', 'PC-TIDAK-ADA', '', '', '', ''],
+                ['SW-200', 'Lisensi 1', 'KEY-KEY-KEY', 'PC-TIDAK-ADA', '', '', '', '', ''],
             ]
         );
 
@@ -267,10 +284,10 @@ class SoftwareImportExportTest extends TestCase
 
         $file = $this->uploadableWorkbook(
             [
-                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', ''],
+                ['SW-001', 'Microsoft Office 2021', '2021', 'Office Suite', 'Volume License', 'Budi', 'budi@kampus.ac.id', 'Aktif', '', '', '', ''],
             ],
             [
-                ['SW-001', 'Lisensi 1', 'AAAA••••CCCC', 'PC-01', '', '', '', ''],
+                ['SW-001', 'Lisensi 1', 'AAAA••••CCCC', 'PC-01', '', '', '', '', ''],
             ]
         );
 
@@ -292,7 +309,7 @@ class SoftwareImportExportTest extends TestCase
         $export->assertOk();
 
         $path = $export->baseResponse->getFile()->getPathname();
-        $copy = tempnam(sys_get_temp_dir(), 'roundtrip') . '.xlsx';
+        $copy = tempnam(sys_get_temp_dir(), 'roundtrip').'.xlsx';
         copy($path, $copy);
 
         $file = new UploadedFile(
@@ -308,9 +325,62 @@ class SoftwareImportExportTest extends TestCase
         $this->assertDatabaseHas('software_licenses', [
             'label' => 'Lisensi 1',
             'license_key' => 'AAAA-BBBB-CCCC',
-            'assigned_computer_id' => Computer::where('code', 'PC-01')->value('id'),
+        ]);
+
+        $licenseId = Software::firstOrFail()->licenses()->where('label', 'Lisensi 1')->value('id');
+        $this->assertDatabaseHas('software_license_computer', [
+            'software_license_id' => $licenseId,
+            'computer_id' => Computer::where('code', 'PC-01')->value('id'),
         ]);
         $this->assertDatabaseCount('software', 1);
         $this->assertDatabaseCount('software_licenses', 1);
+    }
+
+    public function test_import_assigns_multiple_computers_to_one_license(): void
+    {
+        Computer::create(['code' => 'PC-01', 'status' => 'Aktif']);
+        $pc2 = Computer::create(['code' => 'PC-02', 'status' => 'Aktif']);
+
+        $file = $this->uploadableWorkbook(
+            [
+                ['SW-300', 'Windows 11 Pro', '2024', 'OS', 'Volume', '', '', 'Aktif', '', '', ''],
+            ],
+            [
+                ['SW-300', 'Lisensi 1', 'KEY-AAA-BBB', 'PC-01;PC-02', '2', '2025-02-01', '2027-02-01', '', ''],
+            ]
+        );
+
+        $response = $this->actingAs($this->admin())->post(route('software.store-import'), ['file' => $file]);
+
+        $response->assertRedirect(route('software.index'));
+
+        $software = Software::where('code', 'SW-300')->firstOrFail();
+        $license = $software->licenses()->firstOrFail();
+
+        $this->assertSame(2, $license->max_devices);
+        $this->assertCount(2, $license->computers);
+        $this->assertDatabaseHas('computer_software', ['computer_id' => $pc2->id, 'software_id' => $software->id]);
+    }
+
+    public function test_import_rejects_computer_count_over_max_pc(): void
+    {
+        Computer::create(['code' => 'PC-01', 'status' => 'Aktif']);
+        Computer::create(['code' => 'PC-02', 'status' => 'Aktif']);
+
+        $file = $this->uploadableWorkbook(
+            [
+                ['SW-301', 'Windows 11 Pro', '2024', 'OS', 'Volume', '', '', 'Aktif', '', '', ''],
+            ],
+            [
+                ['SW-301', 'Lisensi 1', 'KEY-AAA-BBB', 'PC-01;PC-02', '1', '2025-02-01', '2027-02-01', '', ''],
+            ]
+        );
+
+        $response = $this->actingAs($this->admin())->post(route('software.store-import'), ['file' => $file]);
+
+        $response->assertRedirect(route('software.index'));
+        $response->assertSessionHas('import_errors');
+
+        $this->assertDatabaseCount('software_licenses', 0);
     }
 }

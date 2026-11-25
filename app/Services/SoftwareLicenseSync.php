@@ -15,20 +15,14 @@ class SoftwareLicenseSync
      */
     public function syncComputers(Software $software, array $oldComputerIds = []): void
     {
-        $newComputerIds = $software->licenses()
-            ->whereNotNull('assigned_computer_id')
-            ->pluck('assigned_computer_id')
-            ->unique()
-            ->all();
+        $newComputerIds = $software->licensedComputerIds();
 
         foreach ($newComputerIds as $computerId) {
             Computer::find($computerId)?->software()->syncWithoutDetaching([$software->id]);
         }
 
         foreach (array_diff($oldComputerIds, $newComputerIds) as $computerId) {
-            $stillAssigned = $software->licenses()
-                ->where('assigned_computer_id', $computerId)
-                ->exists();
+            $stillAssigned = in_array($computerId, $newComputerIds, true);
 
             if (! $stillAssigned) {
                 Computer::find($computerId)?->software()->detach($software->id);

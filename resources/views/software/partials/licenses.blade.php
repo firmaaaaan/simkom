@@ -58,15 +58,29 @@
                             class="w-full px-3 py-2 text-sm font-mono border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400"
                             placeholder="XXXXX-XXXXX-XXXXX">
                     </div>
-                    <div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Maks. PC</label>
+                            <input type="number" min="1" max="1000" x-model.number="license.max_devices"
+                                :name="'licenses[' + index + '][max_devices]'"
+                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-end pb-2">
+                            <p class="text-xs text-gray-400">
+                                Terpilih <span x-text="(license.computer_ids || []).length"></span> · Maks <span x-text="license.max_devices || 1"></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
                         <label class="block text-xs font-medium text-gray-600 mb-1">PC Terpasang</label>
-                        <select x-model="license.assigned_computer_id" :name="'licenses[' + index + '][assigned_computer_id]'"
+                        <select multiple size="4" x-model="license.computer_ids"
+                            :name="'licenses[' + index + '][computer_ids][]'"
                             class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                            <option value="">-- Belum dipasang --</option>
                             <template x-for="pc in computers" :key="pc.id">
                                 <option :value="pc.id" x-text="pc.label"></option>
                             </template>
                         </select>
+                        <p class="mt-1 text-xs text-gray-400">Tahan Ctrl/Cmd untuk memilih lebih dari satu PC.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -105,7 +119,8 @@
                     id: license.id || null,
                     label: license.label || '',
                     license_key: license.license_key || '',
-                    assigned_computer_id: license.assigned_computer_id || '',
+                    max_devices: parseInt(license.max_devices, 10) || 1,
+                    computer_ids: license.computer_ids || [],
                     purchase_date: license.purchase_date || '',
                     expiry_date: license.expiry_date || '',
                     notes: license.notes || '',
@@ -118,7 +133,8 @@
                     id: null,
                     label: '',
                     license_key: '',
-                    assigned_computer_id: '',
+                    max_devices: 1,
+                    computer_ids: [],
                     purchase_date: '',
                     expiry_date: '',
                     notes: '',

@@ -104,9 +104,9 @@
                     <div>
                         <p class="text-sm font-semibold text-gray-800">Daftar Lisensi</p>
                         <p class="text-xs text-gray-400 mt-0.5">
-                            Total {{ $software->licenses->count() }} ·
-                            Terpakai {{ $software->assigned_licenses_count }} ·
-                            Tersedia {{ $software->licenses->count() - $software->assigned_licenses_count }}
+                            Total {{ $software->licenses->count() }} lisensi ·
+                            Terpakai {{ $software->assigned_licenses_count }} seat ·
+                            Tersedia {{ max(0, $software->total_seats - $software->assigned_licenses_count) }} seat
                         </p>
                     </div>
                     @can('edit-software')
@@ -126,8 +126,8 @@
                                 @endphp
                                 <li class="text-xs text-amber-800">
                                     <span class="font-medium">{{ $license->label ?? '-' }}</span>
-                                    @if($license->computer)
-                                        · {{ $license->computer->code }}
+                                    @if($license->computers->isNotEmpty())
+                                        · {{ $license->computers->pluck('code')->implode(', ') }}
                                     @endif
                                     · expired {{ $license->expiry_date->format('d/m/Y') }}
                                     ({{ $daysLeft === 0 ? 'hari ini' : $daysLeft.' hari lagi' }})
@@ -179,11 +179,16 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-gray-600">
-                                            @if($license->computer)
-                                                {{ $license->computer->code }}
-                                                @if($license->computer->laboratory)
-                                                    <span class="text-xs text-gray-400">· {{ $license->computer->laboratory->name }}</span>
-                                                @endif
+                                            @if($license->computers->isNotEmpty())
+                                                @foreach($license->computers as $pc)
+                                                    <div>
+                                                        {{ $pc->code }}
+                                                        @if($pc->laboratory)
+                                                            <span class="text-xs text-gray-400">· {{ $pc->laboratory->name }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                                <span class="text-xs text-gray-400">{{ $license->computers->count() }}/{{ $license->max_devices }} seat</span>
                                             @else
                                                 <span class="text-gray-400">Belum dipasang</span>
                                             @endif

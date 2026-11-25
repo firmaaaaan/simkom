@@ -16,8 +16,7 @@ class SoftwareLicenseSheet implements FromCollection, WithHeadings, WithMapping,
     public function __construct(
         private bool $includeKeys = false,
         private bool $withData = true,
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {
@@ -25,7 +24,7 @@ class SoftwareLicenseSheet implements FromCollection, WithHeadings, WithMapping,
             return collect();
         }
 
-        return SoftwareLicense::with(['software', 'computer'])
+        return SoftwareLicense::with(['software', 'computers'])
             ->orderBy('software_id')
             ->orderBy('created_at')
             ->get();
@@ -34,7 +33,7 @@ class SoftwareLicenseSheet implements FromCollection, WithHeadings, WithMapping,
     public function headings(): array
     {
         return [
-            'Kode Software', 'Label', 'Product Key', 'PC',
+            'Kode Software', 'Label', 'Product Key', 'PC', 'Maks PC',
             'Tanggal Beli', 'Tanggal Expired', 'Catatan', 'Status',
         ];
     }
@@ -49,7 +48,8 @@ class SoftwareLicenseSheet implements FromCollection, WithHeadings, WithMapping,
             $license->software?->code,
             $license->label,
             $key,
-            $license->computer?->code,
+            $license->computers->pluck('code')->implode(';'),
+            $license->max_devices,
             $license->purchase_date?->format('Y-m-d'),
             $license->expiry_date?->format('Y-m-d'),
             $license->notes,

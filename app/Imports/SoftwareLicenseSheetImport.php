@@ -16,8 +16,7 @@ class SoftwareLicenseSheetImport implements ToCollection, WithHeadingRow
     public function __construct(
         private SoftwareImportContext $context,
         private SoftwareLicenseSync $licenseSync,
-    ) {
-    }
+    ) {}
 
     public function collection(Collection $rows): void
     {
@@ -64,11 +63,7 @@ class SoftwareLicenseSheetImport implements ToCollection, WithHeadingRow
     private function syncSoftwareLicenses(Software $software, array $items): void
     {
         $existing = $software->licenses()->get();
-        $oldComputerIds = $existing
-            ->whereNotNull('assigned_computer_id')
-            ->pluck('assigned_computer_id')
-            ->unique()
-            ->all();
+        $oldComputerIds = $software->licensedComputerIds();
 
         $matchedIds = [];
         $usedComputers = [];
@@ -81,26 +76,47 @@ class SoftwareLicenseSheetImport implements ToCollection, WithHeadingRow
             try {
                 $key = trim((string) ($row['product_key'] ?? ''));
                 $label = trim((string) ($row['label'] ?? ''));
-                $pcCode = trim((string) ($row['pc'] ?? ''));
+                $pcCell = trim((string) ($row['pc'] ?? ''));
                 $masked = $key !== '' && str_contains($key, '•');
 
-                $computer = null;
-                if ($pcCode !== '') {
-                    $computer = Computer::where('code', $pcCode)->first();
+                $computerIds = [];
 
-                    if (! $computer) {
-                        $this->context->errors[] = "Lisensi baris {$line}: PC '{$pcCode}' tidak ditemukan.";
+                if ($pcCell !== '') {
+                    $pcCodes = array_values(array_filter(array_map('trim', preg_split('/[;,]/', $pcCell))));
+                    $resolved = [];
 
+                    foreach ($pcCodes as $pcCode) {
+                        $computer = Computer::where('code', $pcCode)->first();
+
+                        if (! $computer) {
+                            $this->context->errors[] = "Lisensi baris {$line}: PC '{$pcCode}' tidak ditemukan.";
+
+                            continue;
+                        }
+
+                        if (isset($usedComputers[$computer->id])) {
+                            $this->context->errors[] = "Lisensi baris {$line}: PC '{$pcCode}' dipakai lebih dari satu lisensi.";
+
+                            continue;
+                        }
+
+                        $resolved[] = $computer->id;
+                        $usedComputers[$computer->id] = true;
+                    }
+
+                    if (count($resolved) !== count($pcCodes)) {
                         continue;
                     }
 
-                    if (isset($usedComputers[$computer->id])) {
-                        $this->context->errors[] = "Lisensi baris {$line}: PC '{$pcCode}' dipakai lebih dari satu lisensi.";
+                    $computerIds = $resolved;
+                }
 
-                        continue;
-                    }
+                $maxDevices = (int) ($row['maks_pc'] ?? 0) ?: max(count($computerIds), 1);
 
-                    $usedComputers[$computer->id] = true;
+                if (count($computerIds) > $maxDevices) {
+                    $this->context->errors[] = "Lisensi baris {$line}: jumlah PC melebihi Maks PC ({$maxDevices}).";
+
+                    continue;
                 }
 
                 $purchase = $this->parseDate($row['tanggal_beli'] ?? null, $line, 'Tanggal Beli');
@@ -129,7 +145,7 @@ class SoftwareLicenseSheetImport implements ToCollection, WithHeadingRow
                 $attributes = [
                     'label' => $label !== '' ? $label : ($match?->label ?? 'Lisensi '.($processed + 1)),
                     'license_key' => (! $masked && $key !== '') ? $key : $match?->license_key,
-                    'assigned_computer_id' => $computer?->id,
+                    'max_devices' => $maxDevices,
                     'purchase_date' => $purchase?->toDateString(),
                     'expiry_date' => $expiry?->toDateString(),
                     'notes' => trim((string) ($row['catatan'] ?? '')) ?: null,
@@ -137,11 +153,13 @@ class SoftwareLicenseSheetImport implements ToCollection, WithHeadingRow
 
                 if ($match) {
                     $match->update($attributes);
-                    $matchedIds[] = $match->id;
+                    $license = $match;
                 } else {
-                    $created = $software->licenses()->create($attributes);
-                    $matchedIds[] = $created->id;
+                    $license = $software->licenses()->create($attributes);
                 }
+
+                $license->computers()->sync($computerIds);
+                $matchedIds[] = $license->id;
 
                 $processed++;
                 $this->context->licenseCount++;

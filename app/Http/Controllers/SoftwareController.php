@@ -16,13 +16,12 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SoftwareController extends Controller
 {
-    public function __construct(private SoftwareLicenseSync $licenseSync)
-    {
-    }
+    public function __construct(private SoftwareLicenseSync $licenseSync) {}
 
     public function index()
     {
         $software = Software::withCount('licenses')->latest()->paginate(10);
+
         return view('software.index', compact('software'));
     }
 
@@ -45,14 +44,16 @@ class SoftwareController extends Controller
             $software = Software::create(Arr::except($validated, ['licenses']));
 
             foreach ($licenses as $index => $license) {
-                $software->licenses()->create([
+                $created = $software->licenses()->create([
                     'label' => $license['label'] ?? ('Lisensi '.($index + 1)),
                     'license_key' => $license['license_key'] ?? null,
-                    'assigned_computer_id' => $license['assigned_computer_id'] ?? null,
+                    'max_devices' => $license['max_devices'] ?? 1,
                     'purchase_date' => $license['purchase_date'] ?? null,
                     'expiry_date' => $license['expiry_date'] ?? null,
                     'notes' => $license['notes'] ?? null,
                 ]);
+
+                $created->computers()->sync($license['computer_ids'] ?? []);
             }
 
             $this->licenseSync->syncComputers($software);
@@ -68,7 +69,7 @@ class SoftwareController extends Controller
 
     public function show(Software $software)
     {
-        $software->load(['licenses' => fn ($q) => $q->orderBy('created_at'), 'licenses.computer.laboratory', 'computers']);
+        $software->load(['licenses' => fn ($q) => $q->orderBy('created_at'), 'licenses.computers.laboratory', 'computers']);
 
         $canRevealKey = auth()->user()?->hasPermission('view-license-key') ?? false;
 
@@ -85,7 +86,7 @@ class SoftwareController extends Controller
 
     public function edit(Software $software)
     {
-        $software->load(['licenses' => fn ($q) => $q->orderBy('created_at')]);
+        $software->load(['licenses' => fn ($q) => $q->orderBy('created_at'), 'licenses.computers']);
         $computerOptions = $this->computerOptions();
 
         return view('software.edit', compact('software', 'computerOptions'));
@@ -105,11 +106,7 @@ class SoftwareController extends Controller
                 return;
             }
 
-            $oldComputerIds = $software->licenses()
-                ->whereNotNull('assigned_computer_id')
-                ->pluck('assigned_computer_id')
-                ->unique()
-                ->all();
+            $oldComputerIds = $software->licensedComputerIds();
 
             $existingIds = $software->licenses()->pluck('id')->all();
             $submittedIds = [];
@@ -126,17 +123,20 @@ class SoftwareController extends Controller
                 $attributes = [
                     'label' => $license['label'] ?? ('Lisensi '.($index + 1)),
                     'license_key' => $license['license_key'] ?? null,
-                    'assigned_computer_id' => $license['assigned_computer_id'] ?? null,
+                    'max_devices' => $license['max_devices'] ?? 1,
                     'purchase_date' => $license['purchase_date'] ?? null,
                     'expiry_date' => $license['expiry_date'] ?? null,
                     'notes' => $license['notes'] ?? null,
                 ];
 
                 if ($id !== null) {
-                    $software->licenses()->whereKey($id)->update($attributes);
+                    $target = $software->licenses()->whereKey($id)->firstOrFail();
+                    $target->update($attributes);
+                    $target->computers()->sync($license['computer_ids'] ?? []);
                     $submittedIds[] = $id;
                 } else {
                     $created = $software->licenses()->create($attributes);
+                    $created->computers()->sync($license['computer_ids'] ?? []);
                     $submittedIds[] = $created->id;
                 }
             }
@@ -165,7 +165,7 @@ class SoftwareController extends Controller
 
         Software::whereIn('id', $request->ids)->delete();
 
-        return redirect()->route('software.index')->with('success', count($request->ids) . ' software berhasil dihapus.');
+        return redirect()->route('software.index')->with('success', count($request->ids).' software berhasil dihapus.');
     }
 
     public function revealLicenseKey(Software $software, SoftwareLicense $license)
@@ -212,19 +212,19 @@ class SoftwareController extends Controller
             'file' => 'required|file|mimes:xlsx,xls|max:10240',
         ]);
 
-        $import = new SoftwareImport();
+        $import = new SoftwareImport;
         try {
             Excel::import($import, $request->file('file'));
         } catch (\Exception $e) {
             return redirect()->route('software.import')
-                ->with('import_error', 'Gagal mengimport: ' . $e->getMessage());
+                ->with('import_error', 'Gagal mengimport: '.$e->getMessage());
         }
 
         $message = "Berhasil mengimpor {$import->getImportedCount()} software dan {$import->getImportedLicenseCount()} lisensi";
         if ($errors = $import->getErrors()) {
-            $message .= '. ' . count($errors) . ' baris gagal: ' . implode('; ', array_slice($errors, 0, 5));
+            $message .= '. '.count($errors).' baris gagal: '.implode('; ', array_slice($errors, 0, 5));
             if (count($errors) > 5) {
-                $message .= ' dan ' . (count($errors) - 5) . ' lagi...';
+                $message .= ' dan '.(count($errors) - 5).' lagi...';
             }
         }
 
@@ -251,7 +251,9 @@ class SoftwareController extends Controller
             'licenses.*.id' => 'nullable|uuid',
             'licenses.*.label' => 'nullable|string|max:255',
             'licenses.*.license_key' => 'nullable|string|max:255',
-            'licenses.*.assigned_computer_id' => 'nullable|uuid|exists:computers,id',
+            'licenses.*.max_devices' => 'nullable|integer|min:1|max:1000',
+            'licenses.*.computer_ids' => 'nullable|array',
+            'licenses.*.computer_ids.*' => 'uuid|exists:computers,id',
             'licenses.*.purchase_date' => 'nullable|date',
             'licenses.*.expiry_date' => 'nullable|date',
             'licenses.*.notes' => 'nullable|string',
@@ -272,11 +274,19 @@ class SoftwareController extends Controller
                 ]);
             }
 
-            $computerId = $license['assigned_computer_id'] ?? null;
-            if ($computerId) {
+            $computerIds = array_values(array_unique(array_filter($license['computer_ids'] ?? [])));
+            $maxDevices = (int) ($license['max_devices'] ?? 1);
+
+            if (count($computerIds) > $maxDevices) {
+                throw ValidationException::withMessages([
+                    "licenses.$index.computer_ids" => "Jumlah PC melebihi batas maksimal lisensi ({$maxDevices}).",
+                ]);
+            }
+
+            foreach ($computerIds as $computerId) {
                 if (isset($assigned[$computerId])) {
                     throw ValidationException::withMessages([
-                        "licenses.$index.assigned_computer_id" => 'Satu PC hanya boleh mendapat satu lisensi untuk software ini.',
+                        "licenses.$index.computer_ids" => 'Satu PC hanya boleh mendapat satu lisensi untuk software ini.',
                     ]);
                 }
                 $assigned[$computerId] = true;
