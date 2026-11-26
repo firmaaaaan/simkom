@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -104,6 +105,28 @@ class MonitoringPcController extends Controller
         return response()->json([
             'ok' => true,
             'message' => "Perintah {$label} {$pc->hostname} dikirim — agent mengeksekusi dalam ~10 detik.",
+        ]);
+    }
+
+    /**
+     * Hapus PC dari monitoring: baris pc_monitors + data anak (commands,
+     * softwares, processes — cascadeOnDelete) + file screenshot.
+     *
+     * Catatan: agent yang masih berjalan akan mendaftarkan ulang PC ini
+     * dalam ~10 detik (telemetry memakai updateOrCreate by hostname).
+     */
+    public function destroy(PcMonitor $pc): JsonResponse
+    {
+        $screenshot = $pc->screenshotPath();
+        if (is_file($screenshot)) {
+            File::delete($screenshot);
+        }
+
+        $pc->delete();
+
+        return response()->json([
+            'ok' => true,
+            'message' => "PC {$pc->hostname} dihapus dari monitoring.",
         ]);
     }
 
@@ -406,6 +429,7 @@ class MonitoringPcController extends Controller
             'pcs' => $items,
             'laboratories' => $laboratories,
             'can_power' => (bool) $request->user()?->hasPermission('control-monitoring'),
+            'can_delete' => (bool) $request->user()?->hasPermission('delete-monitoring'),
             'generated_at' => now()->toIso8601String(),
         ];
     }

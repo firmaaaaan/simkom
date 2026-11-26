@@ -893,6 +893,9 @@ Route::get("alat/{alat}/print", [AlatController::class, "printOne"])->name("alat
         Route::post('monitoring-pc/{pc}/command', [MonitoringPcController::class, 'command'])->name('monitoring-pc.command');
         Route::post('monitoring-pc/shutdown-all', [MonitoringPcController::class, 'shutdownAll'])->name('monitoring-pc.shutdown-all');
     });
+    Route::middleware('permission:delete-monitoring')->group(function () {
+        Route::delete('monitoring-pc/{pc}', [MonitoringPcController::class, 'destroy'])->name('monitoring-pc.destroy');
+    });
 
     // Pengembalian Box — HANYA ADMIN/SUPERADMIN
     Route::middleware('role:admin|superadmin')->group(function () {

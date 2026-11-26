@@ -222,7 +222,7 @@
                         </template>
 
                         {{-- Aksi --}}
-                        <div class="mt-auto pt-3 border-t border-gray-100 flex items-center gap-2" x-show="canPower">
+                        <div class="mt-auto pt-3 border-t border-gray-100 flex items-center gap-2" x-show="canPower || canDelete">
                             <template x-if="pc.pending_command">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
                                     <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -296,6 +296,16 @@
                             </template>
                             <template x-if="!pc.pending_command && pc.status === 'offline' && !pc.mac_address">
                                 <span class="text-xs text-gray-400">MAC belum diketahui</span>
+                            </template>
+                            <template x-if="canDelete">
+                                <button type="button" @click="remove(pc)" :disabled="busy === pc.id"
+                                        class="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                                        title="Hapus PC dari monitoring">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                    Hapus
+                                </button>
                             </template>
                         </div>
                     </div>
@@ -392,6 +402,7 @@
             laboratories: initial.laboratories || [],
             selectedLab: 'all',
             canPower: initial.can_power,
+            canDelete: initial.can_delete,
             updatedAt: initial.generated_at,
             toast: null,
             busy: null,
@@ -435,6 +446,7 @@
                     this.allPcs = data.pcs || [];
                     this.laboratories = data.laboratories || [];
                     this.canPower = data.can_power;
+                    this.canDelete = data.can_delete;
                     this.updatedAt = data.generated_at;
                     this.applyFilter();
                 } catch (e) {
@@ -511,6 +523,34 @@
                 try {
                     const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id + '/power-on', {
                         method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    const body = await res.json().catch(() => ({}));
+                    this.toast = { ok: !!body.ok, message: body.message || 'Permintaan gagal diproses.' };
+                } catch (e) {
+                    this.toast = { ok: false, message: 'Tidak dapat terhubung ke server.' };
+                } finally {
+                    this.busy = null;
+                    this.poll();
+                }
+            },
+
+            async remove(pc) {
+                if (this.busy) return;
+                const ok = await window.showConfirm({
+                    title: 'Hapus PC dari Monitoring',
+                    type: 'danger',
+                    message: 'Yakin ingin menghapus ' + pc.hostname + ' dari monitoring? Data perintah, software, dan proses ikut dihapus. Catatan: jika agent di PC tersebut masih berjalan, PC akan muncul kembali otomatis dalam ~10 detik.',
+                });
+                if (! ok) return;
+                this.busy = pc.id;
+                try {
+                    const res = await fetch('{{ url('/') }}/monitoring-pc/' + pc.id, {
+                        method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                             'Accept': 'application/json',
