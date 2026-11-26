@@ -81,7 +81,19 @@ class SoftwareController extends Controller
                 && $license->expiry_date->lte(now()->addDays(30)))
             ->sortBy('expiry_date');
 
-        return view('software.show', compact('software', 'canRevealKey', 'expiringSoon'));
+        // Data modal untuk menampilkan daftar PC saat lisensi memakai >1 PC.
+        $pcModalMap = $software->licenses->mapWithKeys(fn (SoftwareLicense $license) => [
+            $license->id => [
+                'label' => $license->label ?? 'Lisensi',
+                'maxDevices' => $license->max_devices,
+                'pcs' => $license->computers->map(fn (Computer $pc) => [
+                    'code' => $pc->code,
+                    'lab' => $pc->laboratory?->name,
+                ])->values()->all(),
+            ],
+        ])->all();
+
+        return view('software.show', compact('software', 'canRevealKey', 'expiringSoon', 'pcModalMap'));
     }
 
     public function edit(Software $software)

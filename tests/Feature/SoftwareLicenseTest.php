@@ -242,6 +242,50 @@ class SoftwareLicenseTest extends TestCase
         $this->assertCount(0, $software->fresh()->licenses);
     }
 
+    public function test_show_hides_multiple_pcs_behind_modal_trigger(): void
+    {
+        $pc1 = $this->computer('PC-01');
+        $pc2 = $this->computer('PC-02');
+        $user = $this->admin();
+
+        $this->actingAs($user)->post(route('software.store'), $this->payload([
+            'licenses' => [
+                ['license_key' => 'AAAA-BBBB-CCCC', 'max_devices' => 2, 'computer_ids' => [$pc1->id, $pc2->id]],
+            ],
+        ]));
+
+        $software = Software::where('name', 'Microsoft Office 2021')->firstOrFail();
+
+        $this->actingAs($user)
+            ->get(route('software.show', $software))
+            ->assertOk()
+            ->assertSee('Lihat 2 PC')
+            ->assertSee('2/2 seat')
+            ->assertSee('pcMap', false)
+            ->assertDontSee('Lihat 1 PC');
+    }
+
+    public function test_show_lists_single_pc_inline_without_modal_trigger(): void
+    {
+        $pc = $this->computer('PC-01');
+        $user = $this->admin();
+
+        $this->actingAs($user)->post(route('software.store'), $this->payload([
+            'licenses' => [
+                ['license_key' => 'AAAA-BBBB-CCCC', 'computer_ids' => [$pc->id]],
+            ],
+        ]));
+
+        $software = Software::where('name', 'Microsoft Office 2021')->firstOrFail();
+
+        $this->actingAs($user)
+            ->get(route('software.show', $software))
+            ->assertOk()
+            ->assertSee('PC-01')
+            ->assertSee('1/1 seat')
+            ->assertDontSee('Lihat 1 PC');
+    }
+
     public function test_software_pages_render(): void
     {
         $user = $this->admin();
